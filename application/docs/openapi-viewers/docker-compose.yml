@@ -22,11 +22,9 @@ services:
     image: swaggerapi/swagger-editor:latest
     container_name: casino-proxy-swagger-editor-main
     ports:
-      - "8080:8080"
+      - "8080:80"
     volumes:
       - ../openapi:/specs:ro
-    environment:
-      - SWAGGER_FILE=/specs/casino-proxy-api.yaml
     networks:
       - casino-docs
     labels:
@@ -36,7 +34,7 @@ services:
       - "com.casino-proxy.tool=Swagger Editor"
       - "com.casino-proxy.description=Main API Editor - Edit OpenAPI spec for all 8 gaming providers"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -61,7 +59,7 @@ services:
       - "com.casino-proxy.tool=Swagger UI"
       - "com.casino-proxy.description=Main API Documentation & Testing - Try It Out endpoints with casino-proxy-api.yaml loaded"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -102,8 +100,6 @@ services:
       - "8083:8080"
     volumes:
       - ../openapi:/specs:ro
-    environment:
-      - SWAGGER_FILE=/specs/admin-api-spec.yaml
     networks:
       - casino-docs
     labels:
@@ -113,7 +109,7 @@ services:
       - "com.casino-proxy.tool=Swagger Editor"
       - "com.casino-proxy.description=Admin API Editor - Edit OpenAPI spec for operator management"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -138,7 +134,7 @@ services:
       - "com.casino-proxy.tool=Swagger UI"
       - "com.casino-proxy.description=Admin API Documentation & Testing - Try It Out endpoints with admin-api-spec.yaml loaded"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
       timeout: 10s
       retries: 3
