@@ -2,10 +2,10 @@
 
 **Epic ID:** CASINO-1  
 **Type:** Brownfield Migration (Large Scale)  
-**Status:** In Progress (Phase 1: 3/6 stories complete - 50%)  
+**Status:** In Progress (Phase 1: 4/6 stories complete - 67%)  
 **Created:** 2026-05-08  
 **Owner:** Morgan (PM)  
-**Progress:** Stories 1.1-1.3 ✅ merged | Stories 1.4-1.6 in queue  
+**Progress:** Stories 1.1-1.4 ✅ merged | Stories 1.5-1.6 in queue  
 
 ---
 
@@ -106,8 +106,8 @@ Create comprehensive OpenAPI documentation for all 8 provider integrations, then
 1. **CASINO-1.1** - Analyze & Document Pragmatic Play Provider ✅ **DONE** (Merged PR #1)
 2. **CASINO-1.2** - Analyze & Document Evolution Gaming Provider ✅ **DONE** (Merged PR #3)
 3. **CASINO-1.3** - Analyze & Document PG Soft Provider ✅ **DONE** (Merged PR #4)
-4. **CASINO-1.4** - Analyze & Document Remaining Providers (Mancala, Digitain, Evoplay, OpenBox, Alternar) (Pending)
-5. **CASINO-1.5** - Create Master OpenAPI Spec (Gateway + All Services) (Pending - depends on 1.1-1.4)
+4. **CASINO-1.4** - Analyze & Document Remaining Providers (Mancala, Digitain, Evoplay, OpenBox, Alternar) ✅ **DONE** (Merged PR #5)
+5. **CASINO-1.5** - Create Master OpenAPI Spec (Gateway + All Services) (Pending - depends on 1.1-1.4 ✅ COMPLETE)
 6. **CASINO-1.6** - Document Admin API (Operator Management) (Pending)
 
 ---
