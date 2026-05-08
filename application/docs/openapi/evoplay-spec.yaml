@@ -1,0 +1,176 @@
+openapi: 3.0.3
+info:
+  title: Evoplay Provider API
+  description: |
+    Complete OpenAPI 3.0 specification for Evoplay single webhook endpoint integration.
+    Covers 5 operations (init, bet, win, refund, BalanceIncrease) via payload name field.
+  version: 1.0.0
+  contact:
+    name: Casino Proxy Migration
+    url: https://github.com/casino-proxy/docs
+
+servers:
+  - url: https://casino-proxy.example.com/v1/webhooks/evoplay
+    description: Casino Proxy Gateway (Evoplay endpoint)
+  - url: http://localhost:3000/v1/webhooks/evoplay
+    description: Local Development
+
+paths:
+  /:
+    post:
+      summary: Evoplay webhook endpoint
+      description: |
+        Single webhook endpoint for all Evoplay operations. The operation type is specified
+        via the 'name' field in the request payload. Includes MD5 signature validation
+        and complex field traversal for signature calculation.
+      operationId: handleEvoplayWebhook
+      tags:
+        - Webhooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvoplayRequest'
+            examples:
+              bet:
+                value:
+                  token: "my-operator_abc123xyz"
+                  name: "bet"
+                  data:
+                    user_id: "my-operator_player_001"
+                    amount: 50.00
+                    currency: "BRL"
+                    roundId: "round_001"
+                  signature: "md5_signature"
+              win:
+                value:
+                  token: "my-operator_abc123xyz"
+                  name: "win"
+                  data:
+                    user_id: "my-operator_player_001"
+                    amount: 100.00
+                    currency: "BRL"
+                    roundId: "round_001"
+                  signature: "md5_signature"
+      responses:
+        '200':
+          description: Operation processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvoplayResponse'
+              example:
+                balance: 950.00
+                currency: "BRL"
+                error: null
+        '400':
+          description: Invalid request or validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    EvoplayRequest:
+      type: object
+      required:
+        - token
+        - name
+        - data
+        - signature
+      properties:
+        token:
+          type: string
+          description: Player session token in format {operator_slug}_{token}
+          example: "my-operator_abc123xyz"
+        name:
+          type: string
+          enum: [init, bet, win, refund, BalanceIncrease]
+          description: |
+            Operation type:
+            - init: Initialize game session
+            - bet: Bet placement
+            - win: Win/payout
+            - refund: Transaction refund
+            - BalanceIncrease: Balance increase (promotional credit)
+          example: "bet"
+        data:
+          type: object
+          required:
+            - user_id
+          description: Operation-specific data payload
+          properties:
+            user_id:
+              type: string
+              description: Player identifier in format {operator_slug}_{player_id}
+              example: "my-operator_player_001"
+            amount:
+              type: number
+              format: double
+              description: Transaction amount
+              example: 50.00
+            currency:
+              type: string
+              description: ISO 4217 currency code
+              example: "BRL"
+            roundId:
+              type: string
+              description: Game round identifier
+              example: "round_001"
+            bonusId:
+              type: string
+              description: Bonus identifier (optional)
+              example: "bonus_001"
+            customData:
+              type: object
+              description: Custom additional data (optional)
+              additionalProperties: true
+        signature:
+          type: string
+          description: |
+            MD5 signature for validation. Gateway generates signature and forwards to operator.
+            Calculation: MD5(projectId * apiVersion * field1 * field2_recursive * ... * secretKey)
+            Where * = separator, recursive arrays use : as item separator.
+            Signature field itself is excluded from calculation.
+          example: "abc123def456"
+
+    EvoplayResponse:
+      type: object
+      required:
+        - balance
+        - currency
+        - error
+      properties:
+        balance:
+          type: number
+          format: double
+          description: Player balance after operation
+          example: 950.00
+        currency:
+          type: string
+          description: ISO 4217 currency code
+          example: "BRL"
+        error:
+          type: "null"
+          description: Error code (null for success)
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - description
+      properties:
+        error:
+          type: string
+          description: Error identifier
+          example: "Invalid Signature"
+        description:
+          type: string
+          description: Detailed error description
+          example: "Signature validation failed"
+
+tags:
+  - name: Webhooks
+    description: Evoplay single webhook endpoint with operation type specified via name field

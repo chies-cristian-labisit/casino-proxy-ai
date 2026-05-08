@@ -1,0 +1,154 @@
+openapi: 3.0.3
+info:
+  title: Mancala Provider API
+  description: |
+    Complete OpenAPI 3.0 specification for Mancala generic routing webhook integration.
+    Covers 4 endpoints handling player balance, credit, debit, and refund operations.
+  version: 1.0.0
+  contact:
+    name: Casino Proxy Migration
+    url: https://github.com/casino-proxy/docs
+
+servers:
+  - url: https://casino-proxy.example.com/v1/webhooks/mancala
+    description: Casino Proxy Gateway (Mancala endpoint)
+  - url: http://localhost:3000/v1/webhooks/mancala
+    description: Local Development
+
+paths:
+  /{endpoint}:
+    post:
+      summary: Generic Mancala webhook handler
+      description: |
+        Handle webhook requests from Mancala provider. The endpoint parameter specifies the operation:
+        Balance, Credit, Debit, or Refund. Request includes operator context via ExtraData JSON field.
+      operationId: handleMancalaWebhook
+      parameters:
+        - name: endpoint
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [Balance, Credit, Debit, Refund]
+          description: Operation endpoint (case-sensitive)
+      tags:
+        - Operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MancalaRequest'
+            example:
+              ExtraData: '{"operator_slug": "my-operator"}'
+              SessionId: "my-operator_abc123xyz"
+              TransactionGuid: "txn_guid_001"
+              RoundGuid: "round_guid_001"
+              Amount: 50.00
+              Hash: "md5_hash_value"
+      responses:
+        '200':
+          description: Operation processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MancalaResponse'
+              example:
+                data:
+                  balance: 950.00
+                  currency: "BRL"
+                error: null
+        '400':
+          description: Invalid request or validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    MancalaRequest:
+      type: object
+      required:
+        - ExtraData
+        - SessionId
+        - Hash
+      properties:
+        ExtraData:
+          type: string
+          description: JSON string containing operator_slug
+          example: '{"operator_slug": "my-operator"}'
+        SessionId:
+          type: string
+          description: Player session identifier in format {operator_slug}_{token}
+          example: "my-operator_abc123xyz"
+        TransactionGuid:
+          type: string
+          description: Transaction identifier (optional, used in hash calculation)
+          example: "txn_guid_001"
+        RefundTransactionGuid:
+          type: string
+          description: Refund transaction reference (optional, for refund operations)
+          example: "refund_guid_001"
+        RoundGuid:
+          type: string
+          description: Game round identifier (optional)
+          example: "round_guid_001"
+        Amount:
+          type: number
+          format: double
+          description: Transaction amount (optional, included in hash if present)
+          example: 50.00
+        Hash:
+          type: string
+          description: |
+            MD5 hash for validation.
+            Calculated as: MD5(endpoint + "/" + SessionId + [TransactionGuid] + [RefundTransactionGuid] + [RoundGuid] + [Amount] + secret_token)
+          example: "abc123def456"
+
+    MancalaResponse:
+      type: object
+      required:
+        - data
+        - error
+      properties:
+        data:
+          type: object
+          properties:
+            balance:
+              type: number
+              format: double
+              description: Player balance after operation
+              example: 950.00
+            currency:
+              type: string
+              description: ISO 4217 currency code
+              example: "BRL"
+        error:
+          type: "null"
+          description: Error code (null for success)
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - description
+      properties:
+        error:
+          type: string
+          description: Error identifier
+          example: "Invalid Hash"
+        description:
+          type: string
+          description: Detailed error description
+          example: "Hash validation failed for session"
+
+tags:
+  - name: Operations
+    description: Mancala webhook operations (Balance, Credit, Debit, Refund)
