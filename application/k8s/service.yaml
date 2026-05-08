@@ -1,0 +1,21 @@
+# ClusterIP Service for casino-proxy-ai
+# Exposed internally within the EKS cluster.
+# The internal ALB (via AWS Load Balancer Controller) routes traffic here
+# from the VPC Link connected to AWS API Gateway.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: casino-proxy-ai
+  namespace: default
+  labels:
+    app: casino-proxy-ai
+spec:
+  type: ClusterIP
+  selector:
+    app: casino-proxy-ai
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8081

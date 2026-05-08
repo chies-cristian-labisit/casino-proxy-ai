@@ -1,0 +1,12 @@
+{
+  "name": "casino-proxy-ai",
+  "version": "1.0.0",
+  "description": "Casino Proxy AI",
+  "private": true,
+  "scripts": {
+    "setup": "bash scripts/setup.sh"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

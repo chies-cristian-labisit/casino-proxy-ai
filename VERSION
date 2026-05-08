@@ -1,0 +1,52 @@
+v1.0.0
+
+---
+
+Semantic Versioning Strategy
+=============================
+
+This template uses Semantic Versioning (https://semver.org/) with automatic patch version incrementing.
+
+Format: vMAJOR.MINOR.PATCH
+Example: v1.0.0 → v1.0.1 → v1.0.2 → v1.1.0 → v2.0.0
+
+Versioning Rules
+----------------
+
+PATCH (v1.0.0 → v1.0.1):
+- Incremented AUTOMATICALLY on each merge to main
+- Represents bug fixes, minor improvements, or template fixes
+- CI/CD creates tag automatically
+
+MINOR (v1.0.0 → v1.1.0):
+- Incremented MANUALLY when adding new features/functionality
+- Represents new stories completed or feature additions
+- Tag created manually: git tag v1.1.0 && git push origin v1.1.0
+
+MAJOR (v1.0.0 → v2.0.0):
+- Incremented MANUALLY for breaking changes
+- Represents significant architectural changes
+- Tag created manually: git tag v2.0.0 && git push origin v2.0.0
+
+Automatic Tagging
+-----------------
+
+The GitHub Actions CI/CD workflow (.github/workflows/ci.yml) automatically:
+1. Triggers on merge to main
+2. Runs full template verification (scaffold → AIOX → tests → acceptance)
+3. On success, reads the latest git tag
+4. Increments PATCH version
+5. Creates new tag (e.g., v1.0.0 → v1.0.1)
+6. Pushes tag to remote
+
+View all tags: git tag -l
+View tag info: git show v1.0.0
+Delete local tag: git tag -d v1.0.0
+Delete remote tag: git push origin --delete v1.0.0
+
+Release Timeline
+----------------
+
+- v1.0.0-v1.0.x: Phase 1 - AIOX Integration (Stories 1.1-1.4)
+- v1.1.0+: Phase 2 - Application Development (Stories 1.5+)
+- v2.0.0: Major release with breaking changes (if applicable)
