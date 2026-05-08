@@ -7,25 +7,23 @@ cd application/docs/openapi-viewers
 docker-compose -f docker-compose.yml up -d
 ```
 
-All 6 containers start automatically with OpenAPI specs pre-loaded!
+All 6 containers start automatically! Swagger UI and Redoc auto-load specs, Swagger Editor provides file browser access.
 
 ## 🌐 Access Points
 
 Open these URLs in your browser:
 
 ### Main API (Casino Proxy - 8 Providers)
-All specs auto-loaded from `casino-proxy-api.yaml`
 
-- **Edit specs:** http://localhost:8080 (Swagger Editor - `casino-proxy-swagger-editor-main`)
-- **Test API:** http://localhost:8081 (Swagger UI - `casino-proxy-swagger-ui-main`) 
-- **Read docs:** http://localhost:8082 (Redoc - `casino-proxy-redoc-main`)
+- **Edit specs:** http://localhost:8080 (Swagger Editor - click "File" → open `/specs/casino-proxy-api.yaml`)
+- **Test API:** http://localhost:8081 (Swagger UI - ✅ auto-loaded `casino-proxy-api.yaml`) 
+- **Read docs:** http://localhost:8082 (Redoc - ✅ auto-loaded `casino-proxy-api.yaml`)
 
 ### Admin API (Operator Management)
-All specs auto-loaded from `admin-api-spec.yaml`
 
-- **Edit specs:** http://localhost:8083 (Swagger Editor - `casino-proxy-swagger-editor-admin`)
-- **Test API:** http://localhost:8084 (Swagger UI - `casino-proxy-swagger-ui-admin`)
-- **Read docs:** http://localhost:8085 (Redoc - `casino-proxy-redoc-admin`)
+- **Edit specs:** http://localhost:8083 (Swagger Editor - click "File" → open `/specs/admin-api-spec.yaml`)
+- **Test API:** http://localhost:8084 (Swagger UI - ✅ auto-loaded `admin-api-spec.yaml`)
+- **Read docs:** http://localhost:8085 (Redoc - ✅ auto-loaded `admin-api-spec.yaml`)
 
 ## 📋 What Each Tool Does
 
@@ -46,10 +44,11 @@ All specs auto-loaded from `admin-api-spec.yaml`
 6. See response in real-time
 
 ### Edit Documentation
-1. Open http://localhost:8080 (Swagger Editor)
-2. Edit YAML on left side
-3. See validation errors and preview on right
-4. Download updated spec when done
+1. Open http://localhost:8080 (Swagger Editor - Main API) or http://localhost:8083 (Admin API)
+2. Click "File" → select `/specs/casino-proxy-api.yaml` (or `/specs/admin-api-spec.yaml`)
+3. Edit YAML on left side
+4. See validation errors and preview on right
+5. Download updated spec when done
 
 ### Share with Team
 1. Open http://localhost:8082 (Redoc)
