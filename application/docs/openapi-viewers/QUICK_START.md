@@ -1,24 +1,31 @@
-# OpenAPI Viewers - Quick Start
+# Casino Proxy OpenAPI Viewers - Quick Start
 
 ## 🚀 Start in 30 Seconds
 
 ```bash
-docker-compose -f docker-compose.openapi.yml up -d
+cd application/docs/openapi-viewers
+docker-compose -f docker-compose.yml up -d
 ```
+
+All 6 containers start automatically with OpenAPI specs pre-loaded!
 
 ## 🌐 Access Points
 
 Open these URLs in your browser:
 
 ### Main API (Casino Proxy - 8 Providers)
-- **Edit specs:** http://localhost:8080 (Swagger Editor)
-- **Test API:** http://localhost:8081 (Swagger UI - Try It Out)
-- **Read docs:** http://localhost:8082 (Redoc - Beautiful)
+All specs auto-loaded from `casino-proxy-api.yaml`
+
+- **Edit specs:** http://localhost:8080 (Swagger Editor - `casino-proxy-swagger-editor-main`)
+- **Test API:** http://localhost:8081 (Swagger UI - `casino-proxy-swagger-ui-main`) 
+- **Read docs:** http://localhost:8082 (Redoc - `casino-proxy-redoc-main`)
 
 ### Admin API (Operator Management)
-- **Edit specs:** http://localhost:8083 (Swagger Editor)
-- **Test API:** http://localhost:8084 (Swagger UI)
-- **Read docs:** http://localhost:8085 (Redoc)
+All specs auto-loaded from `admin-api-spec.yaml`
+
+- **Edit specs:** http://localhost:8083 (Swagger Editor - `casino-proxy-swagger-editor-admin`)
+- **Test API:** http://localhost:8084 (Swagger UI - `casino-proxy-swagger-ui-admin`)
+- **Read docs:** http://localhost:8085 (Redoc - `casino-proxy-redoc-admin`)
 
 ## 📋 What Each Tool Does
 
@@ -53,18 +60,18 @@ Open these URLs in your browser:
 ## 🛑 Stop Viewers
 
 ```bash
-docker-compose -f docker-compose.openapi.yml down
+docker-compose -f docker-compose.yml down
 ```
 
 ## 🔍 Check Status
 
 ```bash
-docker-compose -f docker-compose.openapi.yml ps
+docker-compose -f docker-compose.yml ps
 ```
 
 ## 📚 Full Documentation
 
-See [docs/OPENAPI_VIEWERS.md](docs/OPENAPI_VIEWERS.md) for:
+See [OPENAPI_VIEWERS.md](OPENAPI_VIEWERS.md) for:
 - Detailed tool guides
 - Common workflows
 - Troubleshooting
