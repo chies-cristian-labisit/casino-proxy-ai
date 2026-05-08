@@ -1,0 +1,151 @@
+openapi: 3.0.3
+info:
+  title: Alternar Provider API
+  description: |
+    Complete OpenAPI 3.0 specification for Alternar redirect webhook integration.
+    Acts as HTTP proxy forwarding requests to external webhook endpoint.
+  version: 1.0.0
+  contact:
+    name: Casino Proxy Migration
+    url: https://github.com/casino-proxy/docs
+
+servers:
+  - url: https://casino-proxy.example.com/v1/webhooks/alternar
+    description: Casino Proxy Gateway (Alternar endpoint)
+  - url: http://localhost:3000/v1/webhooks/alternar
+    description: Local Development
+
+paths:
+  /:
+    post:
+      summary: Alternar webhook redirect
+      description: |
+        Single webhook endpoint that forwards requests to external Alternar backoffice endpoint.
+        Acts as transparent HTTP proxy with automatic retry logic (3 attempts, 100ms backoff).
+        No cryptographic validation - relies on HTTPS/TLS security.
+      operationId: handleAlternarWebhook
+      tags:
+        - Webhooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlternarRequest'
+            example:
+              player: "player_id_001"
+              roundId: "round_123"
+              amount: 50.00
+              operatorId: "operator_123"
+              sessionToken: "session_token_abc"
+      responses:
+        '200':
+          description: Request forwarded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlternarResponse'
+              example:
+                status: 200
+                data:
+                  balance: 950.00
+        '400':
+          description: Request validation failure or upstream error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Upstream service error (passthrough from external endpoint)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    AlternarRequest:
+      type: object
+      description: |
+        Generic webhook request payload. All fields are forwarded as-is to external endpoint.
+        No field validation or transformation performed by gateway.
+      properties:
+        player:
+          type: string
+          description: Player identifier
+          example: "player_id_001"
+        roundId:
+          type: string
+          description: Game round identifier
+          example: "round_123"
+        amount:
+          type: number
+          format: double
+          description: Transaction amount
+          example: 50.00
+        operatorId:
+          type: string
+          description: Operator identifier
+          example: "operator_123"
+        sessionToken:
+          type: string
+          description: Player session token
+          example: "session_token_abc"
+        transactionId:
+          type: string
+          description: Transaction identifier (optional)
+          example: "txn_001"
+        currency:
+          type: string
+          description: ISO 4217 currency code (optional)
+          example: "BRL"
+        customData:
+          type: object
+          description: Custom data fields (optional)
+          additionalProperties: true
+
+    AlternarResponse:
+      type: object
+      description: |
+        Response from external Alternar endpoint. Status code is passthrough from upstream.
+        Uses status code from response, defaults to 400 if missing.
+      required:
+        - status
+      properties:
+        status:
+          type: integer
+          description: HTTP status code (passthrough from upstream)
+          example: 200
+        data:
+          type: object
+          description: Response data from upstream endpoint
+          additionalProperties: true
+          example:
+            balance: 950.00
+            currency: "BRL"
+        error:
+          type: string
+          description: Error message (if present)
+          example: "null"
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Error message or passthrough from upstream
+          example: "Upstream service error"
+        description:
+          type: string
+          description: Additional error details (optional)
+          example: "Failed to reach external endpoint after 3 retries"
+        status:
+          type: integer
+          description: HTTP status code
+          example: 500
+
+tags:
+  - name: Webhooks
+    description: Alternar webhook endpoint with HTTP proxy forwarding

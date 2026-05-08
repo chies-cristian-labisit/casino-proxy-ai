@@ -1,0 +1,214 @@
+openapi: 3.0.3
+info:
+  title: Digitain RGS Provider API
+  description: |
+    Complete OpenAPI 3.0 specification for Digitain RGS (Random Generator Server) webhook integration.
+    Covers 11 endpoints with support for batch processing (multiple operators in single request).
+  version: 1.0.0
+  contact:
+    name: Casino Proxy Migration
+    url: https://github.com/casino-proxy/docs
+
+servers:
+  - url: https://casino-proxy.example.com/v1/webhooks/digitain-rgs
+    description: Casino Proxy Gateway (Digitain endpoint)
+  - url: http://localhost:3000/v1/webhooks/digitain-rgs
+    description: Local Development
+
+paths:
+  /{endpoint}:
+    post:
+      summary: Generic Digitain RGS webhook handler
+      description: |
+        Handle webhook requests from Digitain RGS provider with support for single and batch processing.
+        Endpoint parameter specifies the operation. Supports multi-operator batch processing via items array.
+      operationId: handleDigitainWebhook
+      parameters:
+        - name: endpoint
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [authenticate, getbalance, bet, win, betwin, refund, amend, checktxstatus, charge, promowin, refreshtoken]
+          description: RGS operation endpoint (case-insensitive)
+      tags:
+        - Operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DigitainRequest'
+            example:
+              timestamp: "20260508120000"
+              operatorId: "operator_id_123"
+              token: "my-operator_abc123xyz"
+              info: "bet_info"
+              amount: 100.00
+              currency: "BRL"
+      responses:
+        '200':
+          description: Operation processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DigitainResponse'
+              example:
+                timestamp: "20260508120001"
+                signature: "hmac_sha256_signature"
+                errorCode: 1
+                items:
+                  - info: "bet_info"
+                    errorCode: 1
+                    metadata: ""
+                    balance: 900.00
+        '400':
+          description: Invalid request or validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    DigitainRequest:
+      type: object
+      required:
+        - timestamp
+        - operatorId
+        - info
+      properties:
+        timestamp:
+          type: string
+          description: Request timestamp in format YmdHiu (20260508120000)
+          example: "20260508120000"
+        operatorId:
+          type: string
+          description: Operator identifier from Digitain credentials
+          example: "operator_id_123"
+        token:
+          type: string
+          description: Player session token in format {operator_slug}_{token}
+          example: "my-operator_abc123xyz"
+        playerId:
+          type: string
+          description: Player identifier in format {operator_slug}_{player_id}
+          example: "my-operator_player_001"
+        info:
+          type: string
+          description: Operation information/context
+          example: "bet_info"
+        amount:
+          type: number
+          format: double
+          description: Transaction amount
+          example: 100.00
+        currency:
+          type: string
+          description: ISO 4217 currency code
+          example: "BRL"
+        items:
+          type: array
+          description: Batch items for multi-operator processing
+          items:
+            type: object
+            properties:
+              token:
+                type: string
+                example: "my-operator_abc123xyz"
+              playerId:
+                type: string
+                example: "my-operator_player_001"
+              info:
+                type: string
+                example: "item_info"
+              amount:
+                type: number
+                format: double
+                example: 50.00
+
+    DigitainResponse:
+      type: object
+      required:
+        - timestamp
+        - signature
+        - errorCode
+      properties:
+        timestamp:
+          type: string
+          description: Response timestamp in format YmdHiu
+          example: "20260508120001"
+        signature:
+          type: string
+          description: |
+            HMAC-SHA256 signature for response validation.
+            Calculated as: HMAC-SHA256(timestamp + operatorId, secret-key)
+          example: "base64_encoded_hmac"
+        errorCode:
+          type: integer
+          description: |
+            Operation result code.
+            1 = success, other values = error
+          example: 1
+        playerId:
+          type: string
+          description: Player identifier with operator slug prefix (if present)
+          example: "my-operator_player_001"
+        token:
+          type: string
+          description: Session token with operator slug prefix (if present)
+          example: "my-operator_abc123xyz"
+        balance:
+          type: number
+          format: double
+          description: Player balance after operation
+          example: 900.00
+        items:
+          type: array
+          description: Response items (for batch requests)
+          items:
+            type: object
+            properties:
+              info:
+                type: string
+                example: "item_info"
+              errorCode:
+                type: integer
+                example: 1
+              metadata:
+                type: string
+                example: ""
+              balance:
+                type: number
+                format: double
+                example: 900.00
+
+    ErrorResponse:
+      type: object
+      required:
+        - timestamp
+        - signature
+        - errorCode
+      properties:
+        timestamp:
+          type: string
+          description: Error response timestamp
+          example: "20260508120001"
+        signature:
+          type: string
+          description: HMAC-SHA256 signature
+          example: "base64_encoded_hmac"
+        errorCode:
+          type: integer
+          description: Error code
+          example: 2
+        description:
+          type: string
+          description: Error description
+          example: "Invalid operator ID"
+
+tags:
+  - name: Operations
+    description: Digitain RGS operations (authenticate, getbalance, bet, win, betwin, refund, amend, checktxstatus, charge, promowin, refreshtoken)
+  - name: Batch Processing
+    description: Multi-operator batch processing support
