@@ -1,0 +1,481 @@
+openapi: 3.0.3
+info:
+  title: PG Soft Provider API
+  description: |
+    Complete OpenAPI 3.0 specification for PG Soft webhook integration.
+    Covers 4 endpoints handling session verification, cash operations, and adjustments.
+  version: 1.0.0
+  contact:
+    name: Casino Proxy Migration
+    url: https://github.com/casino-proxy/docs
+
+servers:
+  - url: https://casino-proxy.example.com/v1/webhooks/pgsoft
+    description: Casino Proxy Gateway (PG Soft endpoint)
+  - url: http://localhost:3000/v1/webhooks/pgsoft
+    description: Local Development
+
+paths:
+  /VerifySession:
+    post:
+      summary: Verify player session
+      description: |
+        Verify a player's session and retrieve player information including name, nickname, and currency.
+        Called when player launches a PG Soft game.
+      operationId: verifySession
+      tags:
+        - Session Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifySessionRequest'
+            example:
+              operator_token: "operator"
+              secret_key: "secret_key"
+              operator_player_session: "my-operator_abc123xyz"
+              game_id: 123
+      responses:
+        '200':
+          description: Session verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+              example:
+                data:
+                  player_name: "my-operator_player_001"
+                  nickname: "John Player"
+                  currency: "BRL"
+                error: null
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /Cash/Get:
+    post:
+      summary: Get player balance
+      description: Retrieve current player cash balance.
+      operationId: getCash
+      tags:
+        - Cash Operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetCashRequest'
+            example:
+              operator_token: "operator"
+              secret_key: "secret_key"
+              operator_player_session: "my-operator_abc123xyz"
+              player_name: "my-operator_player_001"
+      responses:
+        '200':
+          description: Balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashResponse'
+              example:
+                data:
+                  currency_code: "BRL"
+                  balance_amount: 1000.50
+                  updated_time: 1715177400123
+                error: null
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /Cash/TransferInOut:
+    post:
+      summary: Transfer in/out (bet placement or win payout)
+      description: |
+        Handle bet placement (transfer out) or win payout (transfer in).
+        Transfer amount indicates direction: negative=bet (debit), positive=win (credit).
+      operationId: transferInOut
+      tags:
+        - Cash Operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferInOutRequest'
+            example:
+              operator_token: "operator"
+              secret_key: "secret_key"
+              operator_player_session: "my-operator_abc123xyz"
+              player_name: "my-operator_player_001"
+              game_id: 123
+              bet_id: "bet_001_123456"
+              parent_bet_id: "bet_001_123456"
+              currency_code: "BRL"
+              bet_amount: 50.00
+              win_amount: 0.00
+              transfer_amount: -50.00
+              transaction_id: "txn_001_bet"
+              create_time: 1715177400000
+              updated_time: 1715177400000
+      responses:
+        '200':
+          description: Transfer completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashResponse'
+              example:
+                data:
+                  currency_code: "BRL"
+                  balance_amount: 950.50
+                  updated_time: 1715177400124
+                error: null
+        '400':
+          description: Invalid request or insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /Cash/Adjustment:
+    post:
+      summary: Manual adjustment (correction or bonus)
+      description: |
+        Perform manual balance adjustment for corrections, bonuses, or customer service adjustments.
+        Amount can be positive (credit) or negative (debit).
+      operationId: adjustment
+      tags:
+        - Cash Operations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdjustmentRequest'
+            example:
+              operator_token: "operator"
+              secret_key: "secret_key"
+              player_name: "my-operator_player_001"
+              currency_code: "BRL"
+              transfer_amount: 100.00
+              adjustment_id: 123
+              adjustment_transaction_id: "adj_001_123"
+              adjustment_time: 1715177400000
+              transaction_type: 901
+              bet_type: 1
+      responses:
+        '200':
+          description: Adjustment completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashResponse'
+              example:
+                data:
+                  currency_code: "BRL"
+                  balance_amount: 1050.50
+                  updated_time: 1715177400125
+                error: null
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    VerifySessionRequest:
+      type: object
+      required:
+        - operator_token
+        - secret_key
+        - operator_player_session
+      properties:
+        operator_token:
+          type: string
+          description: Operator identifier/token
+          example: "operator"
+        secret_key:
+          type: string
+          description: Secret key for operator validation
+          example: "secret_key"
+        operator_player_session:
+          type: string
+          description: Session token in format {operator_slug}_{session_token}
+          example: "my-operator_abc123xyz"
+        game_id:
+          type: integer
+          description: Game identifier (optional)
+          example: 123
+        custom_parameter:
+          type: string
+          description: Custom parameter (optional)
+
+    GetCashRequest:
+      type: object
+      required:
+        - operator_token
+        - secret_key
+        - player_name
+      properties:
+        operator_token:
+          type: string
+          example: "operator"
+        secret_key:
+          type: string
+          example: "secret_key"
+        player_name:
+          type: string
+          description: Player identifier in format {operator_slug}_{player_id}
+          example: "my-operator_player_001"
+        operator_player_session:
+          type: string
+          description: Session token (optional)
+          example: "my-operator_abc123xyz"
+        game_id:
+          type: integer
+          description: Game identifier (optional)
+          example: 123
+        custom_parameter:
+          type: string
+          description: Custom parameter (optional)
+
+    TransferInOutRequest:
+      type: object
+      required:
+        - operator_token
+        - secret_key
+        - player_name
+        - game_id
+        - bet_id
+        - currency_code
+        - bet_amount
+        - transfer_amount
+        - transaction_id
+      properties:
+        operator_token:
+          type: string
+          example: "operator"
+        secret_key:
+          type: string
+          example: "secret_key"
+        operator_player_session:
+          type: string
+          description: Session token (optional)
+          example: "my-operator_abc123xyz"
+        player_name:
+          type: string
+          description: Player identifier {operator_slug}_{player_id}
+          example: "my-operator_player_001"
+        game_id:
+          type: integer
+          description: Game identifier
+          example: 123
+        parent_bet_id:
+          type: string
+          description: Parent bet reference (for bet chains)
+          example: "bet_001_123456"
+        bet_id:
+          type: string
+          description: Unique bet identifier
+          example: "bet_001_123456"
+        bet_type:
+          type: integer
+          description: Bet type code
+          example: 1
+        currency_code:
+          type: string
+          description: ISO 4217 currency code
+          example: "BRL"
+        platform:
+          type: integer
+          description: Platform identifier
+          example: 1
+        create_time:
+          type: integer
+          format: int64
+          description: Creation timestamp in milliseconds
+          example: 1715177400000
+        updated_time:
+          type: integer
+          format: int64
+          description: Update timestamp in milliseconds
+          example: 1715177400000
+        bet_amount:
+          type: number
+          format: double
+          description: Bet amount (always positive)
+          example: 50.00
+        win_amount:
+          type: number
+          format: double
+          description: Win amount (0 for bets)
+          example: 0.00
+        transfer_amount:
+          type: number
+          format: double
+          description: Amount to transfer (negative=debit/bet, positive=credit/win)
+          example: -50.00
+        transaction_id:
+          type: string
+          description: Unique transaction identifier
+          example: "txn_001_bet"
+        wallet_type:
+          type: string
+          description: Wallet type (optional)
+        is_validate_bet:
+          type: boolean
+          description: Validate bet flag (optional)
+        is_feature:
+          type: boolean
+          description: Feature game flag (optional)
+        is_adjustment:
+          type: boolean
+          description: Adjustment flag (optional)
+        is_end_round:
+          type: boolean
+          description: End of round flag (optional)
+
+    AdjustmentRequest:
+      type: object
+      required:
+        - operator_token
+        - secret_key
+        - player_name
+        - currency_code
+        - transfer_amount
+        - adjustment_id
+      properties:
+        operator_token:
+          type: string
+          example: "operator"
+        secret_key:
+          type: string
+          example: "secret_key"
+        player_name:
+          type: string
+          description: Player identifier {operator_slug}_{player_id}
+          example: "my-operator_player_001"
+        currency_code:
+          type: string
+          example: "BRL"
+        transfer_amount:
+          type: number
+          format: double
+          description: Adjustment amount (positive=credit, negative=debit)
+          example: 100.00
+        adjustment_id:
+          type: integer
+          description: Adjustment identifier
+          example: 123
+        adjustment_transaction_id:
+          type: string
+          description: Adjustment transaction identifier
+          example: "adj_001_123"
+        adjustment_time:
+          type: integer
+          format: int64
+          description: Adjustment timestamp in milliseconds
+          example: 1715177400000
+        transaction_type:
+          type: integer
+          description: Transaction type code
+          example: 901
+        bet_type:
+          type: integer
+          description: Bet type code
+          example: 1
+
+    SessionResponse:
+      type: object
+      required:
+        - data
+        - error
+      properties:
+        data:
+          type: object
+          required:
+            - player_name
+            - currency
+          properties:
+            player_name:
+              type: string
+              description: Player identifier with operator prefix
+              example: "my-operator_player_001"
+            nickname:
+              type: string
+              description: Player display name
+              example: "John Player"
+            currency:
+              type: string
+              description: ISO 4217 currency code
+              example: "BRL"
+        error:
+          type: "null"
+          description: Error code (null for success)
+
+    CashResponse:
+      type: object
+      required:
+        - data
+        - error
+      properties:
+        data:
+          type: object
+          required:
+            - currency_code
+            - balance_amount
+            - updated_time
+          properties:
+            currency_code:
+              type: string
+              description: ISO 4217 currency code
+              example: "BRL"
+            balance_amount:
+              type: number
+              format: double
+              description: Current balance amount
+              example: 1000.50
+            updated_time:
+              type: integer
+              format: int64
+              description: Update timestamp in milliseconds
+              example: 1715177400123
+        error:
+          type: "null"
+          description: Error code (null for success)
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - description
+      properties:
+        error:
+          type: string
+          description: Error identifier or code
+          example: "Server error"
+        description:
+          type: string
+          description: Detailed error description
+          example: "No query results for model"
+
+tags:
+  - name: Session Management
+    description: Session verification operations
+  - name: Cash Operations
+    description: Balance and transfer operations
