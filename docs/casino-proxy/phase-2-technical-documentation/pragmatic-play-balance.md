@@ -21,109 +21,48 @@ O endpoint `/balance` é uma consulta de leitura que retorna o saldo atual de um
 
 ## 2. Fluxo de Requisição (Request → Response)
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  ENTRADA: HTTP POST /v1/webhooks/pragmatic-play/balance        │
-│  Payload: { token|userId, currency, ... }                      │
-└─────────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────────┐
-│  FASE 1: ROTEAMENTO (PP-001)                                   │
-│  · Método call() verifica se 'balance' existe                  │
-│  · Valida endpoint conhecida                                   │
-│  · Se não existe → Exception 500                               │
-└─────────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────────┐
-│  FASE 2: EXTRAÇÃO DE TENANT (PP-002)                           │
-│  · Recebe: token = "myoperator_abc123" OU                      │
-│           userId = "myoperator_user456"                        │
-│  · Faz split em '_' (último elemento é valor real)             │
-│  · Extrai operator_slug = "myoperator"                         │
-└─────────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────────┐
-│  FASE 3: LOOKUP DO OPERADOR (PP-003)                           │
-│  · Query: SELECT * FROM operators WHERE slug = "myoperator"    │
-│  · Cache: TTL 1 hora (cache key = "operator_myoperator")       │
-│  · Se não encontrado → OperatorNotFoundException               │
-│  · Carrega também: operator.credentials (relations)            │
-└─────────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────────┐
-│  FASE 4: SANITIZAÇÃO DE TOKENS (PP-004, PP-011)                │
-│  ORDEM: 1) token primeiro, 2) userId depois                    │
-│                                                                 │
-│  SE token presente:                                            │
-│    token = "abc123" (remove prefixo "myoperator_")             │
-│  SENÃO:                                                        │
-│    token = userId (copia userId e remove prefixo)             │
-│                                                                 │
-│  userId = "user456" (remove prefixo "myoperator_")             │
-│                                                                 │
-│  Resultado: dados prontos para provider                        │
-└─────────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────────┐
-│  FASE 5: LOOKUP DE CREDENCIAIS (PP-006)                        │
-│  · Query credenciais do operador                               │
-│  · Filter: WHERE name = 'pragmatic' AND key = 'secret-key'    │
-│  · Extrai: secret = credential.value                           │
-│  · Se não encontrado → null reference error                    │
-└─────────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────────┐
-│  FASE 6: GERAÇÃO DE HASH (PP-005)                              │
-│  · Payload transformado:                                       │
-│    { token: "abc123", userId: "user456" }                      │
-│  · Algoritmo MD5:                                              │
-│    1. Sort keys: token, userId                                 │
-│    2. Build query: "token=abc123&userId=user456"               │
-│    3. Append secret: "token=abc123&userId=user456{secret}"     │
-│    4. URL decode                                               │
-│    5. MD5(string)                                              │
-│  · Adiciona ao payload: hash = "abc123def456..."               │
-└─────────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────────┐
-│  FASE 7: HTTP POST AO PROVIDER (PP-008)                        │
-│  · URL: {operator.url}/pragmatic-play/balance.html             │
-│  · Exemplo: https://pp-backend.com/pragmatic-play/balance.html│
-│  · Method: POST                                                │
-│  · Payload JSON: { token, userId, hash }                       │
-│  · Header: Content-Type: application/json                      │
-│  · Timeout: configurável (retry desabilitado em BaseService)   │
-└─────────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────────┐
-│  FASE 8: RESPOSTA DO PROVIDER                                  │
-│  Retorna JSON (sem transformação):                             │
-│  {                                                             │
-│    "transactionId": "xyz123",                                  │
-│    "currency": "BRL",                                          │
-│    "cash": 500.00,                                             │
-│    "bonus": 50.00,                                             │
-│    "usedPromo": 0,                                             │
-│    "error": 0,                                                 │
-│    "description": "Success"                                    │
-│  }                                                             │
-│                                                                │
-│  ⚠️ NOTA: Balance NÃO re-prefixar userId (ao contrário do      │
-│     authenticate). Retorna resposta inalterada.                │
-└─────────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────────┐
-│  SAÍDA: HTTP 200 OK                                            │
-│  {                                                             │
-│    "transactionId": "xyz123",                                  │
-│    "currency": "BRL",                                          │
-│    "cash": 500.00,                                             │
-│    "bonus": 50.00,                                             │
-│    "usedPromo": 0,                                             │
-│    "error": 0,                                                 │
-│    "description": "Success"                                    │
-│  }                                                             │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    A["<b>INPUT</b><br/>POST /v1/webhooks/pragmatic-play/balance<br/>{ token|userId, currency, ... }"]
+    
+    A --> B["<b>FASE 1: ROTEAMENTO</b><br/>PP-001<br/>method_exists 'balance'<br/>✅ válido"]
+    B --> B_err["❌ Endpoint inválido<br/>Exception 500"]
+    B --> C["<b>FASE 2: EXTRAÇÃO TENANT</b><br/>PP-002, PP-010<br/>token = 'myoperator_abc123'<br/>operator_slug = 'myoperator'"]
+    
+    C --> D["<b>FASE 3: LOOKUP OPERADOR</b><br/>PP-003<br/>SELECT * FROM operators<br/>Cache TTL 1 hora"]
+    D --> D_err["❌ Operador não encontrado<br/>OperatorNotFoundException"]
+    D --> E["<b>FASE 4: SANITIZAÇÃO TOKENS</b><br/>PP-004, PP-011<br/>1️⃣ token = removeTenant<br/>2️⃣ userId = removeTenant"]
+    
+    E --> F["<b>FASE 5: LOOKUP CREDENCIAIS</b><br/>PP-006<br/>WHERE name='pragmatic'<br/>AND key='secret-key'"]
+    F --> F_err["❌ Credencial não encontrada<br/>NullPointerException"]
+    F --> G["<b>FASE 6: GERAÇÃO HASH</b><br/>PP-005<br/>MD5(sorted_payload + secret)"]
+    
+    G --> H["<b>FASE 7: HTTP POST</b><br/>PP-008<br/>POST {operator.url}/pragmatic-play/balance.html<br/>Content-Type: application/json"]
+    H --> H_err["❌ Provider timeout<br/>Connection failed"]
+    H --> I["<b>FASE 8: RESPOSTA PROVIDER</b><br/>JSON passthrough<br/>sem transformação<br/>⚠️ NÃO re-prefixar userId"]
+    
+    I --> J["<b>OUTPUT</b><br/>HTTP 200 OK<br/>{ transactionId, currency, cash, bonus, error, ... }"]
+    
+    B_err --> X["❌ Exception 500"]
+    D_err --> X
+    F_err --> X
+    H_err --> X
+    
+    style A fill:#e1f5ff
+    style B fill:#c8e6c9
+    style C fill:#c8e6c9
+    style D fill:#c8e6c9
+    style E fill:#c8e6c9
+    style F fill:#c8e6c9
+    style G fill:#c8e6c9
+    style H fill:#c8e6c9
+    style I fill:#c8e6c9
+    style J fill:#e1f5ff
+    style X fill:#ffcdd2
+    style B_err fill:#ffcdd2
+    style D_err fill:#ffcdd2
+    style F_err fill:#ffcdd2
+    style H_err fill:#ffcdd2
 ```
 
 ---
@@ -369,61 +308,26 @@ Content-Type: application/json
 
 ---
 
-## 8. Notas para Implementação Go
+## 8. Mudanças Esperadas de CASINO-1.7 Fase 1 para Fase 2
 
-Ao migrar para Go, implementar da seguinte forma:
+**Contexto:** CASINO-1.7 tem 5 Fases:
+- **Fase 1:** Extrair regras de negócio (documento: `pragmatic-play-rules.md`)
+- **Fase 2:** Documentar regras em formato técnico (documento: ESTE ARQUIVO - `pragmatic-play-balance.md`)
+- **Fase 3-5:** Testes, matriz YAML, validação
 
-```go
-// Pseudocódigo Go para /balance
-
-func (s *PragmaticPlayService) Balance(payload map[string]interface{}) map[string]interface{} {
-    // Fase 1: Routing (automático via router)
-    
-    // Fase 2: Tenant extraction
-    operatorSlug := extractOperatorSlug(payload["token"].(string))
-    
-    // Fase 3: Operator lookup with cache
-    operator := s.operatorCache.Get(operatorSlug, func() {
-        return s.db.Where("slug = ?", operatorSlug).First()
-    })
-    
-    // Fase 4: Token sanitization (order: token first, then userId)
-    if payload["token"] != nil {
-        payload["token"] = removeTenant(payload["token"].(string))
-    }
-    payload["userId"] = removeTenant(payload["userId"].(string))
-    
-    // Fase 5-6: Hash generation
-    secret := operator.Credentials().WhereNamed("pragmatic").Value()
-    payload["hash"] = generateMD5Hash(payload, secret)
-    
-    // Fase 7: HTTP POST
-    response := s.httpClient.Post(
-        operator.URL + "/pragmatic-play/balance.html",
-        payload,
-    )
-    
-    // Fase 8: Passthrough response (sem transformação)
-    return response
-}
-```
+| Aspecto | CASINO-1.7 Fase 1 | CASINO-1.7 Fase 2 |
+|---------|------------------|-------------------|
+| **Formato** | Lista de 12 regras isoladas (PP-001 a PP-012) | Fluxo integrado por endpoint |
+| **Granularidade** | Por ponto de decisão/validação | Por endpoint (ex: /balance) |
+| **Visualização** | Lista de regras com pseudocódigo | Mermaid flowchart com 8 fases |
+| **Validação** | Rastreabilidade até código source | Teste de integração |
+| **Público Alvo** | Arquitetos, análise técnica | Implementadores, QA |
+| **Exemplo** | "Regra PP-005: Hash gerado com MD5" | "Fluxo completo do /balance: 8 fases do input até output" |
+| **Uso** | Especificação de requisitos | Template para implementação/testes |
 
 ---
 
-## 9. Mudanças Esperadas da Fase 1 para Fase 2
-
-| Aspecto | Fase 1 | Fase 2 |
-|---------|--------|--------|
-| **Formato** | Regras isoladas | Fluxo integrado |
-| **Granularidade** | Por decisão | Por endpoint |
-| **Visualização** | Lista de regras | Diagrama de fluxo |
-| **Validação** | Rastreabilidade | Teste de integração |
-| **Público** | Arquitetos | Implementadores |
-| **Exemplo** | "Hash gerado com MD5" | "Fluxo completo: entrada → saída" |
-
----
-
-## 10. Checklist de Validação para Aprovação
+## 9. Checklist de Validação para Aprovação
 
 - [ ] **Fluxo correto?** Todas as 8 fases descritas e em ordem?
 - [ ] **Regras aplicadas?** Todas as 10 regras (PP-001, 002, 003, 004, 005, 006, 008, 009, 010, 011) contempladas?
