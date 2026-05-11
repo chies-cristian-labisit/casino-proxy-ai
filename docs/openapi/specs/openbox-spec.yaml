@@ -1,0 +1,247 @@
+openapi: 3.0.0
+info:
+  title: OpenBox Provider API
+  version: 1.0.0
+  description: |
+    Gaming provider webhooks for OpenBox integration.
+    Uses PUT method (non-standard) with HMAC-SHA256 signature authentication.
+  contact:
+    name: Casino Proxy Team
+
+servers:
+  - url: /v1/webhooks/openbox/seamless
+
+paths:
+  /balance:
+    put:
+      operationId: openBoxBalance
+      tags:
+        - OpenBox
+      summary: Get player balance
+      description: Retrieve current player balance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenBoxBalanceRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenBoxBalanceResponse'
+
+  /bet:
+    put:
+      operationId: openBoxBet
+      tags:
+        - OpenBox
+      summary: Place bet
+      description: Place bet and debit player account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenBoxBetRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenBoxBetResponse'
+
+  /win:
+    put:
+      operationId: openBoxWin
+      tags:
+        - OpenBox
+      summary: Record win
+      description: Record player win and credit account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenBoxWinRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenBoxWinResponse'
+
+  /refund:
+    put:
+      operationId: openBoxRefund
+      tags:
+        - OpenBox
+      summary: Refund transaction
+      description: Refund or cancel existing transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenBoxRefundRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenBoxRefundResponse'
+
+components:
+  schemas:
+    OpenBoxBaseRequest:
+      type: object
+      required:
+        - playerId
+        - timestamp
+      properties:
+        playerId:
+          type: string
+          example: player_456
+        timestamp:
+          type: string
+          description: Unix timestamp
+          example: '1715424600'
+
+    OpenBoxBalanceRequest:
+      allOf:
+        - $ref: '#/components/schemas/OpenBoxBaseRequest'
+
+    OpenBoxBalanceResponse:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+          example: 1500.50
+        currency:
+          type: string
+          example: BRL
+        playerId:
+          type: string
+          example: player_456
+
+    OpenBoxBetRequest:
+      allOf:
+        - $ref: '#/components/schemas/OpenBoxBaseRequest'
+        - type: object
+          required:
+            - amount
+            - gameId
+            - roundId
+          properties:
+            amount:
+              type: number
+              format: double
+              example: 50.00
+            gameId:
+              type: string
+              example: game_789
+            roundId:
+              type: string
+              example: round_456
+
+    OpenBoxBetResponse:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+          example: 1450.50
+        currency:
+          type: string
+          example: BRL
+        playerId:
+          type: string
+          example: player_456
+        transactionId:
+          type: string
+          example: txn_131
+
+    OpenBoxWinRequest:
+      allOf:
+        - $ref: '#/components/schemas/OpenBoxBaseRequest'
+        - type: object
+          required:
+            - amount
+            - gameId
+            - roundId
+          properties:
+            amount:
+              type: number
+              format: double
+              example: 100.00
+            gameId:
+              type: string
+              example: game_789
+            roundId:
+              type: string
+              example: round_456
+
+    OpenBoxWinResponse:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+          example: 1550.50
+        currency:
+          type: string
+          example: BRL
+        playerId:
+          type: string
+          example: player_456
+        transactionId:
+          type: string
+          example: txn_132
+
+    OpenBoxRefundRequest:
+      allOf:
+        - $ref: '#/components/schemas/OpenBoxBaseRequest'
+        - type: object
+          required:
+            - originalTransactionId
+            - amount
+          properties:
+            originalTransactionId:
+              type: string
+              example: txn_131
+            amount:
+              type: number
+              format: double
+              example: 50.00
+
+    OpenBoxRefundResponse:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+          example: 1500.50
+        currency:
+          type: string
+          example: BRL
+        playerId:
+          type: string
+          example: player_456
+        transactionId:
+          type: string
+          example: txn_133
+
+  securitySchemes:
+    hmacSignature:
+      type: apiKey
+      in: header
+      name: signature
+      description: |
+        Signature format: api_key:base64_encoded_hmac_sha256
+        HMAC-SHA256 calculated over request body and timestamp
