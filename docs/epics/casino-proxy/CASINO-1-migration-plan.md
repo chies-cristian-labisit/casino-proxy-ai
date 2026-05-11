@@ -379,12 +379,26 @@ Hybrid Mode (During Transition):
 
 ---
 
+## Epic Reorganization (New Structure)
+
+**CASINO-1** has been split into **3 focused epics** for clarity and parallel execution:
+
+| Epic | Phase | Purpose | Stories | Status |
+|------|-------|---------|---------|--------|
+| **CASINO-1** | 1 (OpenAPI) | Documentation & Swagger Generation | 6 | ✅ COMPLETE |
+| **CASINO-2** | 1.5 (Discovery) | Business Rules & Test Oracle | 40 | 🚀 STARTING |
+| **CASINO-3** | 0-5 | Go Implementation & Migration | 23 | ⏸️ WAITING |
+
+**See:** `EPIC-REORGANIZATION-PLAN.md` for detailed breakdown.
+
+---
+
 ## Next Steps
 
 ### Immediate (This Week)
-1. ✅ Complete Phase 1 story planning (CASINO-1.1 to CASINO-1.6)
-2. ✅ Assign story creators from @sm (Scrum Master)
-3. ✅ Start Phase 1 story development
+1. ✅ Complete Phase 1 story planning (CASINO-1.1 to CASINO-1.6) → MERGED to master
+2. 🚀 Start CASINO-2 Phase 1 (Business Rules Extraction - Pragmatic Play)
+3. 🔧 Start CASINO-3.0 (Infrastructure as Code Discovery)
 
 ### Week 2-3
 - Complete OpenAPI documentation for all 8 providers
