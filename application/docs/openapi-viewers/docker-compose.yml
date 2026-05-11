@@ -1,45 +1,14 @@
 version: '3.8'
 
-# Casino Proxy OpenAPI Documentation Viewers
+# Casino Proxy OpenAPI Documentation Viewer
 # Start with: docker-compose -f application/docs/openapi-viewers/docker-compose.yml up -d
 #
-# All containers automatically load their OpenAPI spec files on startup
+# Single Swagger UI container for API testing
 #
 # Access locally:
-# - Swagger Editor (editing):      http://localhost:8080  (Main API - casino-proxy-api.yaml)
-# - Swagger UI (testing):          http://localhost:8081  (Main API with Try It Out)
-# - Redoc (documentation):         http://localhost:8082  (Main API beautiful docs)
-# - Swagger Editor (editing):      http://localhost:8083  (Admin API - admin-api-spec.yaml)
-# - Swagger UI (testing):          http://localhost:8084  (Admin API with Try It Out)
-# - Redoc (documentation):         http://localhost:8085  (Admin API beautiful docs)
+# - Swagger UI (testing & documentation): http://localhost:8081
 
 services:
-  # ============================================================================
-  # MAIN API DOCUMENTATION (Casino Proxy - All 8 Providers)
-  # ============================================================================
-
-  swagger-editor-main:
-    image: swaggerapi/swagger-editor:latest
-    container_name: casino-proxy-swagger-editor-main
-    ports:
-      - "8080:80"
-    volumes:
-      - ../openapi:/specs:ro
-    networks:
-      - casino-docs
-    labels:
-      - "com.casino-proxy.project=Casino Proxy API Platform"
-      - "com.casino-proxy.service=swagger-editor-main"
-      - "com.casino-proxy.api=Main API"
-      - "com.casino-proxy.tool=Swagger Editor"
-      - "com.casino-proxy.description=Main API Editor - Edit OpenAPI spec for all 8 gaming providers"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
   swagger-ui-main:
     image: swaggerapi/swagger-ui:latest
     container_name: casino-proxy-swagger-ui-main
@@ -55,110 +24,9 @@ services:
     labels:
       - "com.casino-proxy.project=Casino Proxy API Platform"
       - "com.casino-proxy.service=swagger-ui-main"
-      - "com.casino-proxy.api=Main API"
-      - "com.casino-proxy.tool=Swagger UI"
-      - "com.casino-proxy.description=Main API Documentation & Testing - Try It Out endpoints with casino-proxy-api.yaml loaded"
+      - "com.casino-proxy.description=Casino Proxy API - Interactive API documentation with Try It Out"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
-  redoc-main:
-    image: redocly/redoc:latest
-    container_name: casino-proxy-redoc-main
-    ports:
-      - "8082:80"
-    environment:
-      - SPEC_URL=/specs/casino-proxy-api.yaml
-    volumes:
-      - ../openapi:/usr/share/nginx/html/specs:ro
-    networks:
-      - casino-docs
-    labels:
-      - "com.casino-proxy.project=Casino Proxy API Platform"
-      - "com.casino-proxy.service=redoc-main"
-      - "com.casino-proxy.api=Main API"
-      - "com.casino-proxy.tool=Redoc"
-      - "com.casino-proxy.description=Main API Beautiful Documentation - Professional API reference with casino-proxy-api.yaml auto-loaded"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
-  # ============================================================================
-  # ADMIN API DOCUMENTATION (Operator Management)
-  # ============================================================================
-
-  swagger-editor-admin:
-    image: swaggerapi/swagger-editor:latest
-    container_name: casino-proxy-swagger-editor-admin
-    ports:
-      - "8083:80"
-    volumes:
-      - ../openapi:/specs:ro
-    networks:
-      - casino-docs
-    labels:
-      - "com.casino-proxy.project=Casino Proxy API Platform"
-      - "com.casino-proxy.service=swagger-editor-admin"
-      - "com.casino-proxy.api=Admin API"
-      - "com.casino-proxy.tool=Swagger Editor"
-      - "com.casino-proxy.description=Admin API Editor - Edit OpenAPI spec for operator management"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
-  swagger-ui-admin:
-    image: swaggerapi/swagger-ui:latest
-    container_name: casino-proxy-swagger-ui-admin
-    ports:
-      - "8084:8080"
-    volumes:
-      - ../openapi:/usr/share/nginx/html/specs:ro
-      - ./docker/swagger-initializer-admin.js:/usr/share/nginx/html/swagger-initializer.js:ro
-    environment:
-      - BASE_URL=/
-    networks:
-      - casino-docs
-    labels:
-      - "com.casino-proxy.project=Casino Proxy API Platform"
-      - "com.casino-proxy.service=swagger-ui-admin"
-      - "com.casino-proxy.api=Admin API"
-      - "com.casino-proxy.tool=Swagger UI"
-      - "com.casino-proxy.description=Admin API Documentation & Testing - Try It Out endpoints with admin-api-spec.yaml loaded"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
-  redoc-admin:
-    image: redocly/redoc:latest
-    container_name: casino-proxy-redoc-admin
-    ports:
-      - "8085:80"
-    environment:
-      - SPEC_URL=/specs/admin-api-spec.yaml
-    volumes:
-      - ../openapi:/usr/share/nginx/html/specs:ro
-    networks:
-      - casino-docs
-    labels:
-      - "com.casino-proxy.project=Casino Proxy API Platform"
-      - "com.casino-proxy.service=redoc-admin"
-      - "com.casino-proxy.api=Admin API"
-      - "com.casino-proxy.tool=Redoc"
-      - "com.casino-proxy.description=Admin API Beautiful Documentation - Professional API reference with admin-api-spec.yaml auto-loaded"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
       timeout: 10s
       retries: 3
