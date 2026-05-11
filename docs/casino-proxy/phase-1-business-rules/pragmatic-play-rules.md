@@ -22,9 +22,9 @@ Todas as 9 endpoints compartilham a mesma lógica base, com variações mínimas
 
 ## Regras Extraídas
 
-### Regra PP-001: Dynamic Endpoint Routing via Method Resolution
+### Regra BR-GENERIC-ROUTING-VALIDATION-001: Dynamic Endpoint Routing via Method Resolution
 
-**ID:** PP-001  
+**ID:** BR-GENERIC-ROUTING-VALIDATION-001  
 **Descrição:** O serviço roteia requisições para métodos específicos usando dynamic method calling baseado no parâmetro `endpoint` da requisição.
 
 **Contexto de Negócio:**  
@@ -53,9 +53,9 @@ Teste: `test_unknown_method_to_pragmatic_play_endpoint()` — verifica que endpo
 
 ---
 
-### Regra PP-002: Tenant/Operator Extraction from Token
+### Regra BR-GENERIC-TENANT-EXTRACTION-001: Tenant/Operator Extraction from Token
 
-**ID:** PP-002  
+**ID:** BR-GENERIC-TENANT-EXTRACTION-001  
 **Descrição:** O `token` (ou `userId`) é parseado usando delimiter `_` para extrair o slug do operador (tenant).
 
 **Contexto de Negócio:**  
@@ -86,9 +86,9 @@ actual_token = token_parts[-1]  # última parte
 
 ---
 
-### Regra PP-003: Tenant Lookup with 1-Hour Caching
+### Regra BR-GENERIC-OPERATOR-CACHING-001: Tenant Lookup with 1-Hour Caching
 
-**ID:** PP-003  
+**ID:** BR-GENERIC-OPERATOR-CACHING-001  
 **Descrição:** O operador é recuperado do banco usando o `operator_slug` e cacheado por 1 hora em memória.
 
 **Contexto de Negócio:**  
@@ -115,15 +115,15 @@ SE cache[cache_key] existe
 **Código Fonte:**  
 `OperatorService.php:30-34` (método `get()` — cache logic)
 
-**Dependências:** PP-002 (deve extrair operator_slug primeiro)
+**Dependências:** BR-GENERIC-TENANT-EXTRACTION-001 (deve extrair operator_slug primeiro)
 
 **Performance Note:** Cache TTL = 3600 segundos (1 hora)
 
 ---
 
-### Regra PP-004: Tenant Prefix Removal (Sanitization)
+### Regra BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001: Tenant Prefix Removal (Sanitization)
 
-**ID:** PP-004  
+**ID:** BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001  
 **Descrição:** Antes de enviar requisição ao provider, todos os tokens no payload são sanitizados removendo o prefixo de tenant.
 
 **Contexto de Negócio:**  
@@ -151,13 +151,13 @@ Exemplo:
 `PragmaticPlayService.php:132-137` (método `removeTenant()`)  
 Chamado em: `authenticate()` linha 33, `balance()` linhas 54-55, `bet()` linha 70, etc.
 
-**Dependências:** PP-002 (parsing logic é a mesma)
+**Dependências:** BR-GENERIC-TENANT-EXTRACTION-001 (parsing logic é a mesma)
 
 ---
 
-### Regra PP-005: MD5 Hash Generation for Request Authentication
+### Regra BR-GENERIC-AUTHENTICATION-HMAC-MD5-001: MD5 Hash Generation for Request Authentication
 
-**ID:** PP-005  
+**ID:** BR-GENERIC-AUTHENTICATION-HMAC-MD5-001  
 **Descrição:** Todo payload deve conter um campo `hash` calculado como MD5 do payload + secret-key do operador.
 
 **Contexto de Negócio:**  
@@ -203,9 +203,9 @@ Secret: "secret-key-value"
 
 ---
 
-### Regra PP-006: Provider-Specific Credential Lookup
+### Regra BR-GENERIC-CREDENTIAL-LOOKUP-001: Provider-Specific Credential Lookup
 
-**ID:** PP-006  
+**ID:** BR-GENERIC-CREDENTIAL-LOOKUP-001  
 **Descrição:** Cada operador possui credenciais armazenadas com `name='pragmatic'` e `key='secret-key'`, que são recuperadas do banco e usadas para hash generation.
 
 **Contexto de Negócio:**  
@@ -236,11 +236,11 @@ SE credential não existir
 $tenant->credentials()->where('name', 'pragmatic')->where('key', 'secret-key')->first()->value
 ```
 
-**Dependências:** PP-003 (operador deve ser recuperado primeiro)
+**Dependências:** BR-GENERIC-OPERATOR-CACHING-001 (operador deve ser recuperado primeiro)
 
 ---
 
-### Regra PP-007: Response Re-Prefixing (Authenticate Only)
+### Regra BR-007: Response Re-Prefixing (Authenticate Only)
 
 **ID:** PP-007  
 **Descrição:** Na resposta do endpoint `authenticate`, o campo `userId` é re-prefixado com o slug do operador (formato: `{operator_slug}_{userId}`), mas **apenas se o erro for 0** (sucesso).
@@ -275,15 +275,15 @@ Output: { userId: "myoperator_12345", error: 0, ... }
 **Código Fonte:**  
 `PragmaticPlayService.php:40-42` (método `authenticate()`)
 
-**Dependências:** PP-002, PP-003, PP-004, PP-005 (tudo precisa vir antes)
+**Dependências:** BR-GENERIC-TENANT-EXTRACTION-001, BR-GENERIC-OPERATOR-CACHING-001, BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001, BR-GENERIC-AUTHENTICATION-HMAC-MD5-001 (tudo precisa vir antes)
 
 **Nota de Risco:** Outros endpoints (balance, bet, etc.) **NÃO** re-prefixam userId — apenas authenticate faz isso.
 
 ---
 
-### Regra PP-008: HTTP POST Integration with Tenant-Specific Base URL
+### Regra BR-GENERIC-PROVIDER-INTEGRATION-001: HTTP POST Integration with Tenant-Specific Base URL
 
-**ID:** PP-008  
+**ID:** BR-GENERIC-PROVIDER-INTEGRATION-001  
 **Descrição:** Todos os endpoints enviam requisição HTTP POST para URL construída como `{tenant.url}/pragmatic-play/{endpoint}.html`, com payload JSON.
 
 **Contexto de Negócio:**  
@@ -321,15 +321,15 @@ retornar response.json()
 `BaseService.php:16-22` (método `postJson()`)  
 `PragmaticPlayService.php:37, 59, 74, 89, 165` (em cada método endpoint)
 
-**Dependências:** PP-001 (routing), PP-002 (tenant extraction), PP-004 (token sanitization), PP-005 (hash generation)
+**Dependências:** BR-GENERIC-ROUTING-VALIDATION-001 (routing), BR-GENERIC-TENANT-EXTRACTION-001 (tenant extraction), BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001 (token sanitization), BR-GENERIC-AUTHENTICATION-HMAC-MD5-001 (hash generation)
 
 **Performance Note:** Retry foi removido (comentado), então falhas não são retentadas automaticamente
 
 ---
 
-### Regra PP-009: Error Handling on Unknown Endpoint
+### Regra BR-GENERIC-ERROR-HANDLING-001: Error Handling on Unknown Endpoint
 
-**ID:** PP-009  
+**ID:** BR-GENERIC-ERROR-HANDLING-001  
 **Descrição:** Quando cliente invoca um endpoint que não existe como método na classe, uma exceção é lançada com mensagem "Endpoint {endpoint} was not found." e HTTP status 500.
 
 **Contexto de Negócio:**  
@@ -360,9 +360,9 @@ SE method_exists(this, endpoint)
 
 ---
 
-### Regra PP-010: Balance Endpoint Dual Token Support
+### Regra BR-PRAGMATIC-BALANCE-DUAL-TOKEN-SUPPORT-001: Balance Endpoint Dual Token Support
 
-**ID:** PP-010  
+**ID:** BR-PRAGMATIC-BALANCE-DUAL-TOKEN-SUPPORT-001  
 **Descrição:** O endpoint `balance` aceita **tanto `token` quanto `userId`** para identificar o operador. Se `token` estiver presente, usa-o; caso contrário, usa `userId`.
 
 **Contexto de Negócio:**  
@@ -393,13 +393,13 @@ PARA CADA campo em ['token', 'userId']:
 **Código Fonte:**  
 `PragmaticPlayService.php:48-62` (método `balance()`)
 
-**Dependências:** PP-002 (tenant extraction), PP-003 (lookup), PP-004 (sanitization), PP-005 (hash), PP-008 (HTTP POST)
+**Dependências:** BR-GENERIC-TENANT-EXTRACTION-001 (tenant extraction), BR-GENERIC-OPERATOR-CACHING-001 (lookup), BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001 (sanitization), BR-GENERIC-AUTHENTICATION-HMAC-MD5-001 (hash), BR-GENERIC-PROVIDER-INTEGRATION-001 (HTTP POST)
 
 ---
 
-### Regra PP-011: Token Sanitization Order
+### Regra BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-ORDER-001: Token Sanitization Order
 
-**ID:** PP-011  
+**ID:** BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-ORDER-001  
 **Descrição:** Quando um endpoint tem múltiplos campos de token (`token` e `userId`), eles são sanitizados **nessa ordem específica**: `token` primeiro, depois `userId`.
 
 **Contexto de Negócio:**  
@@ -421,11 +421,11 @@ $data['userId'] = removeTenant($data['userId']);  # depois userId
 `PragmaticPlayService.php:161` (handleResult — apenas userId)  
 `PragmaticPlayService.php:120` (adjustment — apenas userId)
 
-**Dependências:** PP-004 (removeTenant logic)
+**Dependências:** BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001 (removeTenant logic)
 
 ---
 
-### Regra PP-012: Authenticate Method Only Returns Prefixed UserId
+### Regra BR-012: Authenticate Method Only Returns Prefixed UserId
 
 **ID:** PP-012  
 **Descrição:** **Apenas o endpoint `authenticate` re-prefixar o userId na resposta.** Todos os outros endpoints (`balance`, `bet`, `refund`, `result`, `bonusWin`, `jackpotWin`, `promoWin`, `adjustment`) **retornam a resposta inalterada** do provider.
@@ -483,20 +483,20 @@ Todos os outros métodos (linhas 48-62, 64-77, 79-92, 94-166) não fazem re-pref
 ## Matriz de Dependências entre Regras
 
 ```
-PP-001 (Dynamic Routing)
+BR-GENERIC-ROUTING-VALIDATION-001 (Dynamic Routing)
   ↓
-PP-002 (Tenant Extraction)
+BR-GENERIC-TENANT-EXTRACTION-001 (Tenant Extraction)
   ↓
-PP-003 (Operator Lookup + Cache)
-  ├→ PP-006 (Credential Lookup)
-  └→ PP-004 (Token Sanitization)
-      ├→ PP-005 (Hash Generation)
-      └→ PP-008 (HTTP POST Integration)
+BR-GENERIC-OPERATOR-CACHING-001 (Operator Lookup + Cache)
+  ├→ BR-GENERIC-CREDENTIAL-LOOKUP-001 (Credential Lookup)
+  └→ BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001 (Token Sanitization)
+      ├→ BR-GENERIC-AUTHENTICATION-HMAC-MD5-001 (Hash Generation)
+      └→ BR-GENERIC-PROVIDER-INTEGRATION-001 (HTTP POST Integration)
 
 PP-007 (Response Re-Prefixing) — only for authenticate
-PP-009 (Error Handling) — first check
-PP-010 (Dual Token Support) — only for balance
-PP-011 (Sanitization Order) — implementation detail
+BR-GENERIC-ERROR-HANDLING-001 (Error Handling) — first check
+BR-PRAGMATIC-BALANCE-DUAL-TOKEN-SUPPORT-001 (Dual Token Support) — only for balance
+BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-ORDER-001 (Sanitization Order) — implementation detail
 PP-012 (Authenticate Special) — business rule
 ```
 
@@ -506,15 +506,15 @@ PP-012 (Authenticate Special) — business rule
 
 | Endpoint | Métodos Aplicáveis | Regras | Notas |
 |----------|-------------------|--------|-------|
-| `authenticate` | POST | PP-001,002,003,004,005,006,008,009,012 | Usa `token`, re-prefixar userId se sucesso |
-| `balance` | POST | PP-001,002,003,004,005,006,008,009,010,011 | Dual token support (token ou userId) |
-| `bet` | POST | PP-001,002,003,004,005,006,008,009,011 | Usa `userId` |
-| `refund` | POST | PP-001,002,003,004,005,006,008,009,011 | Usa `userId` |
-| `result` | POST | PP-001,002,003,004,005,006,008,009,011 | Delega para handleResult |
-| `bonusWin` | POST | PP-001,002,003,004,005,006,008,009,011 | Delega para handleResult |
-| `jackpotWin` | POST | PP-001,002,003,004,005,006,008,009,011 | Delega para handleResult |
-| `promoWin` | POST | PP-001,002,003,004,005,006,008,009,011 | Delega para handleResult |
-| `adjustment` | POST | PP-001,002,003,004,005,006,008,009,011 | Usa `userId` |
+| `authenticate` | POST | BR-GENERIC-ROUTING-VALIDATION-001,002,003,004,005,006,008,009,012 | Usa `token`, re-prefixar userId se sucesso |
+| `balance` | POST | BR-GENERIC-ROUTING-VALIDATION-001,002,003,004,005,006,008,009,010,011 | Dual token support (token ou userId) |
+| `bet` | POST | BR-GENERIC-ROUTING-VALIDATION-001,002,003,004,005,006,008,009,011 | Usa `userId` |
+| `refund` | POST | BR-GENERIC-ROUTING-VALIDATION-001,002,003,004,005,006,008,009,011 | Usa `userId` |
+| `result` | POST | BR-GENERIC-ROUTING-VALIDATION-001,002,003,004,005,006,008,009,011 | Delega para handleResult |
+| `bonusWin` | POST | BR-GENERIC-ROUTING-VALIDATION-001,002,003,004,005,006,008,009,011 | Delega para handleResult |
+| `jackpotWin` | POST | BR-GENERIC-ROUTING-VALIDATION-001,002,003,004,005,006,008,009,011 | Delega para handleResult |
+| `promoWin` | POST | BR-GENERIC-ROUTING-VALIDATION-001,002,003,004,005,006,008,009,011 | Delega para handleResult |
+| `adjustment` | POST | BR-GENERIC-ROUTING-VALIDATION-001,002,003,004,005,006,008,009,011 | Usa `userId` |
 
 ---
 
@@ -526,7 +526,7 @@ PP-012 (Authenticate Special) — business rule
 
 3. **Error handling inconsistente:** Alguns erros lançam exceção (unknown endpoint, missing operator), outros retornam resposta do provider (error codes). Sem padronização.
 
-4. **UserId em resposta:** Regra PP-012 assume que resposta de authenticate sempre tem `userId`. Se provider não incluir, causará erro.
+4. **UserId em resposta:** Regra BR-012 assume que resposta de authenticate sempre tem `userId`. Se provider não incluir, causará erro.
 
 5. **Underscore em operador slug:** Suporta múltiplos underscores (ex: `"my_op_co"`), mas parsing usa último underscore como delimiter. Ambiguidade se slug contém underscore.
 
