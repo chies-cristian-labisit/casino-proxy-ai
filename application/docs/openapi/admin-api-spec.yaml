@@ -416,6 +416,54 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /internal/credentials/:
+    get:
+      tags:
+        - Credentials
+      operationId: listCredentials
+      summary: List provider credentials
+      description: Retrieve list of all provider credentials (values redacted for security)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: operator_slug
+          in: query
+          description: Filter by operator slug
+          schema:
+            type: string
+        - name: provider_name
+          in: query
+          description: Filter by provider name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Credentials retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialsListResponse'
+              example:
+                credentials:
+                  - id: 1
+                    operator_slug: my-operator
+                    provider_name: pragmatic
+                    key: secret-key
+                    value: "***hidden***"
+                    created_at: "2026-05-08T12:00:00Z"
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     Operator:
@@ -702,6 +750,39 @@ components:
                   - Slug must be lowercase alphanumeric
                 url:
                   - URL must be HTTPS
+
+    CredentialsListResponse:
+      type: object
+      properties:
+        credentials:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              operator_slug:
+                type: string
+                example: my-operator
+              provider_name:
+                type: string
+                description: Provider name (pragmatic, evolution, pgsoft, mancala, digitain, evoplay, openbox, alternar)
+                example: pragmatic
+              key:
+                type: string
+                description: Credential key
+                example: secret-key
+              value:
+                type: string
+                description: Credential value (redacted in list responses)
+                example: "***hidden***"
+              created_at:
+                type: string
+                format: date-time
+              updated_at:
+                type: string
+                format: date-time
 
   securitySchemes:
     BearerAuth:

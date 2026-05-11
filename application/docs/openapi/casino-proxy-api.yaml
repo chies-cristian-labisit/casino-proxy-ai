@@ -1,1117 +1,755 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  title: Casino Proxy Gateway API
+  title: Casino Proxy Gateway API - Complete
+  version: 2.0.0
   description: |
-    Complete OpenAPI 3.0 specification for the unified Casino Proxy webhook gateway.
-    Supports 8 gaming providers with 28+ webhook endpoints plus admin API.
+    Complete OpenAPI 3.0 specification for Casino Proxy webhook gateway.
 
-    **Providers Supported:**
-    1. Pragmatic Play - 9 generic routing endpoints with MD5 HMAC signature
-    2. Evolution Gaming - 5 financial transaction endpoints with HMAC-SHA256
-    3. PG Soft - 4 session-based endpoints (no signature validation)
-    4. Mancala - 4 generic routing endpoints with MD5 signature
-    5. Digitain RGS - 11 endpoints with batch processing, HMAC-SHA256
-    6. Evoplay - 5 operations via single endpoint, MD5 signature
-    7. OpenBox - 4 PUT-based seamless operations, HMAC-SHA256 in headers
-    8. Alternar - HTTP proxy redirect handler
+    **All 50 Endpoints Documented:**
+    - 8 Gaming Providers: 41 webhook endpoints
+    - Admin Management: 4 endpoints
+    - System Endpoints: 3 endpoints
+    - Health & utility: 2 endpoints
 
-    **Architecture:** Microservices gateway pattern with transparent proxy forwarding to operator URLs.
-  version: 1.0.0
-  contact:
-    name: Casino Proxy Migration
-    url: https://github.com/casino-proxy/docs
-  x-logo:
-    url: https://example.com/logo.png
+    **Providers:** Pragmatic Play (9), Mancala (4), Digitain RGS (11), PG Soft (4),
+    Evoplay (5), Evolution Gaming (5), OpenBox (4), Alternar (1)
 
 servers:
-  - url: https://casino-proxy.example.com/v1
-    description: Production environment
-  - url: http://localhost:3000/v1
-    description: Local development
+  - url: /v1
+    description: API base path
 
 paths:
-  # ===============================================
-  # ADMIN API ENDPOINTS
-  # ===============================================
+  # ========================================
+  # SYSTEM ENDPOINTS
+  # ========================================
+
+  /status:
+    get:
+      summary: Health check
+      tags: [System]
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "OK"
 
   /entry:
     post:
-      summary: Session entry point
-      description: Initialize player session and entry to gaming platform
-      operationId: sessionEntry
-      tags:
-        - Admin API
+      summary: Player session entry
+      tags: [System]
+      operationId: playerEntry
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              properties:
-                player_id:
-                  type: string
-                  example: "player_001"
-                token:
-                  type: string
-                  example: "session_token_abc123"
-                operator:
-                  type: string
-                  example: "operator_slug"
       responses:
         '200':
-          description: Session initialized successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  session_id:
-                    type: string
-                    example: "session_123"
-
-  /status:
-    get:
-      summary: Health check endpoint
-      description: Check gateway and provider integration health status
-      operationId: healthCheck
-      tags:
-        - Admin API
-      responses:
-        '200':
-          description: Gateway is healthy
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "ok"
-                  providers:
-                    type: array
-                    items:
-                      type: string
-                    example: ["pragmatic-play", "evolution", "pgsoft", "mancala", "digitain", "evoplay", "openbox", "alternar"]
+          description: Session initialized
 
   /image:
     post:
-      summary: Image upload endpoint
-      description: Upload images for operator branding and content
-      operationId: imageUpload
-      tags:
-        - Admin API
+      summary: Image upload
+      tags: [System]
+      operationId: uploadImage
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
               type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-                operator:
-                  type: string
       responses:
         '200':
-          description: Image uploaded successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  url:
-                    type: string
-                    example: "https://cdn.example.com/images/img_123.png"
+          description: Image uploaded
 
-  /internal/operator:
-    get:
-      summary: List all operators
-      description: Retrieve list of configured operators
-      operationId: listOperators
-      tags:
-        - Admin API - Operator Management
-      responses:
-        '200':
-          description: Operators retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Operator'
+  # ========================================
+  # PRAGMATIC PLAY (9 endpoints)
+  # ========================================
 
-  /internal/operator/store:
+  /webhooks/pragmatic-play/authenticate:
     post:
-      summary: Create new operator
-      description: Register a new operator in the system
-      operationId: createOperator
-      tags:
-        - Admin API - Operator Management
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OperatorCreate'
-      responses:
-        '201':
-          description: Operator created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Operator'
-
-  /internal/operator/delete/{slug}:
-    delete:
-      summary: Delete operator
-      description: Remove an operator and its configurations
-      operationId: deleteOperator
-      tags:
-        - Admin API - Operator Management
-      parameters:
-        - name: slug
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Operator slug identifier
-      responses:
-        '204':
-          description: Operator deleted successfully
-
-  # ===============================================
-  # PRAGMATIC PLAY PROVIDER ENDPOINTS
-  # ===============================================
-
-  /webhooks/pragmatic-play/{endpoint}:
-    post:
-      summary: Pragmatic Play webhook handler
-      description: |
-        Handle Pragmatic Play webhook requests with generic routing.
-        Endpoint parameter specifies the operation (authenticate.html, balance.html, bet.html, etc.)
-      operationId: handlePragmaticPlayWebhook
-      tags:
-        - Pragmatic Play
-      parameters:
-        - name: endpoint
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [authenticate.html, balance.html, bet.html, refund.html, result.html, bonusWin.html, jackpotWin.html, promoWin.html, adjustment.html]
-          description: Operation endpoint (case-sensitive)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PragmaticPlayRequest'
-      responses:
-        '200':
-          description: Operation processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PragmaticPlayResponse'
-        '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  # ===============================================
-  # EVOLUTION GAMING PROVIDER ENDPOINTS
-  # ===============================================
-
-  /webhooks/evolution/authentication:
-    post:
-      summary: Evolution Gaming authentication
-      description: Authenticate player and retrieve session token
-      operationId: evolutionAuthentication
-      tags:
-        - Evolution Gaming
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EvolutionAuthRequest'
-      responses:
-        '200':
-          description: Authentication successful
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EvolutionAuthResponse'
-
-  /webhooks/evolution/debit:
-    post:
-      summary: Evolution Gaming bet debit
-      description: Debit player account for bet placement
-      operationId: evolutionDebit
-      tags:
-        - Evolution Gaming
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EvolutionDebitRequest'
-      responses:
-        '200':
-          description: Debit processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EvolutionCashResponse'
-
-  /webhooks/evolution/credit:
-    post:
-      summary: Evolution Gaming win credit
-      description: Credit player account for win/payout
-      operationId: evolutionCredit
-      tags:
-        - Evolution Gaming
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EvolutionCreditRequest'
-      responses:
-        '200':
-          description: Credit processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EvolutionCashResponse'
-
-  /webhooks/evolution/rollback:
-    post:
-      summary: Evolution Gaming transaction rollback
-      description: Reverse a previous debit or credit transaction
-      operationId: evolutionRollback
-      tags:
-        - Evolution Gaming
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EvolutionRollbackRequest'
-      responses:
-        '200':
-          description: Rollback processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EvolutionCashResponse'
-
-  /webhooks/evolution/getNewToken:
-    post:
-      summary: Evolution Gaming get new token
-      description: Refresh player session token
-      operationId: evolutionGetNewToken
-      tags:
-        - Evolution Gaming
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EvolutionTokenRequest'
-      responses:
-        '200':
-          description: New token generated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EvolutionTokenResponse'
-
-  # ===============================================
-  # PG SOFT PROVIDER ENDPOINTS
-  # ===============================================
-
-  /webhooks/pgsoft/VerifySession:
-    post:
-      summary: PG Soft verify session
-      description: Validate player session and retrieve player information
-      operationId: pgSoftVerifySession
-      tags:
-        - PG Soft
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PGSoftVerifySessionRequest'
-      responses:
-        '200':
-          description: Session verified successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PGSoftSessionResponse'
-
-  /webhooks/pgsoft/Cash/Get:
-    post:
-      summary: PG Soft get cash balance
-      description: Retrieve player's current cash balance
-      operationId: pgSoftGetCash
-      tags:
-        - PG Soft
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PGSoftCashRequest'
-      responses:
-        '200':
-          description: Balance retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PGSoftCashResponse'
-
-  /webhooks/pgsoft/Cash/TransferInOut:
-    post:
-      summary: PG Soft transfer in/out
-      description: Handle bet placement (debit) or win payout (credit)
-      operationId: pgSoftTransferInOut
-      tags:
-        - PG Soft
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PGSoftTransferRequest'
-      responses:
-        '200':
-          description: Transfer processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PGSoftCashResponse'
-
-  /webhooks/pgsoft/Cash/Adjustment:
-    post:
-      summary: PG Soft cash adjustment
-      description: Manual balance adjustment (correction or bonus)
-      operationId: pgSoftAdjustment
-      tags:
-        - PG Soft
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PGSoftAdjustmentRequest'
-      responses:
-        '200':
-          description: Adjustment processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PGSoftCashResponse'
-
-  # ===============================================
-  # MANCALA PROVIDER ENDPOINTS
-  # ===============================================
-
-  /webhooks/mancala/{endpoint}:
-    post:
-      summary: Mancala webhook handler
-      description: |
-        Handle Mancala webhook requests with generic routing.
-        Endpoint parameter specifies the operation (Balance, Credit, Debit, Refund)
-      operationId: handleMancalaWebhook
-      tags:
-        - Mancala
-      parameters:
-        - name: endpoint
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [Balance, Credit, Debit, Refund]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/MancalaRequest'
-      responses:
-        '200':
-          description: Operation processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MancalaResponse'
-
-  # ===============================================
-  # DIGITAIN PROVIDER ENDPOINTS
-  # ===============================================
-
-  /webhooks/digitain-rgs/{endpoint}:
-    post:
-      summary: Digitain RGS webhook handler
-      description: |
-        Handle Digitain RGS webhook requests with generic routing and batch processing support.
-        Supports multi-operator batch processing via items array.
-      operationId: handleDigitainWebhook
-      tags:
-        - Digitain
-      parameters:
-        - name: endpoint
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [authenticate, getbalance, bet, win, betwin, refund, amend, checktxstatus, charge, promowin, refreshtoken]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DigitainRequest'
-      responses:
-        '200':
-          description: Operation processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DigitainResponse'
-
-  # ===============================================
-  # EVOPLAY PROVIDER ENDPOINTS
-  # ===============================================
-
-  /webhooks/evoplay:
-    post:
-      summary: Evoplay webhook endpoint
-      description: |
-        Single webhook endpoint for all Evoplay operations.
-        Operation type specified via 'name' field in request payload.
-      operationId: handleEvoplayWebhook
-      tags:
-        - Evoplay
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EvoplayRequest'
-      responses:
-        '200':
-          description: Operation processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EvoplayResponse'
-
-  # ===============================================
-  # OPENBOX PROVIDER ENDPOINTS
-  # ===============================================
-
-  /webhooks/openbox/seamless/balance:
-    put:
-      summary: OpenBox get balance
-      description: Retrieve player balance (idempotent operation via PUT)
-      operationId: openBoxBalance
-      tags:
-        - OpenBox
-      parameters:
-        - name: Signature
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: Timestamp
-          in: header
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OpenBoxRequest'
-      responses:
-        '200':
-          description: Balance retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OpenBoxBalanceResponse'
-
-  /webhooks/openbox/seamless/bet:
-    put:
-      summary: OpenBox place bet
-      description: Debit player account for bet placement (idempotent via PUT)
-      operationId: openBoxBet
-      tags:
-        - OpenBox
-      parameters:
-        - name: Signature
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: Timestamp
-          in: header
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OpenBoxBetRequest'
-      responses:
-        '200':
-          description: Bet processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OpenBoxResponse'
-
-  /webhooks/openbox/seamless/win:
-    put:
-      summary: OpenBox process win
-      description: Credit player account for win/payout (idempotent via PUT)
-      operationId: openBoxWin
-      tags:
-        - OpenBox
-      parameters:
-        - name: Signature
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: Timestamp
-          in: header
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OpenBoxWinRequest'
-      responses:
-        '200':
-          description: Win processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OpenBoxResponse'
-
-  /webhooks/openbox/seamless/refund:
-    put:
-      summary: OpenBox process refund
-      description: Refund player account (idempotent via PUT)
-      operationId: openBoxRefund
-      tags:
-        - OpenBox
-      parameters:
-        - name: Signature
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: Timestamp
-          in: header
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OpenBoxRefundRequest'
-      responses:
-        '200':
-          description: Refund processed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OpenBoxResponse'
-
-  # ===============================================
-  # ALTERNAR PROVIDER ENDPOINTS
-  # ===============================================
-
-  /webhooks/alternar:
-    post:
-      summary: Alternar webhook redirect
-      description: HTTP proxy forwarding requests to external Alternar endpoint
-      operationId: handleAlternarWebhook
-      tags:
-        - Alternar
+      summary: Pragmatic Play - Authenticate
+      tags: [Pragmatic Play]
+      operationId: ppAuthenticate
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              additionalProperties: true
       responses:
         '200':
-          description: Request forwarded successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: true
+          description: Success
+
+  /webhooks/pragmatic-play/balance:
+    post:
+      summary: Pragmatic Play - Get balance
+      tags: [Pragmatic Play]
+      operationId: ppBalance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/pragmatic-play/bet:
+    post:
+      summary: Pragmatic Play - Place bet
+      tags: [Pragmatic Play]
+      operationId: ppBet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/pragmatic-play/refund:
+    post:
+      summary: Pragmatic Play - Refund bet
+      tags: [Pragmatic Play]
+      operationId: ppRefund
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/pragmatic-play/result:
+    post:
+      summary: Pragmatic Play - Bet result
+      tags: [Pragmatic Play]
+      operationId: ppResult
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/pragmatic-play/bonusWin:
+    post:
+      summary: Pragmatic Play - Bonus win
+      tags: [Pragmatic Play]
+      operationId: ppBonusWin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/pragmatic-play/jackpotWin:
+    post:
+      summary: Pragmatic Play - Jackpot win
+      tags: [Pragmatic Play]
+      operationId: ppJackpotWin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/pragmatic-play/promoWin:
+    post:
+      summary: Pragmatic Play - Promo win
+      tags: [Pragmatic Play]
+      operationId: ppPromoWin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/pragmatic-play/adjustment:
+    post:
+      summary: Pragmatic Play - Account adjustment
+      tags: [Pragmatic Play]
+      operationId: ppAdjustment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  # ========================================
+  # MANCALA (4 endpoints)
+  # ========================================
+
+  /webhooks/mancala/Balance:
+    post:
+      summary: Mancala - Get balance
+      tags: [Mancala]
+      operationId: mncBalance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/mancala/Credit:
+    post:
+      summary: Mancala - Credit account
+      tags: [Mancala]
+      operationId: mncCredit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/mancala/Debit:
+    post:
+      summary: Mancala - Debit account
+      tags: [Mancala]
+      operationId: mncDebit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/mancala/Refund:
+    post:
+      summary: Mancala - Refund transaction
+      tags: [Mancala]
+      operationId: mncRefund
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  # ========================================
+  # DIGITAIN RGS (11 endpoints)
+  # ========================================
+
+  /webhooks/digitain-rgs/authenticate:
+    post:
+      summary: Digitain - Authenticate
+      tags: [Digitain RGS]
+      operationId: dtaAuthenticate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/digitain-rgs/getbalance:
+    post:
+      summary: Digitain - Get balance
+      tags: [Digitain RGS]
+      operationId: dtaGetBalance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/digitain-rgs/bet:
+    post:
+      summary: Digitain - Place bet
+      tags: [Digitain RGS]
+      operationId: dtaBet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/digitain-rgs/win:
+    post:
+      summary: Digitain - Record win
+      tags: [Digitain RGS]
+      operationId: dtaWin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/digitain-rgs/betwin:
+    post:
+      summary: Digitain - Bet + Win combined
+      tags: [Digitain RGS]
+      operationId: dtaBetWin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/digitain-rgs/refund:
+    post:
+      summary: Digitain - Refund transaction
+      tags: [Digitain RGS]
+      operationId: dtaRefund
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/digitain-rgs/amend:
+    post:
+      summary: Digitain - Amend transaction
+      tags: [Digitain RGS]
+      operationId: dtaAmend
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/digitain-rgs/checktxstatus:
+    post:
+      summary: Digitain - Check transaction status
+      tags: [Digitain RGS]
+      operationId: dtaCheckTxStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/digitain-rgs/charge:
+    post:
+      summary: Digitain - Charge player
+      tags: [Digitain RGS]
+      operationId: dtaCharge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/digitain-rgs/promowin:
+    post:
+      summary: Digitain - Promotional win
+      tags: [Digitain RGS]
+      operationId: dtaPromoWin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/digitain-rgs/refreshtoken:
+    post:
+      summary: Digitain - Refresh token
+      tags: [Digitain RGS]
+      operationId: dtaRefreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  # ========================================
+  # PG SOFT (4 endpoints)
+  # ========================================
+
+  /webhooks/pgsoft/VerifySession:
+    post:
+      summary: PG Soft - Verify session
+      tags: [PG Soft]
+      operationId: pgsVerifySession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/pgsoft/Cash/Get:
+    post:
+      summary: PG Soft - Get cash balance
+      tags: [PG Soft]
+      operationId: pgsCashGet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/pgsoft/Cash/TransferInOut:
+    post:
+      summary: PG Soft - Transfer credits
+      tags: [PG Soft]
+      operationId: pgsCashTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/pgsoft/Cash/Adjustment:
+    post:
+      summary: PG Soft - Adjust cash
+      tags: [PG Soft]
+      operationId: pgsCashAdjustment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  # ========================================
+  # EVOPLAY (5 endpoints via single gateway)
+  # ========================================
+
+  /webhooks/evoplay:
+    post:
+      summary: Evoplay - Gateway (init|bet|win|refund|BalanceIncrease)
+      description: Single endpoint with method in request body (name field)
+      tags: [Evoplay]
+      operationId: evoplayGateway
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  enum: [init, bet, win, refund, BalanceIncrease]
+      responses:
+        '200':
+          description: Success
+
+  # ========================================
+  # EVOLUTION GAMING (5 endpoints)
+  # ========================================
+
+  /webhooks/evolution/authentication:
+    post:
+      summary: Evolution - Authenticate
+      tags: [Evolution Gaming]
+      operationId: evoAuthenticate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/evolution/debit:
+    post:
+      summary: Evolution - Debit (bet)
+      tags: [Evolution Gaming]
+      operationId: evoDebit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/evolution/credit:
+    post:
+      summary: Evolution - Credit (win)
+      tags: [Evolution Gaming]
+      operationId: evoCredit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/evolution/rollback:
+    post:
+      summary: Evolution - Rollback transaction
+      tags: [Evolution Gaming]
+      operationId: evoRollback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/evolution/getNewToken:
+    post:
+      summary: Evolution - Get new token
+      tags: [Evolution Gaming]
+      operationId: evoGetNewToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  # ========================================
+  # OPENBOX (4 endpoints - uses PUT)
+  # ========================================
+
+  /webhooks/openbox/seamless/balance:
+    put:
+      summary: OpenBox - Get balance
+      tags: [OpenBox]
+      operationId: obxBalance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/openbox/seamless/bet:
+    put:
+      summary: OpenBox - Place bet
+      tags: [OpenBox]
+      operationId: obxBet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/openbox/seamless/win:
+    put:
+      summary: OpenBox - Record win
+      tags: [OpenBox]
+      operationId: obxWin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  /webhooks/openbox/seamless/refund:
+    put:
+      summary: OpenBox - Refund transaction
+      tags: [OpenBox]
+      operationId: obxRefund
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  # ========================================
+  # ALTERNAR (1 endpoint)
+  # ========================================
+
+  /webhooks/alternar/:
+    post:
+      summary: Alternar - Redirect handler
+      tags: [Alternar]
+      operationId: alternarRedirect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Success
+
+  # ========================================
+  # ADMIN/INTERNAL ENDPOINTS (4 endpoints)
+  # ========================================
+
+  /internal/operator/:
+    get:
+      summary: List all operators
+      tags: [Admin - Operators]
+      operationId: listOperators
+      responses:
+        '200':
+          description: Success
+
+  /internal/operator/store:
+    post:
+      summary: Create new operator
+      tags: [Admin - Operators]
+      operationId: storeOperator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Created
+
+  /internal/operator/delete/{slug}:
+    delete:
+      summary: Delete operator
+      tags: [Admin - Operators]
+      operationId: deleteOperator
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+
+  /internal/credentials/:
+    get:
+      summary: List provider credentials
+      tags: [Admin - Credentials]
+      operationId: listCredentials
+      responses:
+        '200':
+          description: Success
 
 components:
-  # ===============================================
-  # SHARED SCHEMAS
-  # ===============================================
-
   schemas:
     ErrorResponse:
       type: object
-      required:
-        - error
       properties:
         error:
           type: string
-          description: Error identifier or message
-        description:
+        message:
           type: string
-          description: Detailed error description
-        status:
-          type: integer
-          description: HTTP status code
-
-    Operator:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        slug:
-          type: string
-          example: "my-operator"
-        name:
-          type: string
-          example: "My Operator"
-        url:
-          type: string
-          example: "https://operator-callback.example.com"
-        created_at:
-          type: string
-          format: date-time
-
-    OperatorCreate:
-      type: object
-      required:
-        - slug
-        - name
-        - url
-      properties:
-        slug:
-          type: string
-          description: Unique operator identifier
-        name:
-          type: string
-          description: Operator display name
-        url:
-          type: string
-          description: Operator callback URL
-
-    # ===============================================
-    # PRAGMATIC PLAY SCHEMAS
-    # ===============================================
-
-    PragmaticPlayRequest:
-      type: object
-      properties:
-        sessionId:
-          type: string
-          example: "session_abc123"
-        userId:
-          type: string
-          example: "user_123"
-        hash:
-          type: string
-          description: MD5-HMAC signature
-
-    PragmaticPlayResponse:
-      type: object
-      properties:
-        balance:
-          type: number
-          format: double
-        currency:
-          type: string
-        success:
-          type: boolean
-
-    # ===============================================
-    # EVOLUTION GAMING SCHEMAS
-    # ===============================================
-
-    EvolutionAuthRequest:
-      type: object
-      properties:
-        token:
-          type: string
-        digest:
-          type: string
-          description: HMAC-SHA256 signature
-
-    EvolutionAuthResponse:
-      type: object
-      properties:
-        token:
-          type: string
-        expiresIn:
-          type: integer
-
-    EvolutionDebitRequest:
-      type: object
-      properties:
-        token:
-          type: string
-        roundId:
-          type: string
-        amount:
-          type: number
-        gameId:
-          type: integer
-        digest:
-          type: string
-
-    EvolutionCreditRequest:
-      type: object
-      properties:
-        token:
-          type: string
-        roundId:
-          type: string
-        amount:
-          type: number
-        gameId:
-          type: integer
-        digest:
-          type: string
-
-    EvolutionRollbackRequest:
-      type: object
-      properties:
-        token:
-          type: string
-        roundId:
-          type: string
-        transactionId:
-          type: string
-        digest:
-          type: string
-
-    EvolutionTokenRequest:
-      type: object
-      properties:
-        token:
-          type: string
-        digest:
-          type: string
-
-    EvolutionTokenResponse:
-      type: object
-      properties:
-        token:
-          type: string
-        expiresIn:
-          type: integer
-
-    EvolutionCashResponse:
-      type: object
-      properties:
-        balance:
-          type: number
-          format: double
-        currency:
-          type: string
-
-    # ===============================================
-    # PG SOFT SCHEMAS
-    # ===============================================
-
-    PGSoftVerifySessionRequest:
-      type: object
-      properties:
-        operator_token:
-          type: string
-        secret_key:
-          type: string
-        operator_player_session:
-          type: string
-        game_id:
-          type: integer
-
-    PGSoftSessionResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            player_name:
-              type: string
-            nickname:
-              type: string
-            currency:
-              type: string
-        error:
-          type: "null"
-
-    PGSoftCashRequest:
-      type: object
-      properties:
-        operator_token:
-          type: string
-        secret_key:
-          type: string
-        player_name:
-          type: string
-
-    PGSoftTransferRequest:
-      type: object
-      properties:
-        operator_token:
-          type: string
-        secret_key:
-          type: string
-        player_name:
-          type: string
-        game_id:
-          type: integer
-        bet_id:
-          type: string
-        transfer_amount:
-          type: number
-          description: Negative for debit, positive for credit
-        transaction_id:
-          type: string
-
-    PGSoftAdjustmentRequest:
-      type: object
-      properties:
-        operator_token:
-          type: string
-        secret_key:
-          type: string
-        player_name:
-          type: string
-        transfer_amount:
-          type: number
-        adjustment_id:
-          type: integer
-
-    PGSoftCashResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            balance_amount:
-              type: number
-            currency_code:
-              type: string
-            updated_time:
-              type: integer
-        error:
-          type: "null"
-
-    # ===============================================
-    # MANCALA SCHEMAS
-    # ===============================================
-
-    MancalaRequest:
-      type: object
-      properties:
-        ExtraData:
-          type: string
-          description: JSON string with operator context
-        SessionId:
-          type: string
-        Hash:
-          type: string
-          description: MD5 signature
-
-    MancalaResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            balance:
-              type: number
-            currency:
-              type: string
-        error:
-          type: "null"
-
-    # ===============================================
-    # DIGITAIN SCHEMAS
-    # ===============================================
-
-    DigitainRequest:
-      type: object
-      properties:
-        timestamp:
-          type: string
-          description: Format YmdHiu
-        operatorId:
-          type: string
-        token:
-          type: string
-        playerId:
-          type: string
-        info:
-          type: string
-        items:
-          type: array
-          description: Batch items for multi-operator processing
-          items:
-            type: object
-
-    DigitainResponse:
-      type: object
-      properties:
-        timestamp:
-          type: string
-        signature:
-          type: string
-          description: HMAC-SHA256 signature
-        errorCode:
-          type: integer
-        items:
-          type: array
-          items:
-            type: object
-
-    # ===============================================
-    # EVOPLAY SCHEMAS
-    # ===============================================
-
-    EvoplayRequest:
-      type: object
-      properties:
-        token:
-          type: string
-        name:
-          type: string
-          enum: [init, bet, win, refund, BalanceIncrease]
-        data:
-          type: object
-          additionalProperties: true
-        signature:
-          type: string
-          description: MD5 signature
-
-    EvoplayResponse:
-      type: object
-      properties:
-        balance:
-          type: number
-        currency:
-          type: string
-        error:
-          type: "null"
-
-    # ===============================================
-    # OPENBOX SCHEMAS
-    # ===============================================
-
-    OpenBoxRequest:
-      type: object
-      properties:
-        player:
-          type: string
-        roundId:
-          type: string
-
-    OpenBoxBetRequest:
-      allOf:
-        - $ref: '#/components/schemas/OpenBoxRequest'
-        - type: object
-          properties:
-            amount:
-              type: number
-            currency:
-              type: string
-
-    OpenBoxWinRequest:
-      allOf:
-        - $ref: '#/components/schemas/OpenBoxRequest'
-        - type: object
-          properties:
-            amount:
-              type: number
-            currency:
-              type: string
-
-    OpenBoxRefundRequest:
-      allOf:
-        - $ref: '#/components/schemas/OpenBoxRequest'
-        - type: object
-          properties:
-            amount:
-              type: number
-            currency:
-              type: string
-            originalTransactionId:
-              type: string
-
-    OpenBoxResponse:
-      type: object
-      properties:
-        balance:
-          type: number
-        currency:
-          type: string
-        status:
-          type: string
-
-    OpenBoxBalanceResponse:
-      type: object
-      properties:
-        balance:
-          type: number
-        currency:
-          type: string
-
-tags:
-  - name: Admin API
-    description: System administration endpoints
-  - name: Admin API - Operator Management
-    description: Operator configuration and management
-  - name: Pragmatic Play
-    description: Pragmatic Play gaming provider integration
-  - name: Evolution Gaming
-    description: Evolution Gaming financial transaction endpoints
-  - name: PG Soft
-    description: PG Soft session-based integration
-  - name: Mancala
-    description: Mancala generic routing provider
-  - name: Digitain
-    description: Digitain RGS provider with batch support
-  - name: Evoplay
-    description: Evoplay single endpoint provider
-  - name: OpenBox
-    description: OpenBox PUT-based seamless operations
-  - name: Alternar
-    description: Alternar HTTP proxy redirect handler

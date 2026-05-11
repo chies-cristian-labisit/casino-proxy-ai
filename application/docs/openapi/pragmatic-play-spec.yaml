@@ -1,412 +1,213 @@
 openapi: 3.0.0
 info:
-  title: Casino Proxy - Pragmatic Play Webhook API
+  title: Pragmatic Play Provider API
   version: 1.0.0
   description: |
-    Pragmatic Play webhook integration API for Casino Proxy.
-
-    All endpoints use HMAC-MD5 signature validation with the provider's secret key.
-    The operator context is embedded in the userId/token fields using the format: `{operator_slug}_{actual_value}`
-
+    Gaming provider webhooks for Pragmatic Play integration.
+    All requests include MD5 hash authentication.
   contact:
     name: Casino Proxy Team
 
 servers:
-  - url: https://api.casino-proxy.local/v1/webhooks/pragmatic-play
-    description: Production
-  - url: http://localhost:3000/v1/webhooks/pragmatic-play
-    description: Development
+  - url: /v1/webhooks
 
 paths:
-  /authenticate.html:
+  /pragmatic-play/authenticate:
     post:
-      operationId: authenticate
-      summary: Authenticate Player Session
-      description: |
-        Authenticates a player session and retrieves initial player information including balance,
-        currency, and betting limits.
-
-        This endpoint is typically called when a player launches a Pragmatic Play game.
+      operationId: pragmaticPlayAuthenticate
       tags:
-        - Authentication
+        - Pragmatic Play
+      summary: Authenticate player session
+      description: Authenticate player session with Pragmatic Play backend
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              $ref: '#/components/schemas/AuthenticateRequest'
-            examples:
-              authenticate:
-                value:
-                  providerId: PragmaticPlay
-                  token: "operator_slug_abc123def456"
-                  hash: "5d41402abc4b2a76b9719d911017c592"
+              $ref: '#/components/schemas/PragmaticPlayAuthenticateRequest'
       responses:
         '200':
-          description: Authentication successful
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthenticateResponse'
-              examples:
-                success:
-                  value:
-                    userId: "operator_slug_123456"
-                    currency: "BRL"
-                    cash: 1000.50
-                    bonus: 50.00
-                    country: "BR"
-                    jurisdiction: 99
-                    betLimits:
-                      defaultTotalBet: 2000
-                      minTotalBet: 200
-                      maxTotalBet: 2000
-                    error: 0
-                    description: "Success"
-        '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /balance.html:
-    post:
-      operationId: balance
-      summary: Get Player Balance
-      description: |
-        Retrieves the current balance of a player, including cash and bonus amounts.
-
-        Called frequently during gameplay to validate player balance before placing bets.
-      tags:
-        - Balance
-      requestBody:
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/BalanceRequest'
-            examples:
-              balance:
-                value:
-                  providerId: PragmaticPlay
-                  token: "operator_slug_abc123def456"
-                  userId: "operator_slug_123456"
-                  hash: "5d41402abc4b2a76b9719d911017c592"
-      responses:
-        '200':
-          description: Balance retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BalanceResponse'
-              examples:
-                success:
-                  value:
-                    transactionId: "txn_12345"
-                    currency: "BRL"
-                    cash: 1000.50
-                    bonus: 50.00
-                    usedPromo: 0
-                    error: 0
-                    description: "Success"
+                $ref: '#/components/schemas/PragmaticPlayAuthenticateResponse'
         '400':
           description: Invalid request
         '500':
           description: Server error
 
-  /bet.html:
+  /pragmatic-play/balance:
     post:
-      operationId: bet
-      summary: Place Bet
-      description: |
-        Records a bet placed by a player. This deducts the bet amount from the player's balance.
-
-        The endpoint must validate the player has sufficient balance before accepting the bet.
-        Bets include metadata about the game round and bonus codes (if applicable).
+      operationId: pragmaticPlayBalance
       tags:
-        - Betting
+        - Pragmatic Play
+      summary: Get player balance
+      description: Retrieve current player balance
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              $ref: '#/components/schemas/BetRequest'
-            examples:
-              simple_bet:
-                value:
-                  providerId: PragmaticPlay
-                  reference: "ref_xyz789"
-                  gameId: "sweet-bonanza"
-                  roundId: "round_001"
-                  roundDetails: '{"spin":"auto","lines":25}'
-                  amount: 100.00
-                  timestamp: "2026-05-08T10:30:00Z"
-                  userId: "operator_slug_123456"
-                  hash: "5d41402abc4b2a76b9719d911017c592"
-              bet_with_bonus:
-                value:
-                  providerId: PragmaticPlay
-                  reference: "ref_xyz789"
-                  gameId: "sweet-bonanza"
-                  roundId: "round_001"
-                  roundDetails: '{"spin":"auto","lines":25}'
-                  amount: 100.00
-                  timestamp: "2026-05-08T10:30:00Z"
-                  bonusCode: "BONUS_2024"
-                  userId: "operator_slug_123456"
-                  hash: "5d41402abc4b2a76b9719d911017c592"
+              $ref: '#/components/schemas/PragmaticPlayBalanceRequest'
       responses:
         '200':
-          description: Bet accepted
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BetResponse'
-              examples:
-                success:
-                  value:
-                    transactionId: "txn_12345"
-                    currency: "BRL"
-                    cash: 900.50
-                    bonus: 50.00
-                    usedPromo: 0
-                    error: 0
-                    description: "Success"
-        '400':
-          description: Invalid bet (insufficient balance, invalid game, etc)
-        '409':
-          description: Duplicate bet (same reference)
-        '500':
-          description: Server error
+                $ref: '#/components/schemas/PragmaticPlayBalanceResponse'
 
-  /refund.html:
+  /pragmatic-play/bet:
     post:
-      operationId: refund
-      summary: Refund Bet
-      description: |
-        Refunds a previously placed bet, crediting the amount back to the player's balance.
-
-        Typically called when a bet is cancelled or a game session is interrupted.
-        The reference field must match the original bet reference.
+      operationId: pragmaticPlayBet
       tags:
-        - Betting
+        - Pragmatic Play
+      summary: Place bet
+      description: Place a bet and debit player account
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              $ref: '#/components/schemas/RefundRequest'
-            examples:
-              refund:
-                value:
-                  providerId: PragmaticPlay
-                  reference: "ref_xyz789"
-                  userId: "operator_slug_123456"
-                  hash: "5d41402abc4b2a76b9719d911017c592"
+              $ref: '#/components/schemas/PragmaticPlayBetRequest'
       responses:
         '200':
-          description: Refund processed
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RefundResponse'
-              examples:
-                success:
-                  value:
-                    transactionId: "refund_12345"
-                    error: 0
-                    description: "Success"
-        '400':
-          description: Invalid refund (bet not found, already refunded)
-        '500':
-          description: Server error
+                $ref: '#/components/schemas/PragmaticPlayBetResponse'
 
-  /result.html:
+  /pragmatic-play/refund:
     post:
-      operationId: result
-      summary: Game Result (Regular Win)
-      description: |
-        Records the result of a game round with a regular win. Credits the winning amount to the player.
-
-        Used for standard game results where the player wins the round.
+      operationId: pragmaticPlayRefund
       tags:
-        - Results
+        - Pragmatic Play
+      summary: Refund bet
+      description: Refund or cancel a bet
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              $ref: '#/components/schemas/ResultRequest'
-            examples:
-              result_win:
-                value:
-                  providerId: PragmaticPlay
-                  reference: "ref_xyz789"
-                  gameId: "sweet-bonanza"
-                  roundId: "round_001"
-                  roundDetails: '{"lines":25,"multiplier":2}'
-                  amount: 250.00
-                  timestamp: "2026-05-08T10:31:00Z"
-                  userId: "operator_slug_123456"
-                  hash: "5d41402abc4b2a76b9719d911017c592"
-              result_with_promo:
-                value:
-                  providerId: PragmaticPlay
-                  reference: "ref_xyz789"
-                  gameId: "sweet-bonanza"
-                  roundId: "round_001"
-                  roundDetails: '{"lines":25,"multiplier":2}'
-                  amount: 250.00
-                  timestamp: "2026-05-08T10:31:00Z"
-                  promoWinAmount: 50.00
-                  promoWinReference: "promo_ref_123"
-                  promoCampaignID: "summer_2024"
-                  promoCampaignType: "free_spins"
-                  userId: "operator_slug_123456"
-                  hash: "5d41402abc4b2a76b9719d911017c592"
+              $ref: '#/components/schemas/PragmaticPlayRefundRequest'
       responses:
         '200':
-          description: Result recorded
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResultResponse'
+                $ref: '#/components/schemas/PragmaticPlayRefundResponse'
 
-  /bonusWin.html:
+  /pragmatic-play/result:
     post:
-      operationId: bonusWin
-      summary: Bonus Win
-      description: |
-        Records a bonus win during gameplay. Similar to result but specifically for bonus round wins.
+      operationId: pragmaticPlayResult
       tags:
-        - Results
+        - Pragmatic Play
+      summary: Bet result
+      description: Record bet result (win/loss)
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              $ref: '#/components/schemas/ResultRequest'
+              $ref: '#/components/schemas/PragmaticPlayResultRequest'
       responses:
         '200':
-          description: Bonus win recorded
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResultResponse'
+                $ref: '#/components/schemas/PragmaticPlayResultResponse'
 
-  /jackpotWin.html:
+  /pragmatic-play/bonusWin:
     post:
-      operationId: jackpotWin
-      summary: Jackpot Win
-      description: |
-        Records a jackpot win. Typically involves larger amounts and may trigger special handling.
+      operationId: pragmaticPlayBonusWin
       tags:
-        - Results
+        - Pragmatic Play
+      summary: Bonus win notification
+      description: Notify bonus win event
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              $ref: '#/components/schemas/ResultRequest'
+              $ref: '#/components/schemas/PragmaticPlayResultRequest'
       responses:
         '200':
-          description: Jackpot win recorded
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResultResponse'
+                $ref: '#/components/schemas/PragmaticPlayResultResponse'
 
-  /promoWin.html:
+  /pragmatic-play/jackpotWin:
     post:
-      operationId: promoWin
-      summary: Promo/Campaign Win
-      description: |
-        Records a promotional or campaign win. Includes promo-specific metadata.
+      operationId: pragmaticPlayJackpotWin
       tags:
-        - Results
+        - Pragmatic Play
+      summary: Jackpot win notification
+      description: Notify jackpot win event
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              $ref: '#/components/schemas/ResultRequest'
+              $ref: '#/components/schemas/PragmaticPlayResultRequest'
       responses:
         '200':
-          description: Promo win recorded
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResultResponse'
+                $ref: '#/components/schemas/PragmaticPlayResultResponse'
 
-  /adjustment.html:
+  /pragmatic-play/promoWin:
     post:
-      operationId: adjustment
-      summary: Manual Balance Adjustment
-      description: |
-        Adjusts a player's balance manually. Used for corrections, bonuses, or manual payouts.
-
-        This is typically used by operators for customer service adjustments or bonus credits.
+      operationId: pragmaticPlayPromoWin
       tags:
-        - Balance
+        - Pragmatic Play
+      summary: Promotional win notification
+      description: Notify promotional win event
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              $ref: '#/components/schemas/AdjustmentRequest'
-            examples:
-              adjustment:
-                value:
-                  providerId: PragmaticPlay
-                  reference: "adj_xyz789"
-                  gameId: "sweet-bonanza"
-                  roundId: "round_001"
-                  amount: 50.00
-                  userId: "operator_slug_123456"
-                  hash: "5d41402abc4b2a76b9719d911017c592"
+              $ref: '#/components/schemas/PragmaticPlayResultRequest'
       responses:
         '200':
-          description: Adjustment applied
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdjustmentResponse'
+                $ref: '#/components/schemas/PragmaticPlayResultResponse'
+
+  /pragmatic-play/adjustment:
+    post:
+      operationId: pragmaticPlayAdjustment
+      tags:
+        - Pragmatic Play
+      summary: Account adjustment
+      description: Apply account adjustment (correction, admin action)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PragmaticPlayAdjustmentRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PragmaticPlayAdjustmentResponse'
 
 components:
-  securitySchemes:
-    hmacSignature:
-      type: apiKey
-      in: header
-      name: X-Signature
-      description: |
-        HMAC-MD5 signature of the request payload.
-
-        Algorithm:
-        1. Remove 'hash' field from payload
-        2. Sort remaining fields alphabetically by key
-        3. Build query string: key1=value1&key2=value2&...{secret_key}
-        4. Apply URL decode to the entire string
-        5. Calculate MD5 hash
-
-        Example:
-        payload = {providerId: 'PragmaticPlay', token: 'op_abc123', hash: 'xyz'}
-        secret = 'my_secret_key'
-
-        1. Remove hash: {providerId: 'PragmaticPlay', token: 'op_abc123'}
-        2. Sort: {providerId: 'PragmaticPlay', token: 'op_abc123'}
-        3. Query: providerId=PragmaticPlay&token=op_abc123my_secret_key
-        4. URL decode: providerId=PragmaticPlay&token=op_abc123my_secret_key (no change needed)
-        5. MD5: md5('providerId=PragmaticPlay&token=op_abc123my_secret_key')
-
   schemas:
-    AuthenticateRequest:
+    PragmaticPlayAuthenticateRequest:
       type: object
       required:
         - providerId
@@ -416,75 +217,63 @@ components:
         providerId:
           type: string
           example: PragmaticPlay
-          description: Provider identifier
         token:
           type: string
-          example: operator_slug_abc123
-          description: |
-            Authentication token in format: {operator_slug}_{token_value}
-            The operator slug is stripped by the gateway and used for operator context
+          description: Player session token (sanitized, without operator prefix)
+          example: abc123def456
         hash:
           type: string
-          example: "5d41402abc4b2a76b9719d911017c592"
-          description: HMAC-MD5 signature of request payload
+          description: MD5 hash of request
+          example: md5_hash_value
 
-    AuthenticateResponse:
+    PragmaticPlayAuthenticateResponse:
       type: object
+      required:
+        - error
       properties:
         userId:
           type: string
-          example: "operator_slug_123456"
-          description: Player ID prefixed with operator slug
+          example: operator_slug_123456
         currency:
           type: string
-          example: "BRL"
-          description: Player's currency code
+          example: BRL
         cash:
           type: number
           format: double
           example: 1000.50
-          description: Cash balance
         bonus:
           type: number
           format: double
           example: 50.00
-          description: Bonus balance
         country:
           type: string
-          example: "BR"
-          description: Player's country code
+          example: BR
         jurisdiction:
           type: integer
           example: 99
-          description: Jurisdiction identifier
         betLimits:
           type: object
           properties:
             defaultTotalBet:
               type: number
-              format: double
+              example: 2000
             minTotalBet:
               type: number
-              format: double
+              example: 200
             maxTotalBet:
               type: number
-              format: double
-          description: Betting limits for this player
+              example: 2000
         error:
           type: integer
+          description: 0 = success
           example: 0
-          description: Error code (0 = success)
         description:
           type: string
-          example: "Success"
-          description: Human-readable status message
+          example: Success
 
-    BalanceRequest:
+    PragmaticPlayBalanceRequest:
       type: object
       required:
-        - providerId
-        - token
-        - userId
         - hash
       properties:
         providerId:
@@ -492,50 +281,120 @@ components:
           example: PragmaticPlay
         token:
           type: string
-          example: "operator_slug_abc123"
-          description: Session token in format {operator_slug}_{token}
+          description: Optional - player token
+          example: abc123def456
         userId:
           type: string
-          example: "operator_slug_123456"
-          description: Player ID in format {operator_slug}_{player_id}
+          description: Optional - player ID
+          example: user456
         hash:
           type: string
-          example: "5d41402abc4b2a76b9719d911017c592"
+          example: md5_hash_value
 
-    BalanceResponse:
+    PragmaticPlayBalanceResponse:
       type: object
+      required:
+        - error
       properties:
         transactionId:
           type: string
-          example: "txn_12345"
+          example: '123'
         currency:
           type: string
-          example: "BRL"
+          example: BRL
         cash:
           type: number
           format: double
+          example: 1000.00
         bonus:
           type: number
           format: double
+          example: 50.00
         usedPromo:
-          type: number
-          format: double
-          description: Amount used from promo balance
+          type: integer
+          example: 0
         error:
           type: integer
+          example: 0
         description:
           type: string
+          example: Success
 
-    BetRequest:
+    PragmaticPlayBetRequest:
       type: object
       required:
-        - providerId
-        - reference
-        - gameId
-        - roundId
-        - roundDetails
+        - userId
         - amount
-        - timestamp
+        - hash
+      properties:
+        providerId:
+          type: string
+          example: PragmaticPlay
+        reference:
+          type: string
+          description: Bet reference ID
+          example: bet_ref_123
+        gameId:
+          type: string
+          example: game_789
+        roundId:
+          type: string
+          example: round_456
+        roundDetails:
+          type: string
+          example: game_details
+        amount:
+          type: number
+          format: double
+          example: 50.00
+        timestamp:
+          type: string
+          format: date-time
+          example: '2026-05-11T14:30:00Z'
+        userId:
+          type: string
+          example: operator_slug_user456
+        bonusCode:
+          type: string
+          description: Optional bonus code
+          example: BONUS2024
+        hash:
+          type: string
+          example: md5_hash_value
+
+    PragmaticPlayBetResponse:
+      type: object
+      required:
+        - error
+      properties:
+        transactionId:
+          type: string
+          example: '123'
+        currency:
+          type: string
+          example: BRL
+        cash:
+          type: number
+          format: double
+          example: 950.00
+        bonus:
+          type: number
+          format: double
+          example: 50.00
+        usedPromo:
+          type: integer
+          example: 0
+        error:
+          type: integer
+          example: 0
+        description:
+          type: string
+          example: Success
+
+    PragmaticPlayRefundRequest:
+      type: object
+      required:
+        - reference
         - userId
         - hash
       properties:
@@ -544,175 +403,121 @@ components:
           example: PragmaticPlay
         reference:
           type: string
-          example: "bet_ref_123"
-          description: Unique bet reference
+          example: bet_ref_123
+        userId:
+          type: string
+          example: operator_slug_user456
+        hash:
+          type: string
+          example: md5_hash_value
+
+    PragmaticPlayRefundResponse:
+      type: object
+      required:
+        - error
+      properties:
+        transactionId:
+          type: string
+          example: '124'
+        error:
+          type: integer
+          example: 0
+        description:
+          type: string
+          example: Success
+
+    PragmaticPlayResultRequest:
+      type: object
+      required:
+        - reference
+        - userId
+        - amount
+        - hash
+      properties:
+        providerId:
+          type: string
+          example: PragmaticPlay
+        reference:
+          type: string
+          example: result_ref_123
         gameId:
           type: string
-          example: "sweet-bonanza"
-          description: Game identifier
+          example: game_789
         roundId:
           type: string
-          example: "round_001"
-          description: Game round identifier
-        roundDetails:
-          type: string
-          example: '{"spin":"auto","lines":25}'
-          description: JSON string with round-specific details
+          example: round_456
         amount:
           type: number
           format: double
           example: 100.00
-          description: Bet amount
         timestamp:
           type: string
           format: date-time
-          example: "2026-05-08T10:30:00Z"
-          description: Bet timestamp
-        bonusCode:
-          type: string
-          description: Optional bonus code applied to bet
+          example: '2026-05-11T14:35:00Z'
         userId:
           type: string
-          example: "operator_slug_123456"
-        hash:
-          type: string
-
-    BetResponse:
-      type: object
-      properties:
-        transactionId:
-          type: string
-        currency:
-          type: string
-        cash:
-          type: number
-          format: double
-        bonus:
-          type: number
-          format: double
-        usedPromo:
-          type: number
-          format: double
-        error:
-          type: integer
-        description:
-          type: string
-
-    RefundRequest:
-      type: object
-      required:
-        - providerId
-        - reference
-        - userId
-        - hash
-      properties:
-        providerId:
-          type: string
-          example: PragmaticPlay
-        reference:
-          type: string
-          example: "bet_ref_123"
-          description: Reference of the bet to refund
-        userId:
-          type: string
-          example: "operator_slug_123456"
-        hash:
-          type: string
-
-    RefundResponse:
-      type: object
-      properties:
-        transactionId:
-          type: string
-        error:
-          type: integer
-        description:
-          type: string
-
-    ResultRequest:
-      type: object
-      required:
-        - providerId
-        - reference
-        - gameId
-        - roundId
-        - amount
-        - timestamp
-        - userId
-        - hash
-      properties:
-        providerId:
-          type: string
-          example: PragmaticPlay
-        reference:
-          type: string
-          example: "result_ref_123"
-          description: Unique result reference
-        gameId:
-          type: string
-          example: "sweet-bonanza"
-        roundId:
-          type: string
-          example: "round_001"
+          example: operator_slug_user456
         roundDetails:
           type: string
-          description: Optional JSON details
-        amount:
-          type: number
-          format: double
-          description: Win amount
-        timestamp:
-          type: string
-          format: date-time
+          description: Optional round details
+          example: game_details
         promoWinAmount:
           type: number
           format: double
-          description: Optional promo win amount
+          description: Optional promotional win amount
+          example: 10.00
         promoWinReference:
           type: string
-          description: Optional promo win reference
+          description: Optional promotional reference
+          example: promo_ref
         promoCampaignID:
           type: string
           description: Optional campaign ID
+          example: campaign_123
         promoCampaignType:
           type: string
           description: Optional campaign type
+          example: type
         bonusCode:
           type: string
           description: Optional bonus code
-        userId:
-          type: string
-          example: "operator_slug_123456"
+          example: BONUS2024
         hash:
           type: string
+          example: md5_hash_value
 
-    ResultResponse:
+    PragmaticPlayResultResponse:
       type: object
+      required:
+        - error
       properties:
         transactionId:
           type: string
+          example: '125'
         currency:
           type: string
+          example: BRL
         cash:
           type: number
           format: double
+          example: 1050.00
         bonus:
           type: number
           format: double
+          example: 50.00
         error:
           type: integer
+          example: 0
         description:
           type: string
+          example: Success
 
-    AdjustmentRequest:
+    PragmaticPlayAdjustmentRequest:
       type: object
       required:
-        - providerId
         - reference
-        - gameId
-        - roundId
-        - amount
         - userId
+        - amount
         - hash
       properties:
         providerId:
@@ -720,48 +525,53 @@ components:
           example: PragmaticPlay
         reference:
           type: string
-          example: "adj_ref_123"
-          description: Unique adjustment reference
+          example: adj_ref_123
         gameId:
           type: string
+          example: game_789
         roundId:
           type: string
+          example: round_456
         amount:
           type: number
           format: double
-          description: Adjustment amount (can be positive or negative)
+          example: 50.00
         userId:
           type: string
-          example: "operator_slug_123456"
+          example: operator_slug_user456
         hash:
           type: string
+          example: md5_hash_value
 
-    AdjustmentResponse:
+    PragmaticPlayAdjustmentResponse:
       type: object
+      required:
+        - error
       properties:
         transactionId:
           type: string
+          example: '126'
         currency:
           type: string
+          example: BRL
         cash:
           type: number
           format: double
+          example: 1100.00
         bonus:
           type: number
           format: double
+          example: 50.00
         error:
           type: integer
+          example: 0
         description:
           type: string
+          example: Success
 
-    ErrorResponse:
-      type: object
-      properties:
-        error:
-          type: integer
-          example: 1
-          description: Error code
-        description:
-          type: string
-          example: "Invalid request"
-          description: Error description
+  securitySchemes:
+    md5Hash:
+      type: apiKey
+      in: query
+      name: hash
+      description: MD5 hash for request authentication
