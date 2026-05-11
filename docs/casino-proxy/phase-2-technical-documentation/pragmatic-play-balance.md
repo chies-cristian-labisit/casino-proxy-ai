@@ -25,19 +25,19 @@ O endpoint `/balance` é uma consulta de leitura que retorna o saldo atual de um
 graph TD
     A["<b>INPUT</b><br/>POST /v1/webhooks/pragmatic-play/balance<br/>{ token|userId, currency, ... }"]
     
-    A --> B["<b>FASE 1: ROTEAMENTO</b><br/>PP-001<br/>method_exists 'balance'<br/>✅ válido"]
+    A --> B["<b>FASE 1: ROTEAMENTO</b><br/>BR-GENERIC-ROUTING-VALIDATION-001<br/>method_exists 'balance'<br/>✅ válido"]
     B --> B_err["❌ Endpoint inválido<br/>Exception 500"]
-    B --> C["<b>FASE 2: EXTRAÇÃO TENANT</b><br/>PP-002, PP-010<br/>token = 'myoperator_abc123'<br/>operator_slug = 'myoperator'"]
+    B --> C["<b>FASE 2: EXTRAÇÃO TENANT</b><br/>BR-GENERIC-TENANT-EXTRACTION-001, BR-PRAGMATIC-BALANCE-DUAL-TOKEN-SUPPORT-001<br/>token = 'myoperator_abc123'<br/>operator_slug = 'myoperator'"]
     
-    C --> D["<b>FASE 3: LOOKUP OPERADOR</b><br/>PP-003<br/>SELECT * FROM operators<br/>Cache TTL 1 hora"]
+    C --> D["<b>FASE 3: LOOKUP OPERADOR</b><br/>BR-GENERIC-OPERATOR-CACHING-001<br/>SELECT * FROM operators<br/>Cache TTL 1 hora"]
     D --> D_err["❌ Operador não encontrado<br/>OperatorNotFoundException"]
-    D --> E["<b>FASE 4: SANITIZAÇÃO TOKENS</b><br/>PP-004, PP-011<br/>1️⃣ token = removeTenant<br/>2️⃣ userId = removeTenant"]
+    D --> E["<b>FASE 4: SANITIZAÇÃO TOKENS</b><br/>BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001, BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-ORDER-001<br/>1️⃣ token = removeTenant<br/>2️⃣ userId = removeTenant"]
     
-    E --> F["<b>FASE 5: LOOKUP CREDENCIAIS</b><br/>PP-006<br/>WHERE name='pragmatic'<br/>AND key='secret-key'"]
+    E --> F["<b>FASE 5: LOOKUP CREDENCIAIS</b><br/>BR-GENERIC-CREDENTIAL-LOOKUP-001<br/>WHERE name='pragmatic'<br/>AND key='secret-key'"]
     F --> F_err["❌ Credencial não encontrada<br/>NullPointerException"]
-    F --> G["<b>FASE 6: GERAÇÃO HASH</b><br/>PP-005<br/>MD5(sorted_payload + secret)"]
+    F --> G["<b>FASE 6: GERAÇÃO HASH</b><br/>BR-GENERIC-AUTHENTICATION-HMAC-MD5-001<br/>MD5(sorted_payload + secret)"]
     
-    G --> H["<b>FASE 7: HTTP POST</b><br/>PP-008<br/>POST {operator.url}/pragmatic-play/balance.html<br/>Content-Type: application/json"]
+    G --> H["<b>FASE 7: HTTP POST</b><br/>BR-GENERIC-PROVIDER-INTEGRATION-001<br/>POST {operator.url}/pragmatic-play/balance.html<br/>Content-Type: application/json"]
     H --> H_err["❌ Provider timeout<br/>Connection failed"]
     H --> I["<b>FASE 8: RESPOSTA PROVIDER</b><br/>JSON passthrough<br/>sem transformação<br/>⚠️ NÃO re-prefixar userId"]
     
@@ -71,16 +71,16 @@ graph TD
 
 | Regra | Descrição | Fase | Impacto |
 |-------|-----------|------|---------|
-| **PP-001** | Dynamic Endpoint Routing | 1 | Route `balance` para método `balance()` |
-| **PP-002** | Tenant Extraction | 2 | Parse token/userId para operator_slug |
-| **PP-003** | Operator Lookup + Cache | 3 | Query DB, cache 1 hora |
-| **PP-004** | Token Sanitization | 4 | Remove prefixo tenant de token e userId |
-| **PP-005** | MD5 Hash Generation | 6 | Calcula assinatura de autenticação |
-| **PP-006** | Credential Lookup | 5 | Busca secret-key do operador |
-| **PP-008** | HTTP POST to Provider | 7 | Envia para backend do operador |
-| **PP-009** | Error Handling | 1 | Captura endpoint inválido |
-| **PP-010** | Dual Token Support | 2 | Aceita token OU userId |
-| **PP-011** | Sanitization Order | 4 | Ordem: token primeiro, userId depois |
+| **BR-GENERIC-ROUTING-VALIDATION-001** | Dynamic Endpoint Routing | 1 | Route `balance` para método `balance()` |
+| **BR-GENERIC-TENANT-EXTRACTION-001** | Tenant Extraction | 2 | Parse token/userId para operator_slug |
+| **BR-GENERIC-OPERATOR-CACHING-001** | Operator Lookup + Cache | 3 | Query DB, cache 1 hora |
+| **BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001** | Token Sanitization | 4 | Remove prefixo tenant de token e userId |
+| **BR-GENERIC-AUTHENTICATION-HMAC-MD5-001** | MD5 Hash Generation | 6 | Calcula assinatura de autenticação |
+| **BR-GENERIC-CREDENTIAL-LOOKUP-001** | Credential Lookup | 5 | Busca secret-key do operador |
+| **BR-GENERIC-PROVIDER-INTEGRATION-001** | HTTP POST to Provider | 7 | Envia para backend do operador |
+| **BR-GENERIC-ERROR-HANDLING-001** | Error Handling | 1 | Captura endpoint inválido |
+| **BR-PRAGMATIC-BALANCE-DUAL-TOKEN-SUPPORT-001** | Dual Token Support | 2 | Aceita token OU userId |
+| **BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-ORDER-001** | Sanitization Order | 4 | Ordem: token primeiro, userId depois |
 
 ---
 
@@ -95,7 +95,7 @@ graph TD
 }
 ```
 
-**Validação (PP-010):**
+**Validação (BR-PRAGMATIC-BALANCE-DUAL-TOKEN-SUPPORT-001):**
 - Sem `token` → tenta `userId`
 - Sem `userId` → error
 
@@ -120,7 +120,7 @@ HTTP 500 Internal Server Error
 }
 ```
 
-**Validação (PP-003):**
+**Validação (BR-GENERIC-OPERATOR-CACHING-001):**
 - Parse: operator_slug = "unknown"
 - Query: SELECT * FROM operators WHERE slug = 'unknown'
 - Resultado: NULL
@@ -146,7 +146,7 @@ HTTP 500 Internal Server Error
 }
 ```
 
-**Validação (PP-006):**
+**Validação (BR-GENERIC-CREDENTIAL-LOOKUP-001):**
 - Operador encontrado ✅
 - Query: SELECT * FROM credentials WHERE operator_id=X AND name='pragmatic' AND key='secret-key'
 - Resultado: NULL (operador sem credenciais pragmatic)
@@ -286,11 +286,11 @@ Content-Type: application/json
 
 | Validação | Implementada | Local | Severidade |
 |-----------|-------------|-------|------------|
-| Tenant isolation (token prefix) | ✅ | PP-002, PP-004 | CRÍTICA |
-| Hash authentication (MD5) | ✅ | PP-005, PP-006 | CRÍTICA |
-| Operator existence | ✅ | PP-003 | ALTA |
-| Credential presence | ✅ | PP-006 | ALTA |
-| Endpoint validation | ✅ | PP-001 | MÉDIA |
+| Tenant isolation (token prefix) | ✅ | BR-GENERIC-TENANT-EXTRACTION-001, BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001 | CRÍTICA |
+| Hash authentication (MD5) | ✅ | BR-GENERIC-AUTHENTICATION-HMAC-MD5-001, BR-GENERIC-CREDENTIAL-LOOKUP-001 | CRÍTICA |
+| Operator existence | ✅ | BR-GENERIC-OPERATOR-CACHING-001 | ALTA |
+| Credential presence | ✅ | BR-GENERIC-CREDENTIAL-LOOKUP-001 | ALTA |
+| Endpoint validation | ✅ | BR-GENERIC-ROUTING-VALIDATION-001 | MÉDIA |
 | HTTP method validation | ✅ | routes/api.php | MÉDIA |
 
 ---
@@ -317,12 +317,12 @@ Content-Type: application/json
 
 | Aspecto | CASINO-1.7 Fase 1 | CASINO-1.7 Fase 2 |
 |---------|------------------|-------------------|
-| **Formato** | Lista de 12 regras isoladas (PP-001 a PP-012) | Fluxo integrado por endpoint |
+| **Formato** | Lista de 12 regras isoladas (BR-GENERIC-ROUTING-VALIDATION-001 a PP-012) | Fluxo integrado por endpoint |
 | **Granularidade** | Por ponto de decisão/validação | Por endpoint (ex: /balance) |
 | **Visualização** | Lista de regras com pseudocódigo | Mermaid flowchart com 8 fases |
 | **Validação** | Rastreabilidade até código source | Teste de integração |
 | **Público Alvo** | Arquitetos, análise técnica | Implementadores, QA |
-| **Exemplo** | "Regra PP-005: Hash gerado com MD5" | "Fluxo completo do /balance: 8 fases do input até output" |
+| **Exemplo** | "Regra BR-GENERIC-AUTHENTICATION-HMAC-MD5-001: Hash gerado com MD5" | "Fluxo completo do /balance: 8 fases do input até output" |
 | **Uso** | Especificação de requisitos | Template para implementação/testes |
 
 ---
@@ -330,7 +330,7 @@ Content-Type: application/json
 ## 9. Checklist de Validação para Aprovação
 
 - [ ] **Fluxo correto?** Todas as 8 fases descritas e em ordem?
-- [ ] **Regras aplicadas?** Todas as 10 regras (PP-001, 002, 003, 004, 005, 006, 008, 009, 010, 011) contempladas?
+- [ ] **Regras aplicadas?** Todas as 10 regras (BR-GENERIC-ROUTING-VALIDATION-001, 002, 003, 004, 005, 006, 008, 009, 010, 011) contempladas?
 - [ ] **Casos de erro?** Todos os 5 cenários de erro cobertos?
 - [ ] **Diagrama claro?** Fluxo ASCII legível e completo?
 - [ ] **Exemplo completo?** Request → Response funcional?
