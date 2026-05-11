@@ -1,151 +1,102 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
   title: Alternar Provider API
-  description: |
-    Complete OpenAPI 3.0 specification for Alternar redirect webhook integration.
-    Acts as HTTP proxy forwarding requests to external webhook endpoint.
   version: 1.0.0
+  description: |
+    Gaming provider webhooks for Alternar integration.
+    Generic action handler with dynamic action dispatch.
   contact:
-    name: Casino Proxy Migration
-    url: https://github.com/casino-proxy/docs
+    name: Casino Proxy Team
 
 servers:
-  - url: https://casino-proxy.example.com/v1/webhooks/alternar
-    description: Casino Proxy Gateway (Alternar endpoint)
-  - url: http://localhost:3000/v1/webhooks/alternar
-    description: Local Development
+  - url: /v1/webhooks
 
 paths:
-  /:
+  /alternar/:
     post:
-      summary: Alternar webhook redirect
-      description: |
-        Single webhook endpoint that forwards requests to external Alternar backoffice endpoint.
-        Acts as transparent HTTP proxy with automatic retry logic (3 attempts, 100ms backoff).
-        No cryptographic validation - relies on HTTPS/TLS security.
-      operationId: handleAlternarWebhook
+      operationId: alternarRedirect
       tags:
-        - Webhooks
+        - Alternar
+      summary: Alternar redirect handler
+      description: |
+        Universal redirect handler for Alternar operations.
+        Supports: launch, logout actions
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/AlternarRequest'
-            example:
-              player: "player_id_001"
-              roundId: "round_123"
-              amount: 50.00
-              operatorId: "operator_123"
-              sessionToken: "session_token_abc"
       responses:
         '200':
-          description: Request forwarded successfully
+          description: Success
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AlternarResponse'
-              example:
-                status: 200
-                data:
-                  balance: 950.00
         '400':
-          description: Request validation failure or upstream error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request
         '500':
-          description: Upstream service error (passthrough from external endpoint)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          description: Server error
 
 components:
   schemas:
     AlternarRequest:
       type: object
-      description: |
-        Generic webhook request payload. All fields are forwarded as-is to external endpoint.
-        No field validation or transformation performed by gateway.
+      required:
+        - playerId
+        - token
+        - action
+        - signature
       properties:
-        player:
+        playerId:
           type: string
-          description: Player identifier
-          example: "player_id_001"
-        roundId:
+          description: Player ID
+          example: player_456
+        token:
           type: string
-          description: Game round identifier
-          example: "round_123"
-        amount:
-          type: number
-          format: double
-          description: Transaction amount
-          example: 50.00
-        operatorId:
+          description: Player session token (sanitized)
+          example: token123
+        action:
           type: string
-          description: Operator identifier
-          example: "operator_123"
-        sessionToken:
+          description: Action to perform
+          enum:
+            - launch
+            - logout
+          example: launch
+        gameId:
           type: string
-          description: Player session token
-          example: "session_token_abc"
-        transactionId:
+          description: Optional game ID
+          example: game_789
+        signature:
           type: string
-          description: Transaction identifier (optional)
-          example: "txn_001"
-        currency:
-          type: string
-          description: ISO 4217 currency code (optional)
-          example: "BRL"
-        customData:
-          type: object
-          description: Custom data fields (optional)
-          additionalProperties: true
+          description: Request signature
+          example: hash_value
 
     AlternarResponse:
       type: object
-      description: |
-        Response from external Alternar endpoint. Status code is passthrough from upstream.
-        Uses status code from response, defaults to 400 if missing.
-      required:
-        - status
       properties:
-        status:
-          type: integer
-          description: HTTP status code (passthrough from upstream)
-          example: 200
-        data:
-          type: object
-          description: Response data from upstream endpoint
-          additionalProperties: true
-          example:
-            balance: 950.00
-            currency: "BRL"
-        error:
-          type: string
-          description: Error message (if present)
-          example: "null"
-
-    ErrorResponse:
-      type: object
-      required:
-        - message
-      properties:
+        success:
+          type: boolean
+          example: true
         message:
           type: string
-          description: Error message or passthrough from upstream
-          example: "Upstream service error"
-        description:
-          type: string
-          description: Additional error details (optional)
-          example: "Failed to reach external endpoint after 3 retries"
-        status:
-          type: integer
-          description: HTTP status code
-          example: 500
+          example: Action completed successfully
+        data:
+          type: object
+          description: Optional response data
+          properties:
+            action:
+              type: string
+            playerId:
+              type: string
+            redirectUrl:
+              type: string
+              description: Optional redirect URL for launch action
 
-tags:
-  - name: Webhooks
-    description: Alternar webhook endpoint with HTTP proxy forwarding
+  securitySchemes:
+    signature:
+      type: apiKey
+      in: query
+      name: signature
+      description: Request signature for authentication

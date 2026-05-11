@@ -1,399 +1,247 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  title: OpenBox Provider API (PUT-based Seamless)
-  description: |
-    Complete OpenAPI 3.0 specification for OpenBox PUT-based seamless webhook integration.
-    Non-standard use of PUT for state-changing operations (idempotent semantics).
-    Covers 4 operations (balance, bet, win, refund) plus roundStatus query.
+  title: OpenBox Provider API
   version: 1.0.0
+  description: |
+    Gaming provider webhooks for OpenBox integration.
+    Uses PUT method (non-standard) with HMAC-SHA256 signature authentication.
   contact:
-    name: Casino Proxy Migration
-    url: https://github.com/casino-proxy/docs
+    name: Casino Proxy Team
 
 servers:
-  - url: https://casino-proxy.example.com/v1/webhooks/openbox/seamless
-    description: Casino Proxy Gateway (OpenBox endpoint)
-  - url: http://localhost:3000/v1/webhooks/openbox/seamless
-    description: Local Development
+  - url: /v1/webhooks/openbox/seamless
 
 paths:
   /balance:
     put:
-      summary: Get player balance
-      description: |
-        Retrieve current player balance. Uses PUT method for idempotent semantics.
-        Signature validation required via Signature and Timestamp headers.
-      operationId: getBalance
+      operationId: openBoxBalance
       tags:
-        - Balance Operations
-      parameters:
-        - name: Signature
-          in: header
-          required: true
-          schema:
-            type: string
-          description: HMAC-SHA256 signature in format {apiKey}:{base64url(hmac)}
-          example: "api_key_123:dXJsPXZhbHVl"
-        - name: Timestamp
-          in: header
-          required: true
-          schema:
-            type: integer
-            format: int64
-          description: Unix timestamp in seconds
-          example: 1715177400
+        - OpenBox
+      summary: Get player balance
+      description: Retrieve current player balance
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OpenBoxRequest'
-            example:
-              player: "my-operator_abc123xyz"
-              roundId: "round_123"
-              transactionId: "txn_001"
+              $ref: '#/components/schemas/OpenBoxBalanceRequest'
       responses:
         '200':
-          description: Balance retrieved successfully
+          description: Success
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OpenBoxBalanceResponse'
-        '400':
-          description: Invalid request or validation failure
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
   /bet:
     put:
-      summary: Place bet
-      description: |
-        Debit player account for bet placement. Uses PUT for idempotency.
-        Signature validation required via headers.
-      operationId: placeBet
+      operationId: openBoxBet
       tags:
-        - Betting Operations
-      parameters:
-        - name: Signature
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: Timestamp
-          in: header
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - OpenBox
+      summary: Place bet
+      description: Place bet and debit player account
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/OpenBoxBetRequest'
-            example:
-              player: "my-operator_abc123xyz"
-              roundId: "round_123"
-              amount: 50.00
-              currency: "BRL"
-              transactionId: "txn_bet_001"
       responses:
         '200':
-          description: Bet placed successfully
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OpenBoxResponse'
+                $ref: '#/components/schemas/OpenBoxBetResponse'
 
   /win:
     put:
-      summary: Process win
-      description: |
-        Credit player account for win/payout. Uses PUT for idempotency.
-        Signature validation required via headers.
-      operationId: processWin
+      operationId: openBoxWin
       tags:
-        - Win Operations
-      parameters:
-        - name: Signature
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: Timestamp
-          in: header
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - OpenBox
+      summary: Record win
+      description: Record player win and credit account
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/OpenBoxWinRequest'
-            example:
-              player: "my-operator_abc123xyz"
-              roundId: "round_123"
-              amount: 100.00
-              currency: "BRL"
-              transactionId: "txn_win_001"
       responses:
         '200':
-          description: Win processed successfully
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OpenBoxResponse'
+                $ref: '#/components/schemas/OpenBoxWinResponse'
 
   /refund:
     put:
-      summary: Process refund
-      description: |
-        Refund player account for failed/cancelled transaction.
-        Uses PUT for idempotency. Signature validation required via headers.
-      operationId: processRefund
+      operationId: openBoxRefund
       tags:
-        - Refund Operations
-      parameters:
-        - name: Signature
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: Timestamp
-          in: header
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - OpenBox
+      summary: Refund transaction
+      description: Refund or cancel existing transaction
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/OpenBoxRefundRequest'
-            example:
-              player: "my-operator_abc123xyz"
-              roundId: "round_123"
-              amount: 50.00
-              currency: "BRL"
-              originalTransactionId: "txn_bet_001"
-              transactionId: "txn_refund_001"
       responses:
         '200':
-          description: Refund processed successfully
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OpenBoxResponse'
-
-  /round_status:
-    put:
-      summary: Get round status
-      description: |
-        Query the status of a game round. Uses PUT for idempotent read operation.
-        Signature validation required via headers.
-      operationId: getRoundStatus
-      tags:
-        - Status Operations
-      parameters:
-        - name: Signature
-          in: header
-          required: true
-          schema:
-            type: string
-        - name: Timestamp
-          in: header
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OpenBoxRequest'
-            example:
-              player: "my-operator_abc123xyz"
-              roundId: "round_123"
-      responses:
-        '200':
-          description: Round status retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OpenBoxStatusResponse'
+                $ref: '#/components/schemas/OpenBoxRefundResponse'
 
 components:
   schemas:
-    OpenBoxRequest:
+    OpenBoxBaseRequest:
       type: object
       required:
-        - player
-        - roundId
+        - playerId
+        - timestamp
       properties:
-        player:
+        playerId:
           type: string
-          description: Player identifier in format {operator_slug}_{player_id}
-          example: "my-operator_abc123xyz"
-        roundId:
+          example: player_456
+        timestamp:
           type: string
-          description: Game round identifier
-          example: "round_123"
-        transactionId:
-          type: string
-          description: Transaction identifier (optional)
-          example: "txn_001"
+          description: Unix timestamp
+          example: '1715424600'
 
-    OpenBoxBetRequest:
+    OpenBoxBalanceRequest:
       allOf:
-        - $ref: '#/components/schemas/OpenBoxRequest'
-        - type: object
-          required:
-            - amount
-            - currency
-          properties:
-            amount:
-              type: number
-              format: double
-              description: Bet amount
-              example: 50.00
-            currency:
-              type: string
-              description: ISO 4217 currency code
-              example: "BRL"
-
-    OpenBoxWinRequest:
-      allOf:
-        - $ref: '#/components/schemas/OpenBoxRequest'
-        - type: object
-          required:
-            - amount
-            - currency
-          properties:
-            amount:
-              type: number
-              format: double
-              description: Win amount
-              example: 100.00
-            currency:
-              type: string
-              description: ISO 4217 currency code
-              example: "BRL"
-
-    OpenBoxRefundRequest:
-      allOf:
-        - $ref: '#/components/schemas/OpenBoxRequest'
-        - type: object
-          required:
-            - amount
-            - currency
-            - originalTransactionId
-          properties:
-            amount:
-              type: number
-              format: double
-              description: Refund amount
-              example: 50.00
-            currency:
-              type: string
-              description: ISO 4217 currency code
-              example: "BRL"
-            originalTransactionId:
-              type: string
-              description: Original transaction being refunded
-              example: "txn_bet_001"
-
-    OpenBoxResponse:
-      type: object
-      required:
-        - balance
-        - currency
-        - status
-      properties:
-        balance:
-          type: number
-          format: double
-          description: Player balance after operation
-          example: 950.00
-        currency:
-          type: string
-          description: ISO 4217 currency code
-          example: "BRL"
-        status:
-          type: string
-          description: Operation status
-          example: "success"
+        - $ref: '#/components/schemas/OpenBoxBaseRequest'
 
     OpenBoxBalanceResponse:
       type: object
-      required:
-        - balance
-        - currency
       properties:
         balance:
           type: number
           format: double
-          description: Current player balance
-          example: 1000.00
+          example: 1500.50
         currency:
           type: string
-          description: ISO 4217 currency code
-          example: "BRL"
+          example: BRL
+        playerId:
+          type: string
+          example: player_456
 
-    OpenBoxStatusResponse:
+    OpenBoxBetRequest:
+      allOf:
+        - $ref: '#/components/schemas/OpenBoxBaseRequest'
+        - type: object
+          required:
+            - amount
+            - gameId
+            - roundId
+          properties:
+            amount:
+              type: number
+              format: double
+              example: 50.00
+            gameId:
+              type: string
+              example: game_789
+            roundId:
+              type: string
+              example: round_456
+
+    OpenBoxBetResponse:
       type: object
-      required:
-        - roundId
-        - status
       properties:
-        roundId:
-          type: string
-          description: Round identifier
-          example: "round_123"
-        status:
-          type: string
-          description: Round status (active, completed, etc.)
-          example: "completed"
         balance:
           type: number
           format: double
-          description: Balance at round completion
-          example: 950.00
+          example: 1450.50
+        currency:
+          type: string
+          example: BRL
+        playerId:
+          type: string
+          example: player_456
+        transactionId:
+          type: string
+          example: txn_131
 
-    ErrorResponse:
+    OpenBoxWinRequest:
+      allOf:
+        - $ref: '#/components/schemas/OpenBoxBaseRequest'
+        - type: object
+          required:
+            - amount
+            - gameId
+            - roundId
+          properties:
+            amount:
+              type: number
+              format: double
+              example: 100.00
+            gameId:
+              type: string
+              example: game_789
+            roundId:
+              type: string
+              example: round_456
+
+    OpenBoxWinResponse:
       type: object
-      required:
-        - message
-        - description
-        - timestamp
       properties:
-        message:
+        balance:
+          type: number
+          format: double
+          example: 1550.50
+        currency:
           type: string
-          description: Error message
-          example: "INVALID_SIGNATURE"
-        description:
+          example: BRL
+        playerId:
           type: string
-          description: Detailed error description
-          example: "Signature validation failed"
-        timestamp:
-          type: integer
-          format: int64
-          description: Unix timestamp
-          example: 1715177400
+          example: player_456
+        transactionId:
+          type: string
+          example: txn_132
 
-tags:
-  - name: Balance Operations
-    description: Player balance queries
-  - name: Betting Operations
-    description: Bet placement operations
-  - name: Win Operations
-    description: Win/payout operations
-  - name: Refund Operations
-    description: Refund operations
-  - name: Status Operations
-    description: Round status queries
+    OpenBoxRefundRequest:
+      allOf:
+        - $ref: '#/components/schemas/OpenBoxBaseRequest'
+        - type: object
+          required:
+            - originalTransactionId
+            - amount
+          properties:
+            originalTransactionId:
+              type: string
+              example: txn_131
+            amount:
+              type: number
+              format: double
+              example: 50.00
+
+    OpenBoxRefundResponse:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+          example: 1500.50
+        currency:
+          type: string
+          example: BRL
+        playerId:
+          type: string
+          example: player_456
+        transactionId:
+          type: string
+          example: txn_133
+
+  securitySchemes:
+    hmacSignature:
+      type: apiKey
+      in: header
+      name: signature
+      description: |
+        Signature format: api_key:base64_encoded_hmac_sha256
+        HMAC-SHA256 calculated over request body and timestamp
