@@ -8,15 +8,265 @@
 
 # TABLE OF CONTENTS
 
-1. [Mancala Provider](#mancala-provider)
-2. [Digitain RGS Provider](#digitain-rgs-provider)
-3. [PG Soft Provider](#pg-soft-provider)
-4. [Evoplay Provider](#evoplay-provider)
-5. [Evolution Gaming Provider](#evolution-gaming-provider)
-6. [OpenBox Provider](#openbox-provider)
-7. [Alternar Provider](#alternar-provider)
-8. [Internal Admin APIs](#internal-admin-apis)
-9. [System Endpoints](#system-endpoints)
+1. [Pragmatic Play Provider](#pragmatic-play-provider)
+2. [Mancala Provider](#mancala-provider)
+3. [Digitain RGS Provider](#digitain-rgs-provider)
+4. [PG Soft Provider](#pg-soft-provider)
+5. [Evoplay Provider](#evoplay-provider)
+6. [Evolution Gaming Provider](#evolution-gaming-provider)
+7. [OpenBox Provider](#openbox-provider)
+8. [Alternar Provider](#alternar-provider)
+9. [Internal Admin APIs](#internal-admin-apis)
+10. [System Endpoints](#system-endpoints)
+
+---
+
+# PRAGMATIC PLAY PROVIDER
+
+**Endpoint:** `POST /v1/webhooks/pragmatic-play/{endpoint}`  
+**Allowed Methods:** authenticate, balance, bet, refund, result, bonusWin, jackpotWin, promoWin, adjustment  
+**Authentication:** MD5 Hash  
+**Token Format:** `{operator_slug}_{actual_token}`
+
+## Hash Calculation
+
+```
+hash = MD5(
+  HTTP_QUERY_STRING (url-encoded params) +
+  secret_key
+)
+```
+
+**Process:**
+1. Remove hash from payload
+2. Sort payload by keys (ksort)
+3. Encode to URL query string
+4. Append secret key
+5. Generate MD5
+
+## Endpoints
+
+### POST /v1/webhooks/pragmatic-play/authenticate
+
+Authenticate player session with Pragmatic Play backend.
+
+**Request:**
+```json
+{
+  "providerId": "PragmaticPlay",
+  "token": "operator_slug_abc123def456",
+  "hash": "md5_hash_value"
+}
+```
+
+**Response (Success: error === 0):**
+```json
+{
+  "userId": "player123",
+  "currency": "BRL",
+  "cash": 1000.50,
+  "bonus": 50.00,
+  "country": "BR",
+  "jurisdiction": 99,
+  "betLimits": {
+    "defaultTotalBet": 2000,
+    "minTotalBet": 200,
+    "maxTotalBet": 2000
+  },
+  "error": 0,
+  "description": "Success"
+}
+```
+
+**Casino Proxy Processing:** Prefixes userId back with `{operator_slug}_` if error === 0
+
+---
+
+### POST /v1/webhooks/pragmatic-play/balance
+
+Get player balance.
+
+**Request:**
+```json
+{
+  "providerId": "PragmaticPlay",
+  "token": "operator_slug_abc123def456",
+  "userId": "operator_slug_user456",
+  "hash": "md5_hash_value"
+}
+```
+
+**Response (Success: error === 0):**
+```json
+{
+  "transactionId": "123",
+  "currency": "BRL",
+  "cash": 1000.00,
+  "bonus": 50.00,
+  "usedPromo": 0,
+  "error": 0,
+  "description": "Success"
+}
+```
+
+---
+
+### POST /v1/webhooks/pragmatic-play/bet
+
+Place bet (debit player account).
+
+**Request:**
+```json
+{
+  "providerId": "PragmaticPlay",
+  "reference": "bet_ref_123",
+  "gameId": "game_789",
+  "roundId": "round_456",
+  "roundDetails": "game_details",
+  "amount": 50.00,
+  "timestamp": "2026-05-11T14:30:00Z",
+  "userId": "operator_slug_user456",
+  "bonusCode": "BONUS2024",
+  "hash": "md5_hash_value"
+}
+```
+
+**Response (Success: error === 0):**
+```json
+{
+  "transactionId": "123",
+  "currency": "BRL",
+  "cash": 950.00,
+  "bonus": 50.00,
+  "usedPromo": 0,
+  "error": 0,
+  "description": "Success"
+}
+```
+
+---
+
+### POST /v1/webhooks/pragmatic-play/refund
+
+Refund/cancel bet.
+
+**Request:**
+```json
+{
+  "providerId": "PragmaticPlay",
+  "reference": "bet_ref_123",
+  "userId": "operator_slug_user456",
+  "hash": "md5_hash_value"
+}
+```
+
+**Response (Success: error === 0):**
+```json
+{
+  "transactionId": "124",
+  "error": 0,
+  "description": "Success"
+}
+```
+
+---
+
+### POST /v1/webhooks/pragmatic-play/result
+
+Bet result notification (win/loss).
+
+**Request:**
+```json
+{
+  "providerId": "PragmaticPlay",
+  "reference": "result_ref_123",
+  "gameId": "game_789",
+  "roundId": "round_456",
+  "amount": 100.00,
+  "timestamp": "2026-05-11T14:35:00Z",
+  "userId": "operator_slug_user456",
+  "roundDetails": "game_details",
+  "promoWinAmount": 10.00,
+  "promoWinReference": "promo_ref",
+  "promoCampaignID": "campaign_123",
+  "promoCampaignType": "type",
+  "bonusCode": "BONUS2024",
+  "hash": "md5_hash_value"
+}
+```
+
+**Response (Success: error === 0):**
+```json
+{
+  "transactionId": "125",
+  "currency": "BRL",
+  "cash": 1050.00,
+  "bonus": 50.00,
+  "error": 0,
+  "description": "Success"
+}
+```
+
+---
+
+### POST /v1/webhooks/pragmatic-play/bonusWin
+
+Bonus win notification.
+
+**Request:** Same structure as `/result` endpoint
+
+**Response:** Same structure as `/result` endpoint
+
+---
+
+### POST /v1/webhooks/pragmatic-play/jackpotWin
+
+Jackpot win notification.
+
+**Request:** Same structure as `/result` endpoint
+
+**Response:** Same structure as `/result` endpoint
+
+---
+
+### POST /v1/webhooks/pragmatic-play/promoWin
+
+Promotional win notification.
+
+**Request:** Same structure as `/result` endpoint
+
+**Response:** Same structure as `/result` endpoint
+
+---
+
+### POST /v1/webhooks/pragmatic-play/adjustment
+
+Account adjustment (correction, admin action).
+
+**Request:**
+```json
+{
+  "providerId": "PragmaticPlay",
+  "reference": "adj_ref_123",
+  "gameId": "game_789",
+  "roundId": "round_456",
+  "amount": 50.00,
+  "userId": "operator_slug_user456",
+  "hash": "md5_hash_value"
+}
+```
+
+**Response (Success: error === 0):**
+```json
+{
+  "transactionId": "126",
+  "currency": "BRL",
+  "cash": 1100.00,
+  "bonus": 50.00,
+  "error": 0,
+  "description": "Success"
+}
+```
 
 ---
 
@@ -257,6 +507,282 @@ Place bet (debit).
       "transactionId": "txn_126"
     }
   ]
+}
+```
+
+---
+
+### POST /v1/webhooks/digitain-rgs/win
+
+Record win/payout.
+
+**Request:**
+```json
+{
+  "token": "operator_slug_token123",
+  "operatorId": "op_123",
+  "items": [
+    {
+      "info": "win_info",
+      "amount": 100.00
+    }
+  ],
+  "timestamp": "20260511143022",
+  "signature": "hmac_sha256_value"
+}
+```
+
+**Response:**
+```json
+{
+  "errorCode": 1,
+  "items": [
+    {
+      "info": "win_info",
+      "balance": 1050.00,
+      "transactionId": "txn_127"
+    }
+  ]
+}
+```
+
+---
+
+### POST /v1/webhooks/digitain-rgs/betwin
+
+Combined bet and win transaction.
+
+**Request:**
+```json
+{
+  "token": "operator_slug_token123",
+  "operatorId": "op_123",
+  "items": [
+    {
+      "info": "betwin_info",
+      "betAmount": 50.00,
+      "winAmount": 150.00
+    }
+  ],
+  "timestamp": "20260511143022",
+  "signature": "hmac_sha256_value"
+}
+```
+
+**Response:**
+```json
+{
+  "errorCode": 1,
+  "items": [
+    {
+      "info": "betwin_info",
+      "balance": 1150.00,
+      "transactionId": "txn_128"
+    }
+  ]
+}
+```
+
+---
+
+### POST /v1/webhooks/digitain-rgs/refund
+
+Refund/cancel transaction.
+
+**Request:**
+```json
+{
+  "token": "operator_slug_token123",
+  "operatorId": "op_123",
+  "items": [
+    {
+      "info": "refund_info",
+      "transactionId": "txn_126",
+      "amount": 50.00
+    }
+  ],
+  "timestamp": "20260511143022",
+  "signature": "hmac_sha256_value"
+}
+```
+
+**Response:**
+```json
+{
+  "errorCode": 1,
+  "items": [
+    {
+      "info": "refund_info",
+      "balance": 1000.00,
+      "transactionId": "txn_129"
+    }
+  ]
+}
+```
+
+---
+
+### POST /v1/webhooks/digitain-rgs/amend
+
+Amend/modify existing transaction.
+
+**Request:**
+```json
+{
+  "token": "operator_slug_token123",
+  "operatorId": "op_123",
+  "items": [
+    {
+      "info": "amend_info",
+      "transactionId": "txn_126",
+      "amount": 75.00
+    }
+  ],
+  "timestamp": "20260511143022",
+  "signature": "hmac_sha256_value"
+}
+```
+
+**Response:**
+```json
+{
+  "errorCode": 1,
+  "items": [
+    {
+      "info": "amend_info",
+      "balance": 975.00,
+      "transactionId": "txn_129"
+    }
+  ]
+}
+```
+
+---
+
+### POST /v1/webhooks/digitain-rgs/checktxstatus
+
+Check transaction status.
+
+**Request:**
+```json
+{
+  "token": "operator_slug_token123",
+  "operatorId": "op_123",
+  "providerTxId": "provider_tx_id",
+  "timestamp": "20260511143022",
+  "signature": "hmac_sha256_value"
+}
+```
+
+**Response:**
+```json
+{
+  "timestamp": "20260511143022",
+  "signature": "hmac_sha256_value",
+  "txStatus": true,
+  "txCreationDate": "2026-05-11T14:30:00Z",
+  "externalTxId": "provider_tx_id",
+  "currencyId": "USD",
+  "errorCode": 1
+}
+```
+
+---
+
+### POST /v1/webhooks/digitain-rgs/charge
+
+Charge player (debit for multiple items).
+
+**Request:**
+```json
+{
+  "token": "operator_slug_token123",
+  "operatorId": "op_123",
+  "items": [
+    {
+      "info": "charge_info",
+      "amount": 100.00
+    }
+  ],
+  "timestamp": "20260511143022",
+  "signature": "hmac_sha256_value"
+}
+```
+
+**Response:**
+```json
+{
+  "errorCode": 1,
+  "items": [
+    {
+      "info": "charge_info",
+      "balance": 900.00,
+      "transactionId": "txn_130"
+    }
+  ]
+}
+```
+
+---
+
+### POST /v1/webhooks/digitain-rgs/promowin
+
+Promotional win notification.
+
+**Request:**
+```json
+{
+  "token": "operator_slug_token123",
+  "operatorId": "op_123",
+  "items": [
+    {
+      "info": "promowin_info",
+      "amount": 50.00,
+      "campaignId": "campaign_123"
+    }
+  ],
+  "timestamp": "20260511143022",
+  "signature": "hmac_sha256_value"
+}
+```
+
+**Response:**
+```json
+{
+  "errorCode": 1,
+  "items": [
+    {
+      "info": "promowin_info",
+      "balance": 950.00,
+      "transactionId": "txn_131"
+    }
+  ]
+}
+```
+
+---
+
+### POST /v1/webhooks/digitain-rgs/refreshtoken
+
+Refresh/renew player token.
+
+**Request:**
+```json
+{
+  "token": "operator_slug_token123",
+  "operatorId": "op_123",
+  "timestamp": "20260511143022",
+  "signature": "hmac_sha256_value"
+}
+```
+
+**Response:**
+```json
+{
+  "errorCode": 1,
+  "token": "operator_slug_new_token456",
+  "timestamp": "20260511143022",
+  "signature": "hmac_sha256_value"
 }
 ```
 
@@ -872,21 +1398,24 @@ Player session entry point.
 
 | Provider | Endpoints | Auth Method | Token Format | Status |
 |----------|-----------|-------------|--------------|--------|
-| Pragmatic Play | 9 | MD5 Hash | `{slug}_{value}` | ✅ Existing |
-| Mancala | 4 | MD5 Hash | `{slug}_{value}` | 📝 NEW |
-| Digitain RGS | 11 | HMAC-SHA256 | `{slug}_{value}` | 📝 NEW |
-| PG Soft | 4 | Signature | `{slug}_{value}` | 📝 NEW |
-| Evoplay | 5 | Signature | `{slug}_{value}` | 📝 NEW |
-| Evolution | 5 | HMAC-SHA256 | `{slug}_{value}` | 📝 NEW |
-| OpenBox | 4 | HMAC-SHA256 | `{slug}_{value}` | 📝 NEW |
-| Alternar | 1 | Signature | `{slug}_{value}` | 📝 NEW |
-| **Internal Admin** | 3 | middleware | N/A | 📝 NEW |
-| **System** | 3 | None | N/A | ✅ Partial |
+| Pragmatic Play | 9 | MD5 Hash | `{slug}_{value}` | ✅ Complete |
+| Mancala | 4 | MD5 Hash | `{slug}_{value}` | ✅ Complete |
+| Digitain RGS | 11 | HMAC-SHA256 | `{slug}_{value}` | ✅ Complete |
+| PG Soft | 4 | Signature | `{slug}_{value}` | ✅ Complete |
+| Evoplay | 5 | Signature | `{slug}_{value}` | ✅ Complete |
+| Evolution | 5 | HMAC-SHA256 | `{slug}_{value}` | ✅ Complete |
+| OpenBox | 4 | HMAC-SHA256 | `{slug}_{value}` | ✅ Complete |
+| Alternar | 1 | Signature | `{slug}_{value}` | ✅ Complete |
+| **Internal Admin** | 4 | middleware | N/A | ✅ Complete |
+| **System** | 3 | None | N/A | ✅ Complete |
 
-**Total Endpoints:** 49 (41 gaming webhooks + 3 internal + 3 system + 2 auth)
+**Total Endpoints:** 50 (41 gaming webhooks + 4 internal + 3 system + 2 auth)
+
+**Updated:** All 8 missing Digitain endpoints added (win, betwin, refund, amend, checktxstatus, charge, promowin, refreshtoken)  
+**Updated:** Complete Pragmatic Play provider section added with all 9 endpoints
 
 ---
 
-**Status:** ⏸️ Awaiting Validation
+**Status:** ✅ Ready for YAML Spec Generation
 
 Next: Separate into individual YAML files per provider + create internal-admin-spec.yaml
