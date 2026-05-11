@@ -1,0 +1,260 @@
+openapi: 3.0.0
+info:
+  title: PG Soft Provider API
+  version: 1.0.0
+  description: |
+    Gaming provider webhooks for PG Soft integration.
+    Explicit endpoint routing (not dynamic).
+  contact:
+    name: Casino Proxy Team
+
+servers:
+  - url: /v1/webhooks
+
+paths:
+  /pgsoft/VerifySession:
+    post:
+      operationId: pgSoftVerifySession
+      tags:
+        - PG Soft
+      summary: Verify player session
+      description: Verify and retrieve player session information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PgSoftVerifySessionRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PgSoftVerifySessionResponse'
+
+  /pgsoft/Cash/Get:
+    post:
+      operationId: pgSoftCashGet
+      tags:
+        - PG Soft
+      summary: Get player cash balance
+      description: Retrieve player cash balance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PgSoftCashGetRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PgSoftCashGetResponse'
+
+  /pgsoft/Cash/TransferInOut:
+    post:
+      operationId: pgSoftCashTransferInOut
+      tags:
+        - PG Soft
+      summary: Transfer credits in/out
+      description: Transfer credits for bets and wins
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PgSoftCashTransferInOutRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PgSoftCashTransferInOutResponse'
+
+  /pgsoft/Cash/Adjustment:
+    post:
+      operationId: pgSoftCashAdjustment
+      tags:
+        - PG Soft
+      summary: Adjust player cash
+      description: Apply adjustment or correction to player account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PgSoftCashAdjustmentRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PgSoftCashAdjustmentResponse'
+
+components:
+  schemas:
+    PgSoftVerifySessionRequest:
+      type: object
+      required:
+        - operator_player_session
+        - playerId
+      properties:
+        operator_player_session:
+          type: string
+          description: Operator player session (sanitized)
+          example: session123
+        playerId:
+          type: string
+          example: player_456
+
+    PgSoftVerifySessionResponse:
+      type: object
+      properties:
+        player_id:
+          type: string
+          example: player_456
+        name:
+          type: string
+          example: John Doe
+        currency:
+          type: string
+          example: BRL
+        balance:
+          type: number
+          format: double
+          example: 1000.00
+        error:
+          type: integer
+          description: null = success
+          nullable: true
+
+    PgSoftCashGetRequest:
+      type: object
+      required:
+        - operator_player_session
+        - playerId
+      properties:
+        operator_player_session:
+          type: string
+          example: session123
+        playerId:
+          type: string
+          example: player_456
+
+    PgSoftCashGetResponse:
+      type: object
+      properties:
+        cash:
+          type: number
+          format: double
+          example: 1000.00
+        currency:
+          type: string
+          example: BRL
+        error:
+          type: integer
+          nullable: true
+
+    PgSoftCashTransferInOutRequest:
+      type: object
+      required:
+        - operator_player_session
+        - transactionId
+        - amount
+        - transactionType
+      properties:
+        operator_player_session:
+          type: string
+          example: session123
+        transactionId:
+          type: string
+          description: Transaction identifier
+          example: txn_127
+        amount:
+          type: number
+          format: double
+          example: 50.00
+        transactionType:
+          type: string
+          enum:
+            - bet
+            - win
+          example: bet
+        gameId:
+          type: string
+          description: Optional game ID
+          example: game_123
+        roundId:
+          type: string
+          description: Optional round ID
+          example: round_123
+
+    PgSoftCashTransferInOutResponse:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+          example: 950.00
+        currency:
+          type: string
+          example: BRL
+        transaction_id:
+          type: string
+          example: txn_127
+        error:
+          type: integer
+          nullable: true
+
+    PgSoftCashAdjustmentRequest:
+      type: object
+      required:
+        - operator_player_session
+        - amount
+        - reason
+        - referenceId
+      properties:
+        operator_player_session:
+          type: string
+          example: session123
+        amount:
+          type: number
+          format: double
+          example: 50.00
+        reason:
+          type: string
+          enum:
+            - refund
+            - correction
+            - bonus
+            - adjustment
+          example: refund
+        referenceId:
+          type: string
+          example: ref_123
+
+    PgSoftCashAdjustmentResponse:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+          example: 1000.00
+        currency:
+          type: string
+          example: BRL
+        error:
+          type: integer
+          nullable: true
+
+  securitySchemes:
+    signature:
+      type: apiKey
+      in: header
+      name: X-Signature
+      description: Provider signature validation
