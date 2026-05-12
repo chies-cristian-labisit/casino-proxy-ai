@@ -258,6 +258,20 @@ Para cada endpoint, documentar o fluxo técnico completo mostrando como as regra
 
 Construir módulo agnóstico de testes de integração que valida cada uma das 12 regras de negócio contra o sistema que está sendo testado (PHP legado ou Go futuro).
 
+#### Ambiente de Execução (HML/DEV com Mocks)
+
+Os testes rodam **apenas em ambientes HML/DEV**, **nunca em produção**:
+
+- **Database:** Mockada (ou banco de teste isolado)
+- **External APIs:** Mockadas via WireMock (Pragmatic Play, Evolution Gaming, etc.)
+- **Objetivo:** Testes independentes de recursos terceiros, determinísticos, rápidos
+
+Dessa forma:
+- Sistema sob teste faz requisições HTTP normalmente
+- WireMock intercepta e retorna respostas pré-configuradas
+- Testes validam lógica de negócio sem depender de providers reais ou DB produção
+- **Mesmo código de teste funciona contra PHP legado E Go futuro** (apenas mudar `base_url`)
+
 #### Arquitetura — Casino Proxy Test Oracle
 
 **Objetivo:** Framework reutilizável para testar qualquer implementação (PHP, Go, ou outra linguagem) contra as regras definidas em CASINO-2.
@@ -332,147 +346,41 @@ casino-proxy-test-oracle/
         └── (...fixtures por provider)
 ```
 
-#### Como Funciona (Exemplo: /balance endpoint)
+#### Fluxo de Testes (HML/DEV com Mocks)
 
-```java
-@ExtendWith(WireMockExtension.class)
-class PragmaticPlayBalanceTest {
-    
-    private HttpClient client;
-    private ProviderMockServer mockServer;
-    
-    @BeforeEach
-    void setup(WireMockRuntimeInfo wmRuntimeInfo) {
-        mockServer = new ProviderMockServer(wmRuntimeInfo);
-        client = HttpClientFactory.create("http://system-under-test:8080");
-        
-        // Setup WireMock para simular responses do Pragmatic Play
-        mockServer.stubPragmaticPlayBalance(
-            Fixtures.PRAGMATIC_BALANCE_SUCCESS_RESPONSE
-        );
-    }
-    
-    @Test
-    void testBrGenericRoutingValidation001() {
-        // BR-GENERIC-ROUTING-VALIDATION-001: Endpoint inválido → 500
-        Response response = client.post("/webhooks/pragmatic-play/invalid-endpoint");
-        
-        assertThat(response.getStatusCode()).isEqualTo(500);
-        assertThat(response.getBody()).contains("method_not_found");
-    }
-    
-    @Test
-    void testBrPragmaticBalanceTokenSanitization001() {
-        // BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001: Sanitiza token
-        String payloadWithToken = PayloadBuilder.balance()
-            .withToken("operator1_abc123")
-            .build();
-        
-        Response response = client.post("/webhooks/pragmatic-play/balance", payloadWithToken);
-        
-        // Verifica que a chamada ao mock (Pragmatic Play) recebeu token SEM prefixo
-        mockServer.verify(
-            postRequestedFor(urlEqualTo("/pragmatic-play/balance.html"))
-                .withRequestBody(jsonPath("$.token", equalTo("abc123")))
-        );
-    }
-    
-    @Test
-    void testBrGenericAuthenticationHmacMd5001() {
-        // BR-GENERIC-AUTHENTICATION-HMAC-MD5-001: Hash válido
-        String payload = PayloadBuilder.balance()
-            .withOperator("operator1")
-            .withSecretKey("my-secret")
-            .build();
-        
-        String correctHash = HashGenerator.md5(payload, "my-secret");
-        
-        Response response = client.post(
-            "/webhooks/pragmatic-play/balance",
-            payload,
-            headers("X-Signature", correctHash)
-        );
-        
-        assertThat(response.getStatusCode()).isEqualTo(200);
-    }
-    
-    @Test
-    void testBalanceEndpointFullFlow() {
-        // Teste de fluxo completo: Fase 1-8 descritas em balance.md
-        String request = Fixtures.PRAGMATIC_BALANCE_SUCCESS_REQUEST;
-        
-        Response response = client.post("/webhooks/pragmatic-play/balance", request);
-        
-        // Fase 1: Roteamento ✓
-        assertThat(response.getStatusCode()).isNotEqualTo(500);
-        
-        // Fase 2-4: Tenant extraction e sanitização ✓ (verificado em WireMock)
-        mockServer.verify(
-            postRequestedFor(urlContaining("/pragmatic-play/balance.html"))
-        );
-        
-        // Fase 5-7: Lookup, hash, HTTP ✓ (mock respondeu)
-        
-        // Fase 8: Response passthrough ✓
-        assertThat(response.getBody()).containsKeys("player_id", "balance");
-    }
-}
-```
+**Ambiente de Execução:**
+- Testes rodam em HML/DEV (nunca produção)
+- Todas as chamadas externas são interceptadas por WireMock:
+  - Respostas do Pragmatic Play (e outros providers)
+  - Consultas a banco de dados (se expostas via HTTP)
+  - Qualquer integração terceira
+- Sistema sob teste (PHP ou Go) faz HTTP requests normalmente
+- WireMock retorna respostas pré-configuradas (stubs)
+- Testes validam o comportamento sem dependência de recursos reais
 
-#### WireMock Integration (Exemplo)
-
-```java
-@Component
-class ProviderMockServer {
-    private WireMockServer mockServer;
-    
-    public ProviderMockServer(WireMockRuntimeInfo wmRuntimeInfo) {
-        this.mockServer = wmRuntimeInfo.getWireMock();
-    }
-    
-    public void stubPragmaticPlayBalance(String responseBody) {
-        mockServer.stubFor(
-            post(urlEqualTo("/pragmatic-play/balance.html"))
-                .withHeader("Content-Type", containing("application/json"))
-                .willReturn(aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(responseBody))
-        );
-    }
-    
-    public void stubPragmaticPlayBalanceError(String errorCode) {
-        mockServer.stubFor(
-            post(urlEqualTo("/pragmatic-play/balance.html"))
-                .willReturn(aResponse()
-                    .withStatus(400)
-                    .withBody("{\"error\": \"" + errorCode + "\"}")
-                )
-        );
-    }
-    
-    public void verify(RequestPatternBuilder pattern) {
-        mockServer.verify(pattern);
-    }
-}
-```
+**Exemplo de Teste:**
+- Enviar request `/webhooks/pragmatic-play/balance` com token `operator1_abc123`
+- WireMock stub simula resposta do Pragmatic Play
+- Teste verifica que token foi sanitizado para `abc123` antes de enviar ao mock
+- Teste verifica que resposta foi passada sem transformação
+- Resultado: ✅ mesmo comportamento esperado
 
 #### Agnóstico a Linguagem
+
+**Princípio Core:** Testes são agnósticos a implementação. Validam **comportamento HTTP**, não linguagem de programação.
 
 **Como funciona:**
 
 1. **Sistema sob teste** pode estar em qualquer linguagem (PHP, Go, Java, Python)
 2. **Test Oracle** faz HTTP requests contra qualquer servidor (via configurable `base_url`)
 3. **WireMock** simula respostas do provider externo (Pragmatic Play, Evolution, etc.)
-4. **Assertions** são agnósticas: validam comportamento, não implementação
+4. **Assertions** são agnósticas: validam comportamento observável via HTTP, não implementação interna
 
-**Exemplo — Testando Go:**
-
-```java
-// Mesmo código de teste funciona contra Go quando migrar
-HttpClient client = HttpClientFactory.create("http://casino-proxy-go:8080");
-// ... resto do teste é idêntico
-```
+**Portabilidade entre PHP → Go:**
+- Mesma suite de testes roda contra PHP legado (HML/DEV) sem modificação
+- Quando Go está pronto, mesma suite roda contra Go (apenas mudar `base_url`)
+- Se ambos passam 100%, parity é garantida
+- Nenhuma mudança de código de teste necessária durante migração
 
 #### Definition of Done
 
@@ -497,11 +405,21 @@ HttpClient client = HttpClientFactory.create("http://casino-proxy-go:8080");
 
 #### O que será feito
 
-Criar matrizes YAML que rastreiam cada regra até:
-- OpenAPI spec (CASINO-1)
-- Código-fonte PHP
-- Teste de validação (Fase 3)
-- Implementation Go (CASINO-3)
+Criar matrizes YAML que rastreiam **cada regra de negócio através de 4 camadas de traceabilidade:**
+
+1. **OpenAPI Spec (CASINO-1):** Qual endpoint e operação documenta essa regra?
+2. **Código-fonte PHP:** Exatamente onde a regra está implementada (arquivo + linhas)?
+3. **Teste de Validação (Fase 3):** Qual test case valida essa regra?
+4. **Implementação Go (CASINO-3):** Onde essa mesma regra será implementada em Go?
+
+#### Por Que a Fase 4 Existe?
+
+A Fase 4 fornece **seguro contra regras perdidas** durante a migração PHP → Go. Permite que qualquer desenvolvedor responda:
+- "Mostre-me como BR-GENERIC-ROUTING-VALIDATION-001 fluxo da spec até o código até teste até implementação Go"
+- "Qual regra cobre esse edge case?"
+- "Se essa regra quebra em Go, qual test case pega?"
+
+Sem as matrizes, é impossível garantir que 100% das regras foram traduzidas corretamente.
 
 #### Estrutura de Matrizes
 
@@ -633,6 +551,16 @@ Final de Semana 6 (2026-06-22)
 ---
 
 ## 4. CASINO-3 — Go Microservices Implementation ⏸️ AGUARDANDO
+
+### ⚠️ Status de Trabalho em Progresso
+
+CASINO-3 é um **epic em trabalho em progresso (WIP)**. As fases documentadas abaixo (0, 2, 3, 4, 5) são **baseline assumptions** que serão refináveis durante a execução conforme:
+- Restrições técnicas e de infraestrutura emergirem
+- Resultados dos testes de Fase 3 (CASINO-2) informarem decisões de design
+- Paridade de performance entre PHP e Go for validada
+- Novos requisitos ou edge cases forem descobertos
+
+**Expectativa:** Phases podem ser reorganizadas, adicionadas, ou tidas como removidas. Este roadmap será atualizado a cada sprint com base em aprendizados reais.
 
 ### Objetivo
 Implementar serviços Go que replicam 100% o comportamento do PHP, com infraestrutura moderna e escalabilidade.
