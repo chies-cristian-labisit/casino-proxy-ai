@@ -109,26 +109,29 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
 
 ### CASINO-2: Business Rules Discovery & Test Oracle
 
-**Objetivo:** Descobrir & documentar regras de negócio PHP, construir oráculo de testes
+**Objetivo:** Descobrir & documentar regras de negócio PHP, construir oráculo agnóstico de testes
 
 **Escopo:**
 - **Fase 1:** Extrair lógica de negócio de cada handler PHP (CASINO-2.1-2.5 / 2.6-2.10 / etc.)
-- **Fase 2:** Documentar em markdown (rules.md por provider)
-- **Fase 3:** Construir suite de testes de integração (referência PHP)
+- **Fase 2:** Documentar em markdown (rules.md + endpoint docs por provider)
+- **Fase 3:** Construir Test Oracle Java (agnóstico a linguagem, com WireMock para mocks)
 - **Fase 4:** Criar YAML trace matrix (regra → spec → código → teste)
-- **Fase 5:** Validar: testes PHP passam 100%
-
-**Timeline:** 4-6 semanas (1 semana por provider, sequencial com validação PO entre fases)
+- **Fase 5:** Validar: testes passam 100% contra PHP legado
 
 **Resultado:** 
-- `/docs/casino-proxy/phase-1-business-rules/` (regras markdown)
-- `/tests/php-oracle/` (suite de testes de referência)
+- `/docs/casino-proxy/phase-1-business-rules/` (regras markdown com BR-* nomenclature)
+- `/docs/casino-proxy/phase-2-technical-documentation/` (endpoint documentation por provider)
+- `casino-proxy-test-oracle/` (módulo Java independente com JUnit 5 + WireMock)
+  - Reutilizável para testar PHP legado E Go futuro
+  - 50+ testes por provider (1 por regra BR-* + por endpoint)
 - `/docs/casino-proxy/trace-matrices/` (YAML trace matrices)
 
 **Definition of Done:**
 - [ ] 8 providers com todos os handlers mapeados
-- [ ] Regras de negócio documentadas + validadas
-- [ ] Suite de testes PHP 100% passando
+- [ ] Regras de negócio documentadas + validadas (BR-* nomenclature)
+- [ ] Endpoint documentation (8 fases cada) como templates
+- [ ] Test Oracle implementado em Java
+- [ ] 50+ testes por provider rodando contra PHP legado 100% PASS
 - [ ] PO valida completude antes de liberar CASINO-3
 
 **Bloqueia:** CASINO-3 (não pode implementar Go sem oráculo)
@@ -169,7 +172,7 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
   - Migração gradual de tráfego
   - Cutover final
 
-**Timeline:** 18-26 semanas (Fase 0: 1-2 semanas | Fases 2-5: 17-24 semanas, começa semana 5+, após CASINO-2 Fase 1 estar 100%)
+**Sequência:** Pode começar Fase 0 (IaC) em paralelo com CASINO-2. Fases 2-5 iniciam quando CASINO-2 Fase 1 completa.
 
 **Resultado:**
 - IaC completa (`/infrastructure/` com Terraform/CloudFormation)
@@ -199,7 +202,6 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
 | Métrica | CASINO-1 | CASINO-2 | CASINO-3 |
 |---------|----------|----------|----------|
 | **Stories** | 6 | 40 | 22 |
-| **Duração** | ✅ 2-3 semanas | 🚀 4-6 semanas | ⏸️ 17-25 semanas |
 | **Status** | COMPLETO | INICIANDO | AGUARDANDO |
 | **Depende De** | - | CASINO-1 | CASINO-2 |
 | **Bloqueia** | - | CASINO-3 | - |
