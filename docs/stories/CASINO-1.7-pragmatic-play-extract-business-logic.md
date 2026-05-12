@@ -3,7 +3,7 @@
 **Story ID:** CASINO-1.7  
 **Epic:** CASINO-1 (Migração Casino Proxy PHP → Go)  
 **Tipo:** Descoberta de Regras de Negócio (Fase 1 de Análise com 5 Fases)  
-**Status:** Completo (Pronto para Validação do PO)  
+**Status:** Done  
 **Prioridade:** Alta  
 **Atribuído a:** @dev (com revisão de @architect)  
 **Relacionado:** CASINO-1.1 (Spec OpenAPI para Pragmatic Play)  
@@ -269,6 +269,39 @@ Uma regra de negócio é uma decisão ou restrição imposta pelo código. Exemp
 
 ---
 
+## 🤖 CodeRabbit Integration
+
+**Story Type Analysis:**
+- Tipo primário: `Documentation`
+- Complexidade: Medium (análise de código PHP + extração de 12 regras)
+- Tipo secundário: `Research`
+
+**Specialized Agents:**
+- Executor primário: @dev
+- Quality Gate: @architect (revisar fidelidade técnica das regras)
+
+**Quality Gate Tasks:**
+- [x] Pre-Commit (@dev): Markdown renderiza corretamente, referências de linha válidas
+- [x] Pre-PR (@devops): Links a arquivos PHP existentes verificados
+
+**Self-Healing Configuration:**
+```yaml
+mode: light
+max_iterations: 2
+severity_filter: [CRITICAL, HIGH]
+behavior:
+  CRITICAL: auto_fix
+  HIGH: document_as_debt
+```
+
+**Focus Areas (Documentation/Research):**
+- Fidelidade das regras extraídas vs código PHP fonte
+- Rastreabilidade linha-a-linha
+- Completude — nenhuma regra omitida
+- Clareza dos pseudocódigos para implementação Go
+
+---
+
 ## Comunicação/Slack
 
 Aviso prévio para @architect: Esta descoberta pode surfaçar decisões arquiteturais que informam o design da Fase 2. Se encontrado, discutiremos antes de prosseguir.
@@ -287,3 +320,12 @@ Aviso prévio para @architect: Esta descoberta pode surfaçar decisões arquitet
 ---
 
 **Pronto para validação de @po.** Uma vez aprovado, repetimos esta story para os 7 providers restantes, depois movemos para Fase 2 (documentação).
+
+---
+
+## Change Log
+
+| Data | Agente | Ação |
+|------|--------|------|
+| 2026-05-11 | @dev (Dex) | Story implementada — todos os ACs concluídos, 12 regras extraídas |
+| 2026-05-12 | @po (Pax) | Validação GO (8/10) — Status: Completo → Done. Desvio de lifecycle registrado (impl. antes de validação). Adicionada seção CodeRabbit Integration. |
