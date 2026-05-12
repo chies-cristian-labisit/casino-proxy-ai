@@ -24,11 +24,10 @@ CASINO-3: Go Microservices Implementation ⏸️ AGUARDANDO
 |---------|----------|----------|----------|
 | **Objetivo** | Documentar 100% endpoints | Extrair & validar regras | Reconstruir em Go |
 | **Stories** | 6 | 40 | 22 |
-| **Duração** | 2-3 semanas | 4-6 semanas | 17-25 semanas |
 | **Status** | ✅ Completo | 🚀 Iniciando | ⏸️ Aguardando |
 | **Depende De** | — | CASINO-1 | CASINO-2 |
 | **Bloqueia** | — | CASINO-3 | — |
-| **Artefatos** | OpenAPI specs | Rules + Tests | Go services |
+| **Artefatos** | OpenAPI specs | Rules + Tests + Oracle | Go services |
 | **Validação** | @po | @po (por fase) | @qa + @devops |
 | **Risco** | ✅ Baixo | 🟡 Médio | 🟡 Médio |
 
@@ -117,8 +116,7 @@ Fase 5: VALIDATE    → Testes PHP passam 100%
 ### **Fase 1: EXTRACT — Extrair Regras de Negócio** 🔨
 
 **Story:** CASINO-2.1  
-**Duração Estimada:** 3-4 dias  
-**Status:** ✅ COMPLETO (2026-05-11)
+**Status:** ✅ COMPLETO
 
 #### O que foi feito
 
@@ -170,8 +168,7 @@ Estrutura:
 ### **Fase 2: DOCUMENT — Documentar Endpoints Técnicos**
 
 **Story:** CASINO-2.2  
-**Duração Estimada:** 4-5 dias  
-**Status:** ✅ COMPLETO (2026-05-11)
+**Status:** ✅ COMPLETO
 
 #### O que será feito
 
@@ -255,64 +252,247 @@ Para cada endpoint, documentar o fluxo técnico completo mostrando como as regra
 ### **Fase 3: TEST — Construir Suite de Testes de Integração**
 
 **Story:** CASINO-2.3  
-**Duração Estimada:** 5-7 dias  
 **Status:** ⏳ PLANEJADO
 
 #### O que será feito
 
-Construir suite de testes PHPUnit contra o sistema legado PHP que valida cada uma das 12 regras + cada endpoint.
+Construir módulo agnóstico de testes de integração que valida cada uma das 12 regras de negócio contra o sistema que está sendo testado (PHP legado ou Go futuro).
 
-#### Estrutura de Testes
+#### Arquitetura — Casino Proxy Test Oracle
 
-```
-tests/Feature/PragmaticPlayControllerTest.php
-├─ Test Routing
-│  └─ test_invalid_endpoint_returns_500()
-│  └─ test_valid_endpoint_routes_correctly()
-│
-├─ Test Tenant Extraction
-│  └─ test_extracts_operator_slug_from_token()
-│  └─ test_dual_token_support()
-│
-├─ Test Operator Caching
-│  └─ test_caches_operator_for_1_hour()
-│  └─ test_cache_invalidation()
-│
-├─ Test /balance Endpoint (10 testes)
-│  └─ test_balance_success_with_valid_token()
-│  └─ test_balance_fails_operator_not_found()
-│  └─ test_balance_fails_missing_credentials()
-│  └─ test_balance_sanitizes_tokens()
-│  └─ test_balance_hash_validation()
-│  └─ ...
-│
-└─ Test /bet, /refund, /result, etc (40+ testes totais)
-```
+**Objetivo:** Framework reutilizável para testar qualquer implementação (PHP, Go, ou outra linguagem) contra as regras definidas em CASINO-2.
 
-#### Artefatos Esperados
+**Stack:**
+- **Linguagem:** Java (JDK 21+)
+- **Framework de testes:** JUnit 5
+- **Mock de integrações externas:** WireMock 3.x
+- **HTTP client:** RestAssured ou HttpClient nativo
+- **Assertions:** AssertJ
+- **Build:** Maven ou Gradle
+- **CI/CD:** GitHub Actions / GitLab CI
+
+#### Estrutura do Projeto
 
 ```
-tests/php-oracle/
-├── PragmaticPlayControllerTest.php    (120+ test cases)
-├── PragmaticPlayFixtures.php           (dados de teste)
-└── README.md                           (como executar)
+casino-proxy-test-oracle/
+├── pom.xml                                      # Maven config
+├── README.md                                    # Documentação
+├── src/main/java/
+│   └── com/casino/oracle/
+│       ├── client/
+│       │   ├── HttpClientFactory.java           # Factory para HTTP client
+│       │   └── PayloadBuilder.java              # Builder para payloads
+│       ├── mock/
+│       │   ├── ProviderMockServer.java          # WireMock setup
+│       │   ├── PragmaticPlayMocks.java          # Mocks específicos Pragmatic
+│       │   ├── EvolutionGamingMocks.java        # Mocks específicos Evolution
+│       │   └── (...outros providers)
+│       ├── assertions/
+│       │   ├── ResponseAssertions.java          # Custom assertions
+│       │   ├── RuleAssertions.java              # Rule-specific assertions
+│       │   └── SecurityAssertions.java          # Security checks
+│       ├── data/
+│       │   ├── Fixtures.java                    # Dados de teste
+│       │   ├── PayloadExamples.java             # Exemplos de payloads reais
+│       │   └── (...dados por provider)
+│       └── config/
+│           └── TestConfig.java                  # Config centralizada
+│
+├── src/test/java/
+│   └── com/casino/oracle/
+│       ├── integration/
+│       │   ├── PragmaticPlayRulesTest.java      # Testa 12 regras vs Pragmatic
+│       │   ├── PragmaticPlayEndpointsTest.java  # Testa 9 endpoints do Pragmatic
+│       │   ├── EvolutionGamingRulesTest.java    # (próximo provider)
+│       │   └── (...testes por provider)
+│       └── rules/
+│           ├── RoutingValidationTest.java       # BR-GENERIC-ROUTING-VALIDATION-001
+│           ├── TenantExtractionTest.java        # BR-GENERIC-TENANT-EXTRACTION-001
+│           ├── OperatorCachingTest.java         # BR-GENERIC-OPERATOR-CACHING-001
+│           ├── TokenSanitizationTest.java       # BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001
+│           ├── AuthenticationTest.java          # BR-GENERIC-AUTHENTICATION-HMAC-MD5-001
+│           ├── CredentialLookupTest.java        # BR-GENERIC-CREDENTIAL-LOOKUP-001
+│           ├── ProviderIntegrationTest.java     # BR-GENERIC-PROVIDER-INTEGRATION-001
+│           ├── ErrorHandlingTest.java           # BR-GENERIC-ERROR-HANDLING-001
+│           ├── DualTokenSupportTest.java        # BR-PRAGMATIC-BALANCE-DUAL-TOKEN-SUPPORT-001
+│           ├── TokenSanitizationOrderTest.java  # BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-ORDER-001
+│           └── ResponsePassthroughTest.java     # BR-GENERIC-RESPONSE-PASSTHROUGH-001
+│
+└── src/main/resources/
+    ├── application.properties                    # Config
+    ├── wiremock/
+    │   ├── pragmatic-play/
+    │   │   ├── balance-success-response.json
+    │   │   ├── balance-error-response.json
+    │   │   └── (...stubs por endpoint)
+    │   ├── evolution-gaming/
+    │   └── (...stubs por provider)
+    └── test-data/
+        ├── pragmatic-play-fixtures.json
+        └── (...fixtures por provider)
 ```
 
-#### Definition of Done (esperado)
+#### Como Funciona (Exemplo: /balance endpoint)
 
-- [ ] 50+ test cases covering todas as 12 regras
-- [ ] 100% dos endpoints cobertos
-- [ ] Todos os cenários de erro testados
-- [ ] Dados de test fixtures realistas
-- [ ] Testes executam com sucesso contra PHP 100%
-- [ ] Documentation de como rodar
+```java
+@ExtendWith(WireMockExtension.class)
+class PragmaticPlayBalanceTest {
+    
+    private HttpClient client;
+    private ProviderMockServer mockServer;
+    
+    @BeforeEach
+    void setup(WireMockRuntimeInfo wmRuntimeInfo) {
+        mockServer = new ProviderMockServer(wmRuntimeInfo);
+        client = HttpClientFactory.create("http://system-under-test:8080");
+        
+        // Setup WireMock para simular responses do Pragmatic Play
+        mockServer.stubPragmaticPlayBalance(
+            Fixtures.PRAGMATIC_BALANCE_SUCCESS_RESPONSE
+        );
+    }
+    
+    @Test
+    void testBrGenericRoutingValidation001() {
+        // BR-GENERIC-ROUTING-VALIDATION-001: Endpoint inválido → 500
+        Response response = client.post("/webhooks/pragmatic-play/invalid-endpoint");
+        
+        assertThat(response.getStatusCode()).isEqualTo(500);
+        assertThat(response.getBody()).contains("method_not_found");
+    }
+    
+    @Test
+    void testBrPragmaticBalanceTokenSanitization001() {
+        // BR-PRAGMATIC-BALANCE-TOKEN-SANITIZATION-001: Sanitiza token
+        String payloadWithToken = PayloadBuilder.balance()
+            .withToken("operator1_abc123")
+            .build();
+        
+        Response response = client.post("/webhooks/pragmatic-play/balance", payloadWithToken);
+        
+        // Verifica que a chamada ao mock (Pragmatic Play) recebeu token SEM prefixo
+        mockServer.verify(
+            postRequestedFor(urlEqualTo("/pragmatic-play/balance.html"))
+                .withRequestBody(jsonPath("$.token", equalTo("abc123")))
+        );
+    }
+    
+    @Test
+    void testBrGenericAuthenticationHmacMd5001() {
+        // BR-GENERIC-AUTHENTICATION-HMAC-MD5-001: Hash válido
+        String payload = PayloadBuilder.balance()
+            .withOperator("operator1")
+            .withSecretKey("my-secret")
+            .build();
+        
+        String correctHash = HashGenerator.md5(payload, "my-secret");
+        
+        Response response = client.post(
+            "/webhooks/pragmatic-play/balance",
+            payload,
+            headers("X-Signature", correctHash)
+        );
+        
+        assertThat(response.getStatusCode()).isEqualTo(200);
+    }
+    
+    @Test
+    void testBalanceEndpointFullFlow() {
+        // Teste de fluxo completo: Fase 1-8 descritas em balance.md
+        String request = Fixtures.PRAGMATIC_BALANCE_SUCCESS_REQUEST;
+        
+        Response response = client.post("/webhooks/pragmatic-play/balance", request);
+        
+        // Fase 1: Roteamento ✓
+        assertThat(response.getStatusCode()).isNotEqualTo(500);
+        
+        // Fase 2-4: Tenant extraction e sanitização ✓ (verificado em WireMock)
+        mockServer.verify(
+            postRequestedFor(urlContaining("/pragmatic-play/balance.html"))
+        );
+        
+        // Fase 5-7: Lookup, hash, HTTP ✓ (mock respondeu)
+        
+        // Fase 8: Response passthrough ✓
+        assertThat(response.getBody()).containsKeys("player_id", "balance");
+    }
+}
+```
+
+#### WireMock Integration (Exemplo)
+
+```java
+@Component
+class ProviderMockServer {
+    private WireMockServer mockServer;
+    
+    public ProviderMockServer(WireMockRuntimeInfo wmRuntimeInfo) {
+        this.mockServer = wmRuntimeInfo.getWireMock();
+    }
+    
+    public void stubPragmaticPlayBalance(String responseBody) {
+        mockServer.stubFor(
+            post(urlEqualTo("/pragmatic-play/balance.html"))
+                .withHeader("Content-Type", containing("application/json"))
+                .willReturn(aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(responseBody))
+        );
+    }
+    
+    public void stubPragmaticPlayBalanceError(String errorCode) {
+        mockServer.stubFor(
+            post(urlEqualTo("/pragmatic-play/balance.html"))
+                .willReturn(aResponse()
+                    .withStatus(400)
+                    .withBody("{\"error\": \"" + errorCode + "\"}")
+                )
+        );
+    }
+    
+    public void verify(RequestPatternBuilder pattern) {
+        mockServer.verify(pattern);
+    }
+}
+```
+
+#### Agnóstico a Linguagem
+
+**Como funciona:**
+
+1. **Sistema sob teste** pode estar em qualquer linguagem (PHP, Go, Java, Python)
+2. **Test Oracle** faz HTTP requests contra qualquer servidor (via configurable `base_url`)
+3. **WireMock** simula respostas do provider externo (Pragmatic Play, Evolution, etc.)
+4. **Assertions** são agnósticas: validam comportamento, não implementação
+
+**Exemplo — Testando Go:**
+
+```java
+// Mesmo código de teste funciona contra Go quando migrar
+HttpClient client = HttpClientFactory.create("http://casino-proxy-go:8080");
+// ... resto do teste é idêntico
+```
+
+#### Definition of Done
+
+- [ ] Estrutura de projeto Maven/Gradle criada em `casino-proxy-test-oracle/`
+- [ ] WireMock integrado e configurado
+- [ ] 50+ test cases: 1 por regra BR-* + 40+ por endpoint
+- [ ] Fixtures realistas para Pragmatic Play (9 endpoints)
+- [ ] Testes passam 100% contra PHP legado
+- [ ] Documentação README com:
+  - Como rodar tests
+  - Como adicionar novo provider
+  - Como adicionar novo endpoint
+- [ ] CI/CD pipeline configurado
+- [ ] Testes reutilizáveis para próximas linguagens (Go)
 
 ---
 
 ### **Fase 4: MATRIX — Criar Matrizes de Rastreamento YAML**
 
 **Story:** CASINO-2.4  
-**Duração Estimada:** 2-3 dias  
 **Status:** ⏳ PLANEJADO
 
 #### O que será feito
@@ -374,7 +554,6 @@ docs/casino-proxy/trace-matrices/
 ### **Fase 5: VALIDATE — Validação 100% de Testes PHP**
 
 **Story:** CASINO-2.5  
-**Duração Estimada:** 1-2 dias  
 **Status:** ⏳ PLANEJADO
 
 #### O que será feito
@@ -463,13 +642,13 @@ Implementar serviços Go que replicam 100% o comportamento do PHP, com infraestr
 
 ### Estrutura: 4 Fases
 
-| Fase | Stories | Duração | O que é Feito |
-|------|---------|---------|--------------|
-| **Fase 0: IaC** | CASINO-3.0 | 1-2 sem | Escolhe Terraform/CloudFormation, setup inicial |
-| **Fase 2: Architecture** | CASINO-3.1-3.4 | 2-3 sem | Design microservices + DB schema (PostgreSQL) |
-| **Fase 3: Implementation** | CASINO-3.5-3.11 | 8-10 sem | Implementa 8 serviços Go + gateway + admin API |
-| **Fase 4: Migration** | CASINO-3.12-3.16 | 3-4 sem | Migração dados + dual-write + tráfego gradual |
-| **Fase 5: Deploy** | CASINO-3.17-3.22 | 2-3 sem | Deploy híbrido + cutover final + decommission PHP |
+| Fase | Stories | O que é Feito |
+|------|---------|--------------|
+| **Fase 0: IaC** | CASINO-3.0 | Escolhe Terraform/CloudFormation, setup inicial |
+| **Fase 2: Architecture** | CASINO-3.1-3.4 | Design microservices + DB schema (PostgreSQL) |
+| **Fase 3: Implementation** | CASINO-3.5-3.11 | Implementa 8 serviços Go + gateway + admin API |
+| **Fase 4: Migration** | CASINO-3.12-3.16 | Migração dados + dual-write + tráfego gradual |
+| **Fase 5: Deploy** | CASINO-3.17-3.22 | Deploy híbrido + cutover final + decommission PHP |
 
 ### Como CASINO-2 Tests Guiam CASINO-3
 
@@ -500,7 +679,7 @@ validation report (100% pass)      →  Go tests devem igualar PHP tests 100%
 
 Use este checklist para cada um dos 7 providers restantes (Evolution Gaming até Alternar).
 
-#### Fase 1: EXTRACT (3-4 dias)
+#### Fase 1: EXTRACT
 
 **Entrada:** Código PHP handler do provider  
 **Saída:** Documento `phase-1-business-rules/{provider}-rules.md`
@@ -520,7 +699,7 @@ Use este checklist para cada um dos 7 providers restantes (Evolution Gaming até
 [Quais regras dependem de quais]
 ```
 
-#### Fase 2: DOCUMENT (4-5 dias por endpoint)
+#### Fase 2: DOCUMENT
 
 **Entrada:** Rules extraídas em Fase 1  
 **Saída:** Documento `phase-2-technical-documentation/{provider}-{endpoint}.md`
@@ -547,35 +726,19 @@ Use este checklist para cada um dos 7 providers restantes (Evolution Gaming até
 [Validações de segurança]
 ```
 
-**Para Pragmatic Play:** `/balance`, `/bet`, `/authenticate`, ... (9 endpoints)  
-**Estimativa:** ~40-50 horas para documentar todos os endpoints de um provider
+**Para Pragmatic Play:** `/balance`, `/bet`, `/authenticate`, ... (9 endpoints)
 
-#### Fase 3: TEST (5-7 dias)
+#### Fase 3: TEST
 
 **Entrada:** Documentação + Rules  
-**Saída:** `tests/php-oracle/{provider}Test.php`
+**Saída:** Módulo Java `casino-proxy-test-oracle/` com testes agnósticos
 
-```php
-<?php
-// tests/php-oracle/PragmaticPlayControllerTest.php
+Integra-se com o framework Java `casino-proxy-test-oracle/`:
+- Testes reutilizáveis contra PHP legado
+- Mesmos testes funcionam contra Go futuro (sem mudança de código)
+- WireMock simula respostas do provider externo
 
-class PragmaticPlayControllerTest extends TestCase
-{
-    // Testes para cada regra: 50+ test cases
-    public function test_br_generic_routing_validation_001() { ... }
-    public function test_br_generic_tenant_extraction_001() { ... }
-    // ... etc
-    
-    // Testes para cada endpoint
-    public function test_balance_endpoint_success() { ... }
-    public function test_balance_endpoint_missing_token() { ... }
-    // ... etc
-}
-```
-
-**Estimativa:** ~60-80 horas para 50+ testes
-
-#### Fase 4: MATRIX (2-3 dias)
+#### Fase 4: MATRIX
 
 **Entrada:** Rules + Code + Tests  
 **Saída:** `trace-matrices/{provider}-trace-matrix.yaml`
@@ -596,68 +759,59 @@ rules:
       lines: "TBD"
 ```
 
-#### Fase 5: VALIDATE (1-2 dias)
+#### Fase 5: VALIDATE
 
-**Entrada:** Testes + Codigo PHP  
+**Entrada:** Suite completa de testes Java + Sistema sob teste (PHP ou Go)  
 **Saída:** Relatório de validação + Gate GO/NO-GO
 
 ```bash
-# Executar testes Pragmatic Play
-$ phpunit tests/php-oracle/PragmaticPlayControllerTest.php
+# Executar suite completa de testes
+$ cd casino-proxy-test-oracle/
+$ mvn clean test -Dtest=PragmaticPlayRulesTest,PragmaticPlayEndpointsTest
 
 # Resultado esperado
-OK (50 tests)
+BUILD SUCCESS (50+ tests)
 
-# Se 100% pass → Gate: GO → Libera próximo provider
-# Se falhas → Fix → Re-run
+# Se 100% pass → Gate: GO → @po aprova → Libera próximo provider
+# Se falhas → Fix → Re-run → Loop até GO
 ```
 
 ---
 
 ## 6. Timeline Integrada (Visão Completa)
 
-### Semana-a-Semana
+### Fluxo de Execução
 
 ```
-SEMANA 1 (11-18 maio)
-├─ CASINO-2.1: Pragmatic Play Extract ✅
-├─ CASINO-2.2: Pragmatic Play Document /balance ✅
-├─ CASINO-2.3: Pragmatic Play Testes (em andamento)
-└─ CASINO-3.0: Planejamento IaC (paralelo, preparation)
+Ciclo CASINO-2: Pragmatic Play → Evolution Gaming → PG Soft → (Mancala, Digitain, Evoplay, OpenBox, Alternar)
 
-SEMANA 2 (18-25 maio)
-├─ CASINO-2.3: Pragmatic Play Testes ✅
-├─ CASINO-2.4: Pragmatic Play Matrices ✅
-├─ CASINO-2.5: Pragmatic Play Validation Gate (100% pass) ✅
-├─ @po aprova Pragmatic Play
-└─ CASINO-2.6: Evolution Gaming Extract (inicia)
+Pragmatic Play (Provider 1)
+├─ CASINO-2.1: Extract ✅
+├─ CASINO-2.2: Document ✅
+├─ CASINO-2.3: Test (em andamento)
+├─ CASINO-2.4: Matrix (planejado)
+├─ CASINO-2.5: Validate (planejado)
+└─ Gate: GO → @po aprova → próximo provider
 
-SEMANAS 3-6 (25 maio - 22 junho)
-├─ Semana 2: Evolution Gaming (fases 1-5)
-├─ Semana 3: PG Soft (fases 1-5)
-├─ Semana 4: Mancala (fases 1-5)
-├─ Semanas 5-6: Digitain, Evoplay, OpenBox, Alternar (5 fases cada)
-├─ @po valida cada provider antes de próximo
-└─ CASINO-2 100% completo (22 junho)
+Evolution Gaming (Provider 2)
+├─ CASINO-2.6: Extract (espera aprovação Pragmatic)
+├─ CASINO-2.7: Document
+├─ CASINO-2.8: Test
+├─ CASINO-2.9: Matrix
+├─ CASINO-2.10: Validate
+└─ Gate: GO → @po aprova → próximo provider
 
-SEMANA 7 (22-29 junho) - DESBLOQUEIO CASINO-3
-├─ CASINO-2 ✅ 100% com todas as validações passing
-├─ CASINO-3.0: IaC design + setup inicial (em paralelo desde semana 1)
-├─ CASINO-3.1-3.4: Architecture phase inicia
-└─ Pode começar implementação Go
+(Repetir para PG Soft, Mancala, Digitain, Evoplay, OpenBox, Alternar)
 
-SEMANAS 7-31 (29 junho - 27 novembro)
-├─ CASINO-3: 4 fases em paralelo com CASINO-2 Fases 2-5
-│  ├─ Semanas 7-9: IaC + Architecture (2-3 semanas)
-│  ├─ Semanas 10-19: Implementation (8-10 semanas)
-│  ├─ Semanas 20-23: Migration (3-4 semanas)
-│  └─ Semanas 24-27: Deployment & Cutover (2-3 semanas)
-└─ Resultado: 8 provedores em Go, PHP decommissioned
+Final: CASINO-2 100% Completo
+└─ Desbloqueia CASINO-3: Implementação Go em paralelo
 
-SEMANA 28+ (Pós-migração)
-├─ 30-day PHP standby period
-├─ Monitoring & alerting
-└─ Full operations em Go
+CASINO-3 Timeline
+├─ Fase 0: IaC design + setup (em paralelo com CASINO-2)
+├─ Fase 2: Architecture microservices + DB schema
+├─ Fase 3: Implementation (8 serviços Go + gateway + admin)
+├─ Fase 4: Database migration + dual-write
+└─ Fase 5: Deployment híbrido + cutover final → PHP decommissioned
 ```
 
 ---
