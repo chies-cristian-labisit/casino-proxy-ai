@@ -23,6 +23,34 @@ git push origin feature/my-feature  # ✅ Allowed
 
 **Documentation:** `.claude/rules/git-push-restrictions.md`
 
+---
+
+### `commit-msg`
+**Purpose:** Block commits with LLM (Claude, ChatGPT, etc) attribution
+
+**Behavior:**
+```bash
+git commit -m "feat: Add feature
+
+Co-Authored-By: Claude <claude@anthropic.com>"  # ❌ BLOCKED
+
+git commit -m "feat: Add feature
+
+Co-Authored-By: John Doe <john@example.com>"  # ✅ Allowed
+```
+
+**Location:** `.githooks/commit-msg`
+
+**Documentation:** `.claude/rules/git-commit-restrictions.md`
+
+**Blocked patterns:**
+- `Co-Authored-By: Claude`
+- `Co-Authored-By: ChatGPT`
+- `Co-Authored-By: Copilot`
+- `Co-Authored-By: Gemini`
+- `authored by: AI`
+- And others (see hook for full list)
+
 ## Adding New Hooks
 
 To add a new git hook (e.g., `commit-msg`):
