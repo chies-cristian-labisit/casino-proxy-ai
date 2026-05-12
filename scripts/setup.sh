@@ -153,10 +153,18 @@ fi
 echo ""
 
 ###############################################################################
-# Phase 4: Initialize Husky Git Hooks
+# Phase 4: Initialize Git Hooks (Custom + Husky)
 ###############################################################################
 
-log_step "Configuring Husky git hooks..."
+log_step "Configuring git hooks..."
+
+# Configure git to use .githooks for custom hooks (pre-push protection, etc)
+if [ -d ".githooks" ]; then
+    git config core.hooksPath .githooks > /dev/null 2>&1
+    log_success "Git configured to use .githooks hooks"
+else
+    log_warning ".githooks directory not found (custom hooks disabled)"
+fi
 
 # Install Husky if not already installed
 if ! grep -q '"husky"' package.json; then
@@ -174,9 +182,8 @@ else
     log_success "Husky initialized"
 fi
 
-# Configure git to use .husky
-git config core.hooksPath .husky > /dev/null 2>&1 || true
-log_success "Git configured to use .husky hooks"
+# Note: Both .githooks and .husky can coexist
+# git config core.hooksPath takes precedence if both exist
 
 echo ""
 
