@@ -24,6 +24,20 @@ Migrate **Casino Proxy** from monolithic Laravel PHP to a **microservices archit
 
 ## Project Analysis
 
+### ⚠️ Dynamic Routing Pattern
+
+**Important:** Several providers use dynamic endpoint routing where the actual endpoint is determined by the final path segment:
+- Pragmatic Play: `/pragmatic-play/{endpoint}` → actual endpoints are `/authenticate`, `/balance`, `/bet`, etc.
+- Mancala: `/mancala/{endpoint}` → actual endpoints are `/Balance`, `/Debit`, `/Credit`, etc.
+- Digitain: `/digitain-rgs/{endpoint}` → actual endpoints are `/authenticate`, `/getbalance`, `/bet`, etc.
+- PG Soft: `/pgsoft/{verb}` → actual endpoints are `/VerifySession`, `/Cash/Get`, etc.
+- Evolution: `/evolution/{verb}` → actual endpoints are `/authentication`, `/debit`, `/credit`, etc.
+- OpenBox: `/openbox/seamless/{verb}` → actual endpoints are `/balance`, `/bet`, `/win`, etc.
+
+OpenAPI specs document these as **specific endpoint paths** (no wildcards) since OpenAPI 3.0 doesn't support server-side routing resolution. When implementing Go services, ensure routing logic matches the PHP behavior of accepting and routing based on the final path segment.
+
+---
+
 ### Existing System Context
 
 **Current Technology Stack:**
@@ -57,29 +71,101 @@ Migrate **Casino Proxy** from monolithic Laravel PHP to a **microservices archit
 
 ### Current API Endpoints Inventory
 
+#### ⚠️ IMPORTANT NOTE: Dynamic Routing
+
+**Some providers use dynamic endpoint routing via path parameters** (e.g., `/pragmatic-play/{endpoint}`). These are documented in OpenAPI specs as **specific endpoint names** (e.g., `/pragmatic-play/authenticate`, `/pragmatic-play/balance`) rather than wildcards. The actual implementation routes based on the last path segment. Refer to individual provider specs for the complete endpoint list.
+
+---
+
 **Public API (v1):**
 ```
 POST   /v1/entry                                    - Session entry
 GET    /v1/status                                   - Health check
 POST   /v1/image                                    - Image upload
-
-Admin (internal):
-GET    /v1/internal/operator/                       - List operators
-POST   /v1/internal/operator/store                  - Create operator
-DELETE /v1/internal/operator/delete/{slug}         - Delete operator
-
-Webhooks (primary traffic):
-POST   /v1/webhooks/pragmatic-play/{endpoint}      - Pragmatic Play
-POST   /v1/webhooks/mancala/{endpoint}             - Mancala
-POST   /v1/webhooks/digitain-rgs/{endpoint}        - Digitain
-POST   /v1/webhooks/pgsoft/{verb}                  - PG Soft (4 methods)
-POST   /v1/webhooks/evoplay                        - Evoplay
-POST   /v1/webhooks/evolution/{verb}               - Evolution (5 methods)
-PUT    /v1/webhooks/openbox/seamless/{verb}        - OpenBox (4 methods)
-POST   /v1/webhooks/alternar/                      - Alternar
 ```
 
-**Analysis:** ❌ NO OpenAPI documentation exists. All endpoints must be reverse-engineered from controllers.
+**Admin API (v1/internal):**
+```
+GET    /v1/internal/operator/                       - List operators
+POST   /v1/internal/operator/store                 - Create operator
+DELETE /v1/internal/operator/delete/{slug}         - Delete operator
+GET    /v1/internal/credentials/                   - List provider credentials
+```
+
+**Pragmatic Play Webhooks (POST /v1/webhooks/pragmatic-play/{endpoint}):**
+```
+POST   /v1/webhooks/pragmatic-play/authenticate    - Authenticate player
+POST   /v1/webhooks/pragmatic-play/balance         - Get player balance
+POST   /v1/webhooks/pragmatic-play/bet             - Place bet
+POST   /v1/webhooks/pragmatic-play/refund          - Refund bet
+POST   /v1/webhooks/pragmatic-play/result          - Report game result
+POST   /v1/webhooks/pragmatic-play/adjustment      - Adjust balance
+POST   /v1/webhooks/pragmatic-play/bonusWin        - Bonus win notification
+POST   /v1/webhooks/pragmatic-play/jackpotWin      - Jackpot win notification
+POST   /v1/webhooks/pragmatic-play/promoWin        - Promotion win notification
+```
+
+**Evolution Gaming Webhooks (POST /v1/webhooks/evolution/{verb}):**
+```
+POST   /v1/webhooks/evolution/authentication       - Authenticate player
+POST   /v1/webhooks/evolution/debit                - Debit account
+POST   /v1/webhooks/evolution/credit               - Credit account
+POST   /v1/webhooks/evolution/rollback             - Rollback transaction
+POST   /v1/webhooks/evolution/getNewToken          - Get new session token
+```
+
+**PG Soft Webhooks (POST /v1/webhooks/pgsoft/{verb}):**
+```
+POST   /v1/webhooks/pgsoft/VerifySession           - Verify player session
+POST   /v1/webhooks/pgsoft/Cash/Get                - Get player balance
+POST   /v1/webhooks/pgsoft/Cash/TransferInOut      - Transfer funds
+POST   /v1/webhooks/pgsoft/Cash/Adjustment         - Adjust player balance
+```
+
+**Mancala Webhooks (POST /v1/webhooks/mancala/{endpoint}):**
+```
+POST   /v1/webhooks/mancala/Balance                - Get balance
+POST   /v1/webhooks/mancala/Debit                  - Debit account
+POST   /v1/webhooks/mancala/Credit                 - Credit account
+POST   /v1/webhooks/mancala/Refund                 - Refund transaction
+```
+
+**Digitain RGS Webhooks (POST /v1/webhooks/digitain-rgs/{endpoint}):**
+```
+POST   /v1/webhooks/digitain-rgs/authenticate      - Authenticate player
+POST   /v1/webhooks/digitain-rgs/getbalance        - Get player balance
+POST   /v1/webhooks/digitain-rgs/bet               - Place bet
+POST   /v1/webhooks/digitain-rgs/win               - Report win
+POST   /v1/webhooks/digitain-rgs/betwin            - Combined bet and win
+POST   /v1/webhooks/digitain-rgs/charge            - Charge player
+POST   /v1/webhooks/digitain-rgs/refund            - Refund transaction
+POST   /v1/webhooks/digitain-rgs/promowin          - Promotion win
+POST   /v1/webhooks/digitain-rgs/amend             - Amend transaction
+POST   /v1/webhooks/digitain-rgs/refreshtoken      - Refresh session token
+POST   /v1/webhooks/digitain-rgs/checktxstatus     - Check transaction status
+```
+
+**Evoplay Webhooks:**
+```
+POST   /v1/webhooks/evoplay                        - Generic webhook endpoint
+```
+
+**OpenBox Webhooks (PUT /v1/webhooks/openbox/seamless/{verb}):**
+```
+PUT    /v1/webhooks/openbox/seamless/balance       - Get player balance
+PUT    /v1/webhooks/openbox/seamless/bet           - Place bet
+PUT    /v1/webhooks/openbox/seamless/win           - Report win
+PUT    /v1/webhooks/openbox/seamless/refund        - Refund bet
+```
+
+**Alternar Webhooks:**
+```
+POST   /v1/webhooks/alternar/                      - Generic webhook endpoint
+```
+
+---
+
+**Analysis:** OpenAPI specs created for all 8 providers + admin API. See `docs/openapi/specs/` for complete specifications.
 
 ---
 
