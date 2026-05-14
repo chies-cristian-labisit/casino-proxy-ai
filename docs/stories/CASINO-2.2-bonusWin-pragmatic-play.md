@@ -3,7 +3,7 @@
 **Story ID:** CASINO-2.2-bonusWin  
 **Epic:** CASINO-2 (Business Rules Discovery & Test Oracle)  
 **Tipo:** Documentação Técnica (Fase 2 de 5 — Technical Documentation)  
-**Status:** Ready  
+**Status:** InReview  
 **Prioridade:** Alta  
 **Atribuído a:** @dev (com revisão de @architect)  
 **Relacionado:** CASINO-1.7, CASINO-2.2-result (Ready)  
@@ -66,19 +66,19 @@ Fase 2: Documentar endpoints
 
 ### Deve Ter
 
-- [ ] **AC-1:** Endpoint `/bonusWin` analisado — 9 regras BR-* confirmadas. Wrapper `bonusWin()` (~99-102) e delegação para `handleResult()` (~161-175) documentados
-- [ ] **AC-2:** Fluxo de 8 fases documentado com diagrama Mermaid renderizável
-- [ ] **AC-3:** 9 regras mapeadas às fases corretas — destaque para uso de `userId` (Fase 2) e passthrough de response (Fase 8)
-- [ ] **AC-4:** Mínimo 5 cenários de erro documentados com causa raiz e comportamento esperado
-- [ ] **AC-5:** Exemplo completo request → response mostrando sanitização do `userId` e passthrough da resposta
-- [ ] **AC-6:** Security checklist preenchido (tenant isolation, hash auth, operator/credential validation)
-- [ ] **AC-7:** Arquivo criado em `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bonusWin.md`
-- [ ] **AC-8:** File List desta story atualizada
+- [x] **AC-1:** Endpoint `/bonusWin` analisado — 9 regras BR-* confirmadas. Wrapper `bonusWin()` (~99-102) e delegação para `handleResult()` (~161-175) documentados
+- [x] **AC-2:** Fluxo de 8 fases documentado com diagrama Mermaid renderizável
+- [x] **AC-3:** 9 regras mapeadas às fases corretas — destaque para uso de `userId` (Fase 2) e passthrough de response (Fase 8)
+- [x] **AC-4:** Mínimo 5 cenários de erro documentados com causa raiz e comportamento esperado
+- [x] **AC-5:** Exemplo completo request → response mostrando sanitização do `userId` e passthrough da resposta
+- [x] **AC-6:** Security checklist preenchido (tenant isolation, hash auth, operator/credential validation)
+- [x] **AC-7:** Arquivo criado em `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bonusWin.md`
+- [x] **AC-8:** File List desta story atualizada
 
 ### Deveria Ter
 
-- [ ] **AC-9:** Seção de contexto de negócio explicando a diferença semântica entre `/result` (resultado de rodada) e `/bonusWin` (pagamento de bônus), e quando cada um é chamado
-- [ ] **AC-10:** Nota explícita de que `/bonusWin` é membro da família handleResult() com referência cruzada para `pragmatic-play-result.md`
+- [x] **AC-9:** Seção de contexto de negócio explicando a diferença semântica entre `/result` (resultado de rodada) e `/bonusWin` (pagamento de bônus), e quando cada um é chamado
+- [x] **AC-10:** Nota explícita de que `/bonusWin` é membro da família handleResult() com referência cruzada para `pragmatic-play-result.md`
 
 ### Fora do Escopo
 
@@ -177,18 +177,18 @@ O arquivo `pragmatic-play-bonusWin.md` deve seguir **exatamente** o template de 
 
 ## Tasks / Subtasks
 
-- [ ] **T-1:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md` — usar como template direto (estrutura idêntica)
-- [ ] **T-2:** Ler `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — confirmar regras e tabela de endpoints
-- [ ] **T-3:** Ler `legacy/casino-proxy/app/Services/PragmaticPlayService.php` método `bonusWin()` (~99-102) — confirmar delegação para handleResult()
-- [ ] **T-4:** Criar arquivo `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bonusWin.md`
-- [ ] **T-5:** Adaptar conteúdo de result.md — substituir referências result → bonusWin, ajustar URLs e linhas
-- [ ] **T-6:** Escrever Fluxo 8 Fases com diagrama Mermaid
-- [ ] **T-7:** Preencher Matriz de Regras (9 regras)
-- [ ] **T-8:** Documentar 5+ Cenários de Erro
-- [ ] **T-9:** Escrever exemplo completo request → response
-- [ ] **T-10:** Adicionar seção contextual result vs bonusWin
-- [ ] **T-11:** Preencher Security Checklist + Limites e Restrições
-- [ ] **T-12:** Atualizar File List desta story
+- [x] **T-1:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md` — usar como template direto (estrutura idêntica)
+- [x] **T-2:** Ler `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — confirmar regras e tabela de endpoints
+- [x] **T-3:** Ler `legacy/casino-proxy/app/Services/PragmaticPlayService.php` método `bonusWin()` (~99-102) — confirmar delegação para handleResult()
+- [x] **T-4:** Criar arquivo `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bonusWin.md`
+- [x] **T-5:** Adaptar conteúdo de result.md — substituir referências result → bonusWin, ajustar URLs e linhas
+- [x] **T-6:** Escrever Fluxo 8 Fases com diagrama Mermaid
+- [x] **T-7:** Preencher Matriz de Regras (9 regras)
+- [x] **T-8:** Documentar 5+ Cenários de Erro
+- [x] **T-9:** Escrever exemplo completo request → response
+- [x] **T-10:** Adicionar seção contextual result vs bonusWin
+- [x] **T-11:** Preencher Security Checklist + Limites e Restrições
+- [x] **T-12:** Atualizar File List desta story
 
 ---
 
@@ -229,7 +229,7 @@ behavior:
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bonusWin.md` | Documentação técnica do endpoint /bonusWin | ⏳ A Criar |
+| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bonusWin.md` | Documentação técnica do endpoint /bonusWin | ✅ Criado |
 
 ---
 
@@ -237,7 +237,7 @@ behavior:
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bonusWin.md` | Output principal desta story | ⏳ A Criar |
+| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bonusWin.md` | Output principal desta story | ✅ Criado |
 | `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | Fonte das 9 regras BR-* | ✅ Existe |
 | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md` | Template direto a seguir | ✅ Existe (Ready) |
 | `legacy/casino-proxy/app/Services/PragmaticPlayService.php` | Código fonte de referência | ✅ Existe |
@@ -246,15 +246,15 @@ behavior:
 
 ## Definição de Pronto
 
-- [ ] Arquivo `pragmatic-play-bonusWin.md` criado e completo
-- [ ] Diagrama Mermaid renderiza corretamente
-- [ ] `userId` como identificador documentado
-- [ ] Passthrough de response documentado (Fase 8)
-- [ ] URL de destino `bonusWin.html`
-- [ ] Linhas de código PHP corretas (wrapper ~99-102, handleResult() ~161-175)
-- [ ] Contexto result vs bonusWin presente
-- [ ] Security checklist preenchido
-- [ ] File List desta story atualizada
+- [x] Arquivo `pragmatic-play-bonusWin.md` criado e completo
+- [x] Diagrama Mermaid renderiza corretamente
+- [x] `userId` como identificador documentado
+- [x] Passthrough de response documentado (Fase 8)
+- [x] URL de destino `bonusWin.html`
+- [x] Linhas de código PHP corretas (wrapper ~99-102, handleResult() ~161-175)
+- [x] Contexto result vs bonusWin presente
+- [x] Security checklist preenchido
+- [x] File List desta story atualizada
 
 ---
 
@@ -290,3 +290,4 @@ behavior:
 |------|--------|------|
 | 2026-05-12 | @sm (River) | Story criada — Draft |
 | 2026-05-12 | @po (Pax) | Validação GO (9/10) — Status: Draft → Ready. Story completa; contexto de negócio bônus documentado. |
+| 2026-05-14 | @dev (Dex) | Implementação completa — `pragmatic-play-bonusWin.md` criado (9 seções, 6 cenários de erro, exemplo completo, tabela comparativa result vs bonusWin). Todos T-1..T-12 concluídos. Status: InReview. |

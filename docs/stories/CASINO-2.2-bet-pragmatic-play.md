@@ -3,7 +3,7 @@
 **Story ID:** CASINO-2.2-bet  
 **Epic:** CASINO-2 (Business Rules Discovery & Test Oracle)  
 **Tipo:** Documentação Técnica (Fase 2 de 5 — Technical Documentation)  
-**Status:** Ready  
+**Status:** InReview  
 **Prioridade:** Alta  
 **Atribuído a:** @dev (com revisão de @architect)  
 **Relacionado:** CASINO-1.7 (Regras de Negócio Pragmatic Play), CASINO-2.2-authenticate (story anterior da Fase 2)  
@@ -61,19 +61,19 @@ Fase 2: Documentar endpoints
 
 ### Deve Ter
 
-- [ ] **AC-1:** Endpoint `/bet` analisado — 9 regras BR-* identificadas e confirmadas contra `PragmaticPlayService.php` (método `bet()`, linhas ~64-77)
-- [ ] **AC-2:** Fluxo de 8 fases documentado com diagrama Mermaid renderizável
-- [ ] **AC-3:** 9 regras mapeadas às fases corretas — destaque para uso de `userId` (Fase 2) e passthrough de response (Fase 8)
-- [ ] **AC-4:** Mínimo 5 cenários de erro documentados com causa raiz e comportamento esperado
-- [ ] **AC-5:** Exemplo completo request → response mostrando sanitização do `userId` e passthrough da resposta
-- [ ] **AC-6:** Security checklist preenchido (tenant isolation, hash auth, operator/credential validation, endpoint validation)
-- [ ] **AC-7:** Arquivo criado em `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md`
-- [ ] **AC-8:** File List desta story atualizada
+- [x] **AC-1:** Endpoint `/bet` analisado — 9 regras BR-* identificadas e confirmadas contra `PragmaticPlayService.php` (método `bet()`, linhas ~64-77)
+- [x] **AC-2:** Fluxo de 8 fases documentado com diagrama Mermaid renderizável
+- [x] **AC-3:** 9 regras mapeadas às fases corretas — destaque para uso de `userId` (Fase 2) e passthrough de response (Fase 8)
+- [x] **AC-4:** Mínimo 5 cenários de erro documentados com causa raiz e comportamento esperado
+- [x] **AC-5:** Exemplo completo request → response mostrando sanitização do `userId` e passthrough da resposta
+- [x] **AC-6:** Security checklist preenchido (tenant isolation, hash auth, operator/credential validation, endpoint validation)
+- [x] **AC-7:** Arquivo criado em `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md`
+- [x] **AC-8:** File List desta story atualizada
 
 ### Deveria Ter
 
-- [ ] **AC-9:** Tabela comparativa `/bet` vs `/authenticate` vs `/balance` — destacar que /bet é o padrão canônico de transação
-- [ ] **AC-10:** Nota sobre `/bet` como modelo para `/refund`, `/result`, `/bonusWin`, `/jackpotWin`, `/promoWin` — indicar quais partes serão idênticas
+- [x] **AC-9:** Tabela comparativa `/bet` vs `/authenticate` vs `/balance` — destacar que /bet é o padrão canônico de transação
+- [x] **AC-10:** Nota sobre `/bet` como modelo para `/refund`, `/result`, `/bonusWin`, `/jackpotWin`, `/promoWin` — indicar quais partes serão idênticas
 
 ### Fora do Escopo
 
@@ -179,19 +179,19 @@ O arquivo `pragmatic-play-bet.md` deve seguir o template de `pragmatic-play-bala
 
 > Sequência de implementação para @dev
 
-- [ ] **T-1:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md` — usar como template base
-- [ ] **T-2:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md` — consultar seção de diferenças
-- [ ] **T-3:** Ler `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — confirmar regras 001-009, 011
-- [ ] **T-4:** Ler `legacy/casino-proxy/app/Services/PragmaticPlayService.php` método `bet()` (linhas ~64-77)
-- [ ] **T-5:** Criar arquivo `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md`
-- [ ] **T-6:** Escrever Header + Resumo Executivo (destacar: padrão canônico de transação, modelo para próximos 5)
-- [ ] **T-7:** Escrever Fluxo 8 Fases com diagrama Mermaid (Fase 2 = userId; Fase 8 = passthrough)
-- [ ] **T-8:** Preencher Matriz de Regras (9 regras × fase × exclusiva?)
-- [ ] **T-9:** Documentar 5+ Cenários de Erro
-- [ ] **T-10:** Escrever exemplo completo request → response
-- [ ] **T-11:** Adicionar tabela comparativa /bet vs /authenticate vs /balance
-- [ ] **T-12:** Preencher Security Checklist + Limites e Restrições
-- [ ] **T-13:** Atualizar File List desta story
+- [x] **T-1:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md` — usar como template base
+- [x] **T-2:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md` — consultar seção de diferenças
+- [x] **T-3:** Ler `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — confirmar regras 001-009, 011
+- [x] **T-4:** Ler `legacy/casino-proxy/app/Services/PragmaticPlayService.php` método `bet()` (linhas ~64-77)
+- [x] **T-5:** Criar arquivo `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md`
+- [x] **T-6:** Escrever Header + Resumo Executivo (destacar: padrão canônico de transação, modelo para próximos 5)
+- [x] **T-7:** Escrever Fluxo 8 Fases com diagrama Mermaid (Fase 2 = userId; Fase 8 = passthrough)
+- [x] **T-8:** Preencher Matriz de Regras (9 regras × fase × exclusiva?)
+- [x] **T-9:** Documentar 5+ Cenários de Erro
+- [x] **T-10:** Escrever exemplo completo request → response
+- [x] **T-11:** Adicionar tabela comparativa /bet vs /authenticate vs /balance
+- [x] **T-12:** Preencher Security Checklist + Limites e Restrições
+- [x] **T-13:** Atualizar File List desta story
 
 ---
 
@@ -232,7 +232,7 @@ behavior:
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` | Documentação técnica do endpoint /bet | ⏳ A Criar |
+| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` | Documentação técnica do endpoint /bet | ✅ Criado |
 
 ### Templates de Referência
 
@@ -247,7 +247,7 @@ docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` | Output principal desta story | ⏳ A Criar |
+| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` | Output principal desta story | ✅ Criado |
 | `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | Fonte das 9 regras BR-* | ✅ Existe |
 | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md` | Template base | ✅ Existe |
 | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md` | Referência de comparação | ✅ Existe (Ready) |
@@ -257,14 +257,14 @@ docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md
 
 ## Definição de Pronto
 
-- [ ] Arquivo `pragmatic-play-bet.md` criado e completo
-- [ ] Diagrama Mermaid renderiza corretamente (8 fases visíveis)
-- [ ] Uso de `userId` (não `token`) claramente documentado na Fase 2
-- [ ] Passthrough de response documentado na Fase 8 (sem transformação)
-- [ ] Tabela comparativa /bet vs /authenticate vs /balance presente
-- [ ] Security checklist preenchido
-- [ ] File List desta story atualizada
-- [ ] Pronto para validação de @po antes de documentar próximo endpoint (/refund)
+- [x] Arquivo `pragmatic-play-bet.md` criado e completo
+- [x] Diagrama Mermaid renderiza corretamente (8 fases visíveis)
+- [x] Uso de `userId` (não `token`) claramente documentado na Fase 2
+- [x] Passthrough de response documentado na Fase 8 (sem transformação)
+- [x] Tabela comparativa /bet vs /authenticate vs /balance presente
+- [x] Security checklist preenchido
+- [x] File List desta story atualizada
+- [x] Pronto para validação de @po antes de documentar próximo endpoint (/refund)
 
 ---
 
@@ -301,3 +301,4 @@ docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md
 |------|--------|------|
 | 2026-05-12 | @sm (River) | Story criada — Draft |
 | 2026-05-12 | @po (Pax) | Validação GO (9/10) — Status: Draft → Ready. Corrigida coluna "Regras exclusivas" → "Regras notáveis" na tabela comparativa. |
+| 2026-05-14 | @dev (Dex) | Implementação completa — `pragmatic-play-bet.md` criado (9 seções, 6 cenários de erro, exemplo completo, tabela comparativa 3-way, nota de modelo para 5 endpoints). Todos T-1..T-13 concluídos. Status: InReview. |
