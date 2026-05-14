@@ -3,7 +3,7 @@
 **Story ID:** CASINO-2.2-adjustment  
 **Epic:** CASINO-2 (Business Rules Discovery & Test Oracle)  
 **Tipo:** Documentação Técnica (Fase 2 de 5 — Technical Documentation)  
-**Status:** Ready  
+**Status:** InReview  
 **Prioridade:** Alta  
 **Atribuído a:** @dev (com revisão de @architect)  
 **Relacionado:** CASINO-1.7, CASINO-2.2-promoWin, CASINO-2.2-bet (Ready)  
@@ -66,19 +66,19 @@ Fase 2: Documentar endpoints
 
 ### Deve Ter
 
-- [ ] **AC-1:** Endpoint `/adjustment` analisado — 9 regras BR-* confirmadas contra `PragmaticPlayService.php` (método `adjustment()`, linhas ~114-127, userId em linha ~120)
-- [ ] **AC-2:** Fluxo de 8 fases documentado com diagrama Mermaid renderizável
-- [ ] **AC-3:** 9 regras mapeadas às fases corretas — destaque para uso de `userId` (Fase 2) e passthrough de response (Fase 8)
-- [ ] **AC-4:** Mínimo 5 cenários de erro documentados com causa raiz e comportamento esperado
-- [ ] **AC-5:** Exemplo completo request → response mostrando sanitização do `userId` e passthrough da resposta
-- [ ] **AC-6:** Security checklist preenchido (tenant isolation, hash auth, operator/credential validation)
-- [ ] **AC-7:** Arquivo criado em `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md`
-- [ ] **AC-8:** File List desta story atualizada
+- [x] **AC-1:** Endpoint `/adjustment` analisado — 9 regras BR-* confirmadas contra `PragmaticPlayService.php` (método `adjustment()`, linhas ~114-127, userId em linha ~120)
+- [x] **AC-2:** Fluxo de 8 fases documentado com diagrama Mermaid renderizável
+- [x] **AC-3:** 9 regras mapeadas às fases corretas — destaque para uso de `userId` (Fase 2) e passthrough de response (Fase 8)
+- [x] **AC-4:** Mínimo 5 cenários de erro documentados com causa raiz e comportamento esperado
+- [x] **AC-5:** Exemplo completo request → response mostrando sanitização do `userId` e passthrough da resposta
+- [x] **AC-6:** Security checklist preenchido (tenant isolation, hash auth, operator/credential validation)
+- [x] **AC-7:** Arquivo criado em `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md`
+- [x] **AC-8:** File List desta story atualizada
 
 ### Deveria Ter
 
-- [ ] **AC-9:** Seção de contexto de negócio explicando: quando `/adjustment` é chamado, quem o inicia (operador vs. provider), e distinção de todos os outros endpoints (ajuste administrativo vs. evento de jogo)
-- [ ] **AC-10:** Nota explícita de que `/adjustment` é standalone (lógica inline) — não usa handleResult() — com referência ao grupo bet/refund/adjustment como padrão de lógica inline
+- [x] **AC-9:** Seção de contexto de negócio explicando: quando `/adjustment` é chamado, quem o inicia (operador vs. provider), e distinção de todos os outros endpoints (ajuste administrativo vs. evento de jogo)
+- [x] **AC-10:** Nota explícita de que `/adjustment` é standalone (lógica inline) — não usa handleResult() — com referência ao grupo bet/refund/adjustment como padrão de lógica inline
 
 ### Fora do Escopo
 
@@ -204,18 +204,18 @@ O arquivo `pragmatic-play-adjustment.md` deve seguir o template de `pragmatic-pl
 
 ## Tasks / Subtasks
 
-- [ ] **T-1:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` — usar como template direto (lógica inline idêntica)
-- [ ] **T-2:** Ler `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — confirmar regras e tabela de endpoints (adjustment)
-- [ ] **T-3:** Ler `legacy/casino-proxy/app/Services/PragmaticPlayService.php` método `adjustment()` (linhas ~114-127) — confirmar lógica inline e userId em ~120
-- [ ] **T-4:** Criar arquivo `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md`
-- [ ] **T-5:** Adaptar conteúdo de bet.md — substituir referências bet → adjustment, ajustar URLs e linhas de código
-- [ ] **T-6:** Escrever Fluxo 8 Fases com diagrama Mermaid
-- [ ] **T-7:** Preencher Matriz de Regras (9 regras)
-- [ ] **T-8:** Documentar 5+ Cenários de Erro
-- [ ] **T-9:** Escrever exemplo completo request → response
-- [ ] **T-10:** Adicionar seção contexto de negócio (ajuste administrativo, iniciado por operador) + tabela de grupos de implementação dos 9 endpoints
-- [ ] **T-11:** Preencher Security Checklist + Limites e Restrições
-- [ ] **T-12:** Atualizar File List desta story
+- [x] **T-1:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` — usar como template direto (lógica inline idêntica)
+- [x] **T-2:** Ler `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — confirmar regras e tabela de endpoints (adjustment)
+- [x] **T-3:** Ler `legacy/casino-proxy/app/Services/PragmaticPlayService.php` método `adjustment()` (linhas ~114-127) — confirmar lógica inline e userId em ~120
+- [x] **T-4:** Criar arquivo `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md`
+- [x] **T-5:** Adaptar conteúdo de bet.md — substituir referências bet → adjustment, ajustar URLs e linhas de código
+- [x] **T-6:** Escrever Fluxo 8 Fases com diagrama Mermaid
+- [x] **T-7:** Preencher Matriz de Regras (9 regras)
+- [x] **T-8:** Documentar 5+ Cenários de Erro
+- [x] **T-9:** Escrever exemplo completo request → response
+- [x] **T-10:** Adicionar seção contexto de negócio (ajuste administrativo, iniciado por operador) + tabela de grupos de implementação dos 9 endpoints
+- [x] **T-11:** Preencher Security Checklist + Limites e Restrições
+- [x] **T-12:** Atualizar File List desta story
 
 ---
 
@@ -257,7 +257,7 @@ behavior:
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` | Documentação técnica do endpoint /adjustment | ⏳ A Criar |
+| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` | Documentação técnica do endpoint /adjustment | ✅ Criado |
 
 ---
 
@@ -265,7 +265,7 @@ behavior:
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` | Output principal desta story | ⏳ A Criar |
+| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` | Output principal desta story | ✅ Criado |
 | `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | Fonte das 9 regras BR-* | ✅ Existe |
 | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` | Template direto a seguir | ✅ Existe (Ready) |
 | `legacy/casino-proxy/app/Services/PragmaticPlayService.php` | Código fonte de referência | ✅ Existe |
@@ -274,16 +274,16 @@ behavior:
 
 ## Definição de Pronto
 
-- [ ] Arquivo `pragmatic-play-adjustment.md` criado e completo
-- [ ] Diagrama Mermaid renderiza corretamente
-- [ ] `userId` como identificador documentado (linha PHP ~120)
-- [ ] Passthrough de response documentado (Fase 8)
-- [ ] URL de destino `adjustment.html`
-- [ ] Linhas de código PHP corretas (~114-127)
-- [ ] Contexto de negócio administrativo presente (distinção de evento de jogo)
-- [ ] Tabela de grupos dos 9 endpoints presente
-- [ ] Security checklist preenchido
-- [ ] File List desta story atualizada
+- [x] Arquivo `pragmatic-play-adjustment.md` criado e completo
+- [x] Diagrama Mermaid renderiza corretamente
+- [x] `userId` como identificador documentado (linha PHP ~120)
+- [x] Passthrough de response documentado (Fase 8)
+- [x] URL de destino `adjustment.html`
+- [x] Linhas de código PHP corretas (~114-127)
+- [x] Contexto de negócio administrativo presente (distinção de evento de jogo)
+- [x] Tabela de grupos dos 9 endpoints presente
+- [x] Security checklist preenchido
+- [x] File List desta story atualizada
 
 ---
 
@@ -320,3 +320,4 @@ behavior:
 |------|--------|------|
 | 2026-05-12 | @sm (River) | Story criada — Draft |
 | 2026-05-12 | @po (Pax) | Validação GO (9/10) — Status: Draft → Ready. Fecha Fase 2; tabela de grupos dos 9 endpoints e contexto administrativo exigidos em ACs. |
+| 2026-05-14 | @dev (Dex) | Implementação completa — `pragmatic-play-adjustment.md` criado (10 seções, 6 cenários, tabela de grupos dos 9 endpoints, nota standalone/não-handleResult(), encerramento Fase 2). Todos T-1..T-12 concluídos. Status: InReview. |
