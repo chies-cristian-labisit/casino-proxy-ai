@@ -3,7 +3,7 @@
 **Story ID:** CASINO-2.2-refund  
 **Epic:** CASINO-2 (Business Rules Discovery & Test Oracle)  
 **Tipo:** Documentação Técnica (Fase 2 de 5 — Technical Documentation)  
-**Status:** Ready  
+**Status:** InReview  
 **Prioridade:** Alta  
 **Atribuído a:** @dev (com revisão de @architect)  
 **Relacionado:** CASINO-1.7, CASINO-2.2-authenticate (Ready), CASINO-2.2-bet (Ready)  
@@ -62,19 +62,19 @@ Fase 2: Documentar endpoints
 
 ### Deve Ter
 
-- [ ] **AC-1:** Endpoint `/refund` analisado — 9 regras BR-* confirmadas contra `PragmaticPlayService.php` (método `refund()`, linhas ~79-92)
-- [ ] **AC-2:** Fluxo de 8 fases documentado com diagrama Mermaid renderizável
-- [ ] **AC-3:** 9 regras mapeadas às fases corretas — destaque para uso de `userId` (Fase 2) e passthrough de response (Fase 8)
-- [ ] **AC-4:** Mínimo 5 cenários de erro documentados com causa raiz e comportamento esperado
-- [ ] **AC-5:** Exemplo completo request → response mostrando sanitização do `userId` e passthrough da resposta
-- [ ] **AC-6:** Security checklist preenchido (tenant isolation, hash auth, operator/credential validation)
-- [ ] **AC-7:** Arquivo criado em `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-refund.md`
-- [ ] **AC-8:** File List desta story atualizada
+- [x] **AC-1:** Endpoint `/refund` analisado — 9 regras BR-* confirmadas contra `PragmaticPlayService.php` (método `refund()`, linhas ~79-92)
+- [x] **AC-2:** Fluxo de 8 fases documentado com diagrama Mermaid renderizável
+- [x] **AC-3:** 9 regras mapeadas às fases corretas — destaque para uso de `userId` (Fase 2) e passthrough de response (Fase 8)
+- [x] **AC-4:** Mínimo 5 cenários de erro documentados com causa raiz e comportamento esperado
+- [x] **AC-5:** Exemplo completo request → response mostrando sanitização do `userId` e passthrough da resposta
+- [x] **AC-6:** Security checklist preenchido (tenant isolation, hash auth, operator/credential validation)
+- [x] **AC-7:** Arquivo criado em `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-refund.md`
+- [x] **AC-8:** File List desta story atualizada
 
 ### Deveria Ter
 
-- [ ] **AC-9:** Seção de contexto de negócio explicando a relação bet ↔ refund (par transacional) e quando cada um é chamado
-- [ ] **AC-10:** Nota explícita de que `/refund` é estruturalmente idêntico ao `/bet`, servindo de confirmação do padrão canônico
+- [x] **AC-9:** Seção de contexto de negócio explicando a relação bet ↔ refund (par transacional) e quando cada um é chamado
+- [x] **AC-10:** Nota explícita de que `/refund` é estruturalmente idêntico ao `/bet`, servindo de confirmação do padrão canônico
 
 ### Fora do Escopo
 
@@ -169,18 +169,18 @@ O arquivo `pragmatic-play-refund.md` deve seguir **exatamente** o template de `p
 
 > Sequência de implementação para @dev
 
-- [ ] **T-1:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` — usar como template direto (estrutura idêntica)
-- [ ] **T-2:** Ler `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — confirmar regras aplicáveis ao refund
-- [ ] **T-3:** Ler `legacy/casino-proxy/app/Services/PragmaticPlayService.php` método `refund()` (linhas ~79-92) — confirmar identidade com bet()
-- [ ] **T-4:** Criar arquivo `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-refund.md`
-- [ ] **T-5:** Adaptar conteúdo de bet.md — substituir referências bet → refund, ajustar URLs e linhas de código
-- [ ] **T-6:** Escrever Fluxo 8 Fases com diagrama Mermaid
-- [ ] **T-7:** Preencher Matriz de Regras (9 regras)
-- [ ] **T-8:** Documentar 5+ Cenários de Erro
-- [ ] **T-9:** Escrever exemplo completo request → response
-- [ ] **T-10:** Adicionar seção contextual bet↔refund (par transacional)
-- [ ] **T-11:** Preencher Security Checklist + Limites e Restrições
-- [ ] **T-12:** Atualizar File List desta story
+- [x] **T-1:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` — usar como template direto (estrutura idêntica)
+- [x] **T-2:** Ler `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — confirmar regras aplicáveis ao refund
+- [x] **T-3:** Ler `legacy/casino-proxy/app/Services/PragmaticPlayService.php` método `refund()` (linhas ~79-92) — confirmar identidade com bet()
+- [x] **T-4:** Criar arquivo `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-refund.md`
+- [x] **T-5:** Adaptar conteúdo de bet.md — substituir referências bet → refund, ajustar URLs e linhas de código
+- [x] **T-6:** Escrever Fluxo 8 Fases com diagrama Mermaid
+- [x] **T-7:** Preencher Matriz de Regras (9 regras)
+- [x] **T-8:** Documentar 5+ Cenários de Erro
+- [x] **T-9:** Escrever exemplo completo request → response
+- [x] **T-10:** Adicionar seção contextual bet↔refund (par transacional)
+- [x] **T-11:** Preencher Security Checklist + Limites e Restrições
+- [x] **T-12:** Atualizar File List desta story
 
 ---
 
@@ -221,7 +221,7 @@ behavior:
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-refund.md` | Documentação técnica do endpoint /refund | ⏳ A Criar |
+| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-refund.md` | Documentação técnica do endpoint /refund | ✅ Criado |
 
 ### Template de Referência
 
@@ -236,7 +236,7 @@ docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-refund.md` | Output principal desta story | ⏳ A Criar |
+| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-refund.md` | Output principal desta story | ✅ Criado |
 | `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | Fonte das 9 regras BR-* | ✅ Existe |
 | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` | Template direto a seguir | ✅ Existe (Ready) |
 | `legacy/casino-proxy/app/Services/PragmaticPlayService.php` | Código fonte de referência | ✅ Existe |
@@ -245,15 +245,15 @@ docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md
 
 ## Definição de Pronto
 
-- [ ] Arquivo `pragmatic-play-refund.md` criado e completo
-- [ ] Diagrama Mermaid renderiza corretamente
-- [ ] `userId` como identificador documentado (não `token`)
-- [ ] Passthrough de response documentado (Fase 8)
-- [ ] Seção contexto bet↔refund presente
-- [ ] URL de destino `refund.html` (não `bet.html`)
-- [ ] Linhas de código PHP corretas (~79-92)
-- [ ] Security checklist preenchido
-- [ ] File List desta story atualizada
+- [x] Arquivo `pragmatic-play-refund.md` criado e completo
+- [x] Diagrama Mermaid renderiza corretamente
+- [x] `userId` como identificador documentado (não `token`)
+- [x] Passthrough de response documentado (Fase 8)
+- [x] Seção contexto bet↔refund presente
+- [x] URL de destino `refund.html` (não `bet.html`)
+- [x] Linhas de código PHP corretas (~79-92)
+- [x] Security checklist preenchido
+- [x] File List desta story atualizada
 
 ---
 
@@ -290,3 +290,4 @@ docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md
 |------|--------|------|
 | 2026-05-12 | @sm (River) | Story criada — Draft |
 | 2026-05-12 | @po (Pax) | Validação GO (9/10) — Status: Draft → Ready. Story completa e rastreável; riscos de copy-paste cobertos no CodeRabbit Focus Areas. |
+| 2026-05-14 | @dev (Dex) | Implementação completa — `pragmatic-play-refund.md` criado (9 seções, 6 cenários de erro, exemplo completo, seção contexto bet↔refund com side-by-side PHP, tabela ciclo transacional). Todos T-1..T-12 concluídos. Status: InReview. |
