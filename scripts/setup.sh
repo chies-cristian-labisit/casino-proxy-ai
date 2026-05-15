@@ -124,7 +124,7 @@ if [ -d ".aiox-core" ]; then
 fi
 
 # Install AIOX with --quiet flag for non-interactive CI/CD compatibility
-if npx aiox-core install --quiet; then
+if npx -y -p @aiox-squads/core@5.2.5 aiox install --quiet --force; then
     log_success "AIOX core framework installed"
 else
     log_error "Failed to install AIOX core framework"
@@ -153,18 +153,10 @@ fi
 echo ""
 
 ###############################################################################
-# Phase 4: Initialize Git Hooks (Custom + Husky)
+# Phase 4: Initialize Husky Git Hooks
 ###############################################################################
 
-log_step "Configuring git hooks..."
-
-# Configure git to use .githooks for custom hooks (pre-push protection, etc)
-if [ -d ".githooks" ]; then
-    git config core.hooksPath .githooks > /dev/null 2>&1
-    log_success "Git configured to use .githooks hooks"
-else
-    log_warning ".githooks directory not found (custom hooks disabled)"
-fi
+log_step "Configuring Husky git hooks..."
 
 # Install Husky if not already installed
 if ! grep -q '"husky"' package.json; then
@@ -182,8 +174,9 @@ else
     log_success "Husky initialized"
 fi
 
-# Note: Both .githooks and .husky can coexist
-# git config core.hooksPath takes precedence if both exist
+# Configure git to use .husky
+git config core.hooksPath .husky > /dev/null 2>&1 || true
+log_success "Git configured to use .husky hooks"
 
 echo ""
 
@@ -196,7 +189,7 @@ log_step "Verifying installation..."
 # Run AIOX doctor
 if command -v npx &> /dev/null; then
     echo ""
-    if npx aiox-core doctor; then
+    if npx -y -p @aiox-squads/core@5.2.5 aiox doctor; then
         log_success "System verification passed"
     else
         log_warning "AIOX doctor reported warnings (see above)"

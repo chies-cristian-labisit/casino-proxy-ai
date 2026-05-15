@@ -12,7 +12,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/infrastructure/database"
+	"github.com/cometagaming/ms-casino-go-v2/internal/infrastructure/database"
 )
 
 var (

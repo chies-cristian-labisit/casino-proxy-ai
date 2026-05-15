@@ -80,8 +80,8 @@ func TestLoad_AllRequiredVarsSet_Defaults(t *testing.T) {
 	if cfg.Port != "8081" {
 		t.Errorf("expected default Port=8081, got %s", cfg.Port)
 	}
-	if cfg.KafkaGroupID != "casino-proxy-ai" {
-		t.Errorf("expected default KafkaGroupID=casino-proxy-ai, got %s", cfg.KafkaGroupID)
+	if cfg.KafkaGroupID != "ms-casino-go-v2" {
+		t.Errorf("expected default KafkaGroupID=ms-casino-go-v2, got %s", cfg.KafkaGroupID)
 	}
 	if cfg.KafkaWorkers != 5 {
 		t.Errorf("expected default KafkaWorkers=5, got %d", cfg.KafkaWorkers)

@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: "ms-casino-go-v2-pdb"
+  namespace: "default"
+  labels:
+    app: "ms-casino-go-v2"
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      app: "ms-casino-go-v2"

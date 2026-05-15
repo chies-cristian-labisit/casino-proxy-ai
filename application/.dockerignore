@@ -1,0 +1,25 @@
+# Git
+.git
+.gitignore
+
+# Environment files — never bake into the image
+.env
+.env.local
+.env.*
+
+# Test artefacts
+tests/
+
+# Documentation
+*.md
+LOCAL_DEVELOPMENT.md
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Go build cache
+tmp/

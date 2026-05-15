@@ -2,12 +2,14 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 )
 
 type Config struct {
 	Port               string
+	LogLevel           slog.Level
 	DatabaseURL        string
 	KafkaBrokers       string
 	KafkaTopic         string
@@ -15,6 +17,7 @@ type Config struct {
 	KafkaWorkers       int
 	IdempotencyLockTTL int
 	AppEnv             string
+	Datadog            *DatadogConfig
 }
 
 func Load() (*Config, error) {
@@ -36,15 +39,22 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("missing required environment variables: %v", missing)
 	}
 
+	logLevel, err := ParseLogLevel()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
 		Port:               getEnvOrDefault("PORT", "8081"),
+		LogLevel:           logLevel,
 		DatabaseURL:        dbURL,
 		KafkaBrokers:       kafkaBrokers,
 		KafkaTopic:         kafkaTopic,
-		KafkaGroupID:       getEnvOrDefault("KAFKA_GROUP_ID", "casino-proxy-ai"),
+		KafkaGroupID:       getEnvOrDefault("KAFKA_GROUP_ID", "ms-casino-go-v2"),
 		KafkaWorkers:       mustAtoi(getEnvOrDefault("KAFKA_WORKERS", "5")),
 		IdempotencyLockTTL: mustAtoi(getEnvOrDefault("IDEMPOTENCY_LOCK_TTL", "30")),
 		AppEnv:             getEnvOrDefault("APP_ENV", "development"),
+		Datadog:            loadDatadogConfig(),
 	}, nil
 }
 

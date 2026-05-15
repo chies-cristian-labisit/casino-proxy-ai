@@ -15,12 +15,12 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/adapter/http/handler"
-	"github.com/cometagaming/casino-proxy-ai/internal/adapter/http/router"
-	kafkaadapter "github.com/cometagaming/casino-proxy-ai/internal/adapter/kafka"
-	"github.com/cometagaming/casino-proxy-ai/internal/infrastructure/database"
-	"github.com/cometagaming/casino-proxy-ai/internal/infrastructure/idempotency"
-	"github.com/cometagaming/casino-proxy-ai/internal/usecase"
+	"github.com/cometagaming/ms-casino-go-v2/internal/adapter/http/handler"
+	"github.com/cometagaming/ms-casino-go-v2/internal/adapter/http/router"
+	kafkaadapter "github.com/cometagaming/ms-casino-go-v2/internal/adapter/kafka"
+	"github.com/cometagaming/ms-casino-go-v2/internal/infrastructure/database"
+	"github.com/cometagaming/ms-casino-go-v2/internal/infrastructure/idempotency"
+	"github.com/cometagaming/ms-casino-go-v2/internal/usecase"
 	"testing"
 )
 

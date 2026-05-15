@@ -6,8 +6,8 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/domain"
-	"github.com/cometagaming/casino-proxy-ai/internal/usecase"
+	"github.com/cometagaming/ms-casino-go-v2/internal/domain"
+	"github.com/cometagaming/ms-casino-go-v2/internal/usecase"
 )
 
 var _ usecase.CustomerRepository = (*CustomerRepository)(nil)

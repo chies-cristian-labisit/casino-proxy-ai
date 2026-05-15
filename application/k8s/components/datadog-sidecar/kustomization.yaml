@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: "ms-casino-go-v2"
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/-
+        value:
+          name: datadog-agent
+          image: gcr.io/datadoghq/agent:7
+          env:
+            - name: DD_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "ms-casino-go-v2-secrets"
+                  key: DATADOG_API_KEY
+            - name: DD_SITE
+              value: "datadoghq.com"
+            - name: DD_CONTAINER_COLLECT_ALL
+              value: "true"
+            - name: DD_LOGS_ENABLED
+              value: "true"
+          volumeMounts:
+            - name: dockersocket
+              mountPath: /var/run/docker.sock
+      - op: add
+        path: /spec/template/spec/volumes/-
+        value:
+          name: dockersocket
+          hostPath:
+            path: /var/run/docker.sock

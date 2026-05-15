@@ -7,9 +7,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/adapter/http/handler"
-	"github.com/cometagaming/casino-proxy-ai/internal/domain"
 	"github.com/gofiber/fiber/v2"
+	"github.com/cometagaming/ms-casino-go-v2/internal/adapter/http/handler"
+	"github.com/cometagaming/ms-casino-go-v2/internal/adapter/http/router"
+	"github.com/cometagaming/ms-casino-go-v2/internal/domain"
 )
 
 // mockCustomerRepo satisfies usecase.CustomerRepository for handler tests.
@@ -26,9 +27,11 @@ func (m *mockCustomerRepo) Save(_ context.Context, _ *domain.Customer) error {
 	return nil
 }
 
-func newCustomerTestApp(h *handler.CustomerHandler) *fiber.App {
+func newCustomerTestApp(repo *mockCustomerRepo) *fiber.App {
 	app := fiber.New()
-	app.Get("/api/v1/customers/:idTx", h.GetByIdTx)
+	healthH := handler.NewHealthHandler(func(_ context.Context) error { return nil })
+	customerH := handler.NewCustomerHandler(repo)
+	router.Setup(app, healthH, customerH)
 	return app
 }
 
@@ -36,10 +39,9 @@ func TestGetByIdTx_ReturnsCustomerJSON(t *testing.T) {
 	repo := &mockCustomerRepo{
 		customer: &domain.Customer{ID: 1, Code: "TX-001", Name: "Alice"},
 	}
-	h := handler.NewCustomerHandler(repo)
-	app := newCustomerTestApp(h)
+	app := newCustomerTestApp(repo)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/customers/TX-001", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v2/customers/TX-001", nil)
 	resp, err := app.Test(req)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -51,10 +53,9 @@ func TestGetByIdTx_ReturnsCustomerJSON(t *testing.T) {
 
 func TestGetByIdTx_Returns404OnNotFound(t *testing.T) {
 	repo := &mockCustomerRepo{err: domain.ErrCustomerNotFound}
-	h := handler.NewCustomerHandler(repo)
-	app := newCustomerTestApp(h)
+	app := newCustomerTestApp(repo)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/customers/MISSING", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v2/customers/MISSING", nil)
 	resp, err := app.Test(req)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -66,10 +67,9 @@ func TestGetByIdTx_Returns404OnNotFound(t *testing.T) {
 
 func TestGetByIdTx_Returns500OnUnexpectedError(t *testing.T) {
 	repo := &mockCustomerRepo{err: errors.New("db timeout")}
-	h := handler.NewCustomerHandler(repo)
-	app := newCustomerTestApp(h)
+	app := newCustomerTestApp(repo)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/customers/TX-001", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v2/customers/TX-001", nil)
 	resp, err := app.Test(req)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

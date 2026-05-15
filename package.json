@@ -1,12 +1,13 @@
 {
-  "name": "casino-proxy-ai",
+  "name": "ms-casino-go-v2",
   "version": "1.0.0",
-  "description": "Casino Proxy AI",
+  "description": "Casino Proxy V2",
   "private": true,
   "scripts": {
     "setup": "bash scripts/setup.sh"
   },
   "devDependencies": {
-    "husky": "^9.1.7"
+    "@aiox-squads/core": "5.2.5",
+    "husky": "9.1.7"
   }
 }

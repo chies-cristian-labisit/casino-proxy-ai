@@ -33,5 +33,3 @@ Thumbs.db
 
 # Environment & Secrets (AIOX)
 .env.local
-
-/legacy/casino-proxy/

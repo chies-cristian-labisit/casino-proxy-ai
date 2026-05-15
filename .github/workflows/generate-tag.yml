@@ -1,0 +1,103 @@
+name: Generate Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        default: patch
+        type: choice
+        options: [patch, minor, major]
+      dry_run:
+        description: 'Dry run (print tag but do not push)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  generate-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4.2.0
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          ref: ${{ github.ref }}
+
+      - name: Verify CI is passing on branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+
+          for STATUS in in_progress queued waiting; do
+            COUNT=$(gh run list \
+              --workflow=ci.yml \
+              --branch="$BRANCH" \
+              --status="$STATUS" \
+              --json databaseId \
+              --jq 'length')
+            if [ "$COUNT" -gt 0 ]; then
+              echo "❌ CI has a run in state '$STATUS' on '$BRANCH'. Wait for it to finish."
+              exit 1
+            fi
+          done
+
+          CONCLUSION=$(gh run list \
+            --workflow=ci.yml \
+            --branch="$BRANCH" \
+            --limit=1 \
+            --json conclusion \
+            --jq '.[0].conclusion // "none"')
+
+          if [ "$CONCLUSION" != "success" ]; then
+            echo "❌ Latest CI on '$BRANCH' did not pass (conclusion: $CONCLUSION)."
+            exit 1
+          fi
+
+          echo "✓ CI is green on '$BRANCH'"
+
+      - name: Compute next version
+        id: version
+        run: |
+          LATEST=$(git tag -l 'v*' --sort=-version:refname | head -n 1)
+          LATEST=${LATEST:-v0.0.0}
+          VERSION=${LATEST#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          case "${{ inputs.bump }}" in
+            major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR+1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH+1)) ;;
+          esac
+
+          NEW="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "current=$LATEST" >> "$GITHUB_OUTPUT"
+          echo "next=$NEW"       >> "$GITHUB_OUTPUT"
+
+      - name: Show version plan
+        run: |
+          echo "Branch      : ${{ github.ref_name }}"
+          echo "Current tag : ${{ steps.version.outputs.current }}"
+          echo "Next tag    : ${{ steps.version.outputs.next }}"
+          echo "Bump type   : ${{ inputs.bump }}"
+          echo "Dry run     : ${{ inputs.dry_run }}"
+
+      - name: Tag and push
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.version.outputs.next }}"
+          git push origin "${{ steps.version.outputs.next }}"
+          echo "✓ Tagged ${{ steps.version.outputs.current }} → ${{ steps.version.outputs.next }}"
+
+      - name: Dry run summary
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "DRY RUN — no tag was created."
+          echo "Would have tagged: ${{ steps.version.outputs.current }} → ${{ steps.version.outputs.next }}"

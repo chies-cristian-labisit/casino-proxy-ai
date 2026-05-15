@@ -8,9 +8,9 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/adapter/http/handler"
-	"github.com/cometagaming/casino-proxy-ai/internal/adapter/http/router"
-	"github.com/cometagaming/casino-proxy-ai/internal/domain"
+	"github.com/cometagaming/ms-casino-go-v2/internal/adapter/http/handler"
+	"github.com/cometagaming/ms-casino-go-v2/internal/adapter/http/router"
+	"github.com/cometagaming/ms-casino-go-v2/internal/domain"
 )
 
 type stubCustomerRepo struct{}
@@ -54,13 +54,13 @@ func TestSetup_RegistersReadinessRoute(t *testing.T) {
 }
 
 func TestSetup_RegistersGetCustomerRoute(t *testing.T) {
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/customers/TX-001", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v2/customers/TX-001", nil)
 	resp, err := newTestApp().Test(req)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if resp.StatusCode == http.StatusNotFound {
-		t.Error("/api/v1/customers/:idTx route not registered")
+		t.Error("/api/v2/customers/:idTx route not registered")
 	}
 }
 

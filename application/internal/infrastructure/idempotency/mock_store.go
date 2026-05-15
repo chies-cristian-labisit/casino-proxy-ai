@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/usecase"
+	"github.com/cometagaming/ms-casino-go-v2/internal/usecase"
 )
 
 var _ usecase.IdempotencyStore = (*MockIdempotencyStore)(nil)

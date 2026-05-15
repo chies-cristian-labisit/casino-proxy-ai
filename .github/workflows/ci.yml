@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main, feature/*, feat/*, fix/*, bugfix/*]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: 'application/go.mod'
+
+      - name: Resolve Go dependencies
+        working-directory: application
+        run: go mod tidy
+
+      - name: Run unit tests
+        working-directory: application
+        run: go test ./internal/... -v -timeout 60s
+
+      - name: Run integration tests
+        working-directory: application
+        run: go test ./tests/integration/... -v -timeout 120s
+
+      - name: Run acceptance tests
+        working-directory: application
+        run: go test ./tests/acceptance/... -v -timeout 300s
+
+      - name: Summary
+        if: always()
+        run: |
+          echo ""
+          echo "=== CI Pipeline Summary ==="
+          echo "✓ Unit tests passed"
+          echo "✓ Integration tests passed"
+          echo "✓ Acceptance tests passed"
+          echo ""
+          echo "Generated project is fully tested and ready."

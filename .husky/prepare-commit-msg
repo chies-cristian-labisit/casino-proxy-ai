@@ -1,0 +1,33 @@
+#!/bin/bash
+# prepare-commit-msg hook: Automatically add branch name tag to commit messages
+# Format: [branch-name] - original message
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+
+# Skip ONLY for merge and squash commits (auto-generated messages)
+# Apply to all other commits: normal, -m, and --amend
+if [ "$COMMIT_SOURCE" = "merge" ] || [ "$COMMIT_SOURCE" = "squash" ]; then
+    exit 0
+fi
+
+# Get current branch name
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+# Skip if we couldn't get branch (e.g., detached HEAD)
+if [ -z "$BRANCH" ] || [ "$BRANCH" = "HEAD" ]; then
+    exit 0
+fi
+
+# Read current commit message
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Check if message already starts with [branch-tag] (avoid duplication on amend)
+if echo "$COMMIT_MSG" | grep -q "^\\[$BRANCH\\]"; then
+    exit 0
+fi
+
+# Prepend branch tag to the message
+echo "[$BRANCH] - $COMMIT_MSG" > "$COMMIT_MSG_FILE"
+
+exit 0

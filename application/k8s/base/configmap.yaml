@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "ms-casino-go-v2-config"
+  namespace: "default"
+  labels:
+    app: "ms-casino-go-v2"
+data:
+  PORT: "8081"
+  API_VERSION_PREFIX: "v2"
+  KAFKA_GROUP_ID: "ms-casino-go-v2"

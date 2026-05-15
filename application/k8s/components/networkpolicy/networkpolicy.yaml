@@ -1,0 +1,23 @@
+# NetworkPolicy: default-deny + allow from gateway namespace only
+# Restricts ingress to ms-casino-go-v2 pods to traffic from the Gateway namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: "ms-casino-go-v2-netpol"
+  namespace: "default"
+  labels:
+    app: "ms-casino-go-v2"
+spec:
+  podSelector:
+    matchLabels:
+      app: "ms-casino-go-v2"
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: "gateway"
+      ports:
+        - protocol: TCP
+          port: "8081"

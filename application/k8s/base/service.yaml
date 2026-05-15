@@ -1,0 +1,20 @@
+# ClusterIP Service for ms-casino-go-v2
+# Exposed internally within the EKS cluster.
+# The internal ALB (via AWS Load Balancer Controller) routes traffic here
+# from the VPC Link connected to AWS API Gateway.
+apiVersion: v1
+kind: Service
+metadata:
+  name: "ms-casino-go-v2"
+  namespace: "default"
+  labels:
+    app: "ms-casino-go-v2"
+spec:
+  type: ClusterIP
+  selector:
+    app: "ms-casino-go-v2"
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: "8081"

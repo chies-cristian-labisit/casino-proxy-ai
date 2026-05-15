@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"strings"
@@ -14,31 +14,43 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/adapter/http/handler"
-	"github.com/cometagaming/casino-proxy-ai/internal/adapter/http/router"
-	kafkaadapter "github.com/cometagaming/casino-proxy-ai/internal/adapter/kafka"
-	"github.com/cometagaming/casino-proxy-ai/internal/config"
-	"github.com/cometagaming/casino-proxy-ai/internal/infrastructure/database"
-	"github.com/cometagaming/casino-proxy-ai/internal/infrastructure/idempotency"
-	"github.com/cometagaming/casino-proxy-ai/internal/usecase"
+	"github.com/cometagaming/ms-casino-go-v2/internal/adapter/http/handler"
+	"github.com/cometagaming/ms-casino-go-v2/internal/adapter/http/router"
+	kafkaadapter "github.com/cometagaming/ms-casino-go-v2/internal/adapter/kafka"
+	"github.com/cometagaming/ms-casino-go-v2/internal/config"
+	"github.com/cometagaming/ms-casino-go-v2/internal/infrastructure/database"
+	"github.com/cometagaming/ms-casino-go-v2/internal/infrastructure/idempotency"
+	"github.com/cometagaming/ms-casino-go-v2/internal/observability"
+	"github.com/cometagaming/ms-casino-go-v2/internal/usecase"
 )
 
 func main() {
 	// 1. Load configuration from environment variables.
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("config: %v", err)
+		slog.Error("failed to load config", "error", err)
+		os.Exit(1)
 	}
+
+	// Initialize logger with configured log level (must be first)
+	baseLogger := config.NewLogger(cfg.LogLevel)
+	slog.SetDefault(baseLogger)
+
+	// Initialize Datadog APM tracer (no-op when DD_ENABLED=false).
+	stopTracer := observability.InitTracer(cfg.Datadog)
+	defer stopTracer()
 
 	// 2. Connect to Aurora PostgreSQL via GORM (pgx driver).
 	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("database: connect: %v", err)
+		baseLogger.Error("failed to connect to database", "error", err)
+		os.Exit(1)
 	}
 
 	// 3. Run schema migration for customerRecord model.
 	if err := database.Migrate(db); err != nil {
-		log.Fatalf("database: migrate: %v", err)
+		baseLogger.Error("failed to run migration", "error", err)
+		os.Exit(1)
 	}
 
 	// 4. Create in-memory idempotency store (replace with Redis in production).
@@ -81,6 +93,7 @@ func main() {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	})
+	app.Use(observability.FiberMiddleware())
 	router.Setup(app, healthH, customerH)
 
 	// 10. Graceful shutdown: wait for SIGTERM / SIGINT.
@@ -89,16 +102,16 @@ func main() {
 
 	go func() {
 		<-quit
-		log.Println("shutting down…")
+		baseLogger.Info("shutting down")
 		cancel() // stop Kafka listener
 		if err := app.ShutdownWithTimeout(30 * time.Second); err != nil {
-			log.Printf("http shutdown: %v", err)
+			baseLogger.Error("failed to shutdown http server", "error", err)
 		}
 	}()
 
 	addr := ":" + cfg.Port
-	log.Printf("listening on %s (env=%s)", addr, cfg.AppEnv)
+	baseLogger.Info("listening on server", "addr", addr, "env", cfg.AppEnv)
 	if err := app.Listen(addr); err != nil {
-		log.Printf("http: %v", err)
+		baseLogger.Error("http server error", "error", err)
 	}
 }

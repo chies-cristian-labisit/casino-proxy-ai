@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "ms-casino-go-v2"
+  namespace: "default"
+  labels:
+    app: "ms-casino-go-v2"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "ms-casino-go-v2"
+  template:
+    metadata:
+      labels:
+        app: "ms-casino-go-v2"
+    spec:
+      containers:
+        - name: api
+          image: "<ECR_REPO>/ms-casino-go-v2:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: "8081"
+              name: http
+          env:
+            - name: PORT
+              value: "8081"
+            - name: APP_ENV
+              value: production
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: "8081"
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: "8081"
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 500m
+      volumes: []

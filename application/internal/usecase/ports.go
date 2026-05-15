@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/domain"
+	"github.com/cometagaming/ms-casino-go-v2/internal/domain"
 )
 
 type CustomerRepository interface {

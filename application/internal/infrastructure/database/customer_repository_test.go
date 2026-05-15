@@ -1,5 +1,5 @@
 package database
 
-import "github.com/cometagaming/casino-proxy-ai/internal/usecase"
+import "github.com/cometagaming/ms-casino-go-v2/internal/usecase"
 
 var _ usecase.CustomerRepository = (*CustomerRepository)(nil)

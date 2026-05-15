@@ -1,0 +1,56 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../base
+
+components:
+  - ../../components/datadog-sidecar
+  - ../../components/networkpolicy
+
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: "ms-casino-go-v2"
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            memory: "1Gi"
+            cpu: "1000m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+
+patchesJson6902:
+  - target:
+      group: ""
+      version: v1
+      kind: ConfigMap
+      name: "ms-casino-go-v2-config"
+    patch: |-
+      - op: add
+        path: /data/LOG_LEVEL
+        value: "INFO"
+      - op: add
+        path: /data/APP_ENV
+        value: "production"
+      - op: add
+        path: /data/DD_ENABLED
+        value: "true"
+      - op: add
+        path: /data/DD_ENV
+        value: "production"
+      - op: add
+        path: /data/DD_TRACE_SAMPLE_RATE
+        value: "1.0"
+
+resources:
+  - hpa.yaml
+  - pdb.yaml

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/domain"
+	"github.com/cometagaming/ms-casino-go-v2/internal/domain"
 )
 
 func truncateCustomers(t *testing.T) {

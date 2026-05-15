@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/adapter/http/handler"
 	"github.com/gofiber/fiber/v2"
+	"github.com/cometagaming/ms-casino-go-v2/internal/adapter/http/handler"
 )
 
 func newTestApp(h *handler.HealthHandler) *fiber.App {

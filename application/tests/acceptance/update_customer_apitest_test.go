@@ -13,7 +13,7 @@ import (
 	kafkago "github.com/segmentio/kafka-go"
 	"github.com/steinfletcher/apitest"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/domain"
+	"github.com/cometagaming/ms-casino-go-v2/internal/domain"
 )
 
 // fiberHandler bridges the Fiber app to net/http.Handler, which apitest requires.
@@ -36,14 +36,14 @@ func fiberHandler() http.HandlerFunc {
 	}
 }
 
-// pollUntilNameIs polls GET /api/v1/customers/:code via the Fiber test server
+// pollUntilNameIs polls GET /api/v2/customers/:code via the Fiber test server
 // every 300 ms until the customer name matches or timeout is reached.
 // This is the async bridge between the Kafka side-effect and the final apitest assertion.
 func pollUntilNameIs(t *testing.T, code, expectedName string, timeout time.Duration) {
 	t.Helper()
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
-		req := httptest.NewRequest(http.MethodGet, "/api/v1/customers/"+code, nil)
+		req := httptest.NewRequest(http.MethodGet, "/api/v2/customers/"+code, nil)
 		resp, err := sharedApp.Test(req)
 		if err != nil {
 			t.Fatalf("poll: fiber test error: %v", err)
@@ -115,7 +115,7 @@ func TestUpdateCustomer_SuccessfulNameUpdate(t *testing.T) {
 
 	apitest.New().
 		HandlerFunc(fiberHandler()).
-		Get("/api/v1/customers/" + code).
+		Get("/api/v2/customers/" + code).
 		Expect(t).
 		Status(http.StatusOK).
 		Assert(assertCustomer(code, "João Silva")).
@@ -141,7 +141,7 @@ func TestUpdateCustomer_IdempotencyDuplicateSuppressed(t *testing.T) {
 
 	apitest.New().
 		HandlerFunc(fiberHandler()).
-		Get("/api/v1/customers/" + code).
+		Get("/api/v2/customers/" + code).
 		Expect(t).
 		Status(http.StatusOK).
 		Assert(assertCustomer(code, "Updated Name")).

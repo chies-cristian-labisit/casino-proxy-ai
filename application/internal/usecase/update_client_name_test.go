@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cometagaming/casino-proxy-ai/internal/domain"
-	"github.com/cometagaming/casino-proxy-ai/internal/infrastructure/idempotency"
-	"github.com/cometagaming/casino-proxy-ai/internal/usecase"
+	"github.com/cometagaming/ms-casino-go-v2/internal/domain"
+	"github.com/cometagaming/ms-casino-go-v2/internal/infrastructure/idempotency"
+	"github.com/cometagaming/ms-casino-go-v2/internal/usecase"
 )
 
 // mockCustomerRepository satisfies usecase.CustomerRepository for unit tests.
@@ -33,7 +33,7 @@ func (e *errIdempotencyStore) AcquireLock(_ context.Context, _ string, _ time.Du
 	return false, e.err
 }
 func (e *errIdempotencyStore) SetStatus(_ context.Context, _ string, _ string) error { return nil }
-func (e *errIdempotencyStore) DeleteKey(_ context.Context, _ string) error           { return nil }
+func (e *errIdempotencyStore) DeleteKey(_ context.Context, _ string) error            { return nil }
 
 func TestExecute(t *testing.T) {
 	ctx := context.Background()
@@ -59,7 +59,7 @@ func TestExecute(t *testing.T) {
 	t.Run("duplicate message — AcquireLock returns false", func(t *testing.T) {
 		store := idempotency.NewMockIdempotencyStore()
 		_, _ = store.AcquireLock(ctx, key, ttl) // pre-acquire → second call returns false
-		repo := &mockCustomerRepository{}       // GetByCode must never be called
+		repo := &mockCustomerRepository{}        // GetByCode must never be called
 		uc := usecase.NewUpdateClientNameUseCase(repo, store, ttl)
 
 		if err := uc.Execute(ctx, key, "New"); err != nil {

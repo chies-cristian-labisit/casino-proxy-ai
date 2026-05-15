@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: go-backend-postgres
+    container_name: ms-casino-go-v2-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -20,14 +20,17 @@ services:
 
   kafka:
     image: confluentinc/confluent-local:7.5.0
-    container_name: go-backend-kafka
+    container_name: ms-casino-go-v2-kafka
     environment:
       CLUSTER_ID: "obLD1OX2SJCrze8SNFZ4kA"
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # Two listeners:
+      #   PLAINTEXT  → host access via localhost:9092
+      #   INTERNAL   → container-to-container via kafka:29092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -39,10 +42,39 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
-      test: ["CMD", "kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # Full-stack: start with `docker-compose --profile full up -d`
+  # or use `make up-full` / `make rebuild`
+  app:
+    profiles:
+      - full
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ms-casino-go-v2-app
+    ports:
+      - "8081:8081"
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/go_backend?sslmode=disable
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_TOPIC: events
+      PORT: "8081"
+      KAFKA_GROUP_ID: ms-casino-go-v2
+      KAFKA_WORKERS: "5"
+      IDEMPOTENCY_LOCK_TTL: "30"
+      APP_ENV: development
+      LOG_LEVEL: DEBUG
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: on-failure
 
 volumes:
   postgres_data:
@@ -52,4 +84,4 @@ volumes:
 
 networks:
   default:
-    name: go-backend-network
+    name: ms-casino-go-v2-network

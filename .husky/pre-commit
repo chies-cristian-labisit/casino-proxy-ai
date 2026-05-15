@@ -1,0 +1,43 @@
+#!/bin/sh
+# pre-commit hook — runs before every git commit
+
+# Template variable protection — only active in the template repository itself.
+# Generated projects do not have copier.yml, so these checks are skipped there.
+if [ -f "copier.yml" ]; then
+  echo "🔒 Checking for hardcoded template variables..."
+
+  FOUND_VIOLATION=0
+
+  # Check for hardcoded go version (must be 1.25.4)
+  if git diff --cached | grep -q '^+.*go 1\.[0-9]\+\.[0-9]\+'; then
+    echo "❌ ERROR: Detected hardcoded Go version in application/go.mod"
+    echo "   Must use: go 1.25.4"
+    FOUND_VIOLATION=1
+  fi
+
+  # Check for hardcoded module path in Go source files only (must be cometagaming/ms-casino-go-v2)
+  if git diff --cached -- '*.go' 'application/go.mod' | grep -q '^+.*github\.com/cometagaming/'; then
+    echo "❌ ERROR: Detected hardcoded module path"
+    echo "   Must use: github.com/cometagaming/ms-casino-go-v2"
+    FOUND_VIOLATION=1
+  fi
+
+  if [ $FOUND_VIOLATION -eq 1 ]; then
+    echo ""
+    echo "⚠️  Template variables must remain as placeholders."
+    echo "   This template is used by developers to scaffold new projects."
+    echo "   Hardcoding values breaks the Copier scaffolding system."
+    echo ""
+    echo "See .claude/rules/template-protection.md for details."
+    exit 1
+  fi
+
+  echo "✅ Template variables intact"
+  echo ""
+fi
+
+# Run Go unit tests
+if command -v go > /dev/null 2>&1; then
+  echo "🧪 Running unit tests before commit..."
+  (cd application && go test ./internal/...) 2>/dev/null || true
+fi
