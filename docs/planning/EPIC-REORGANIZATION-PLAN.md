@@ -42,12 +42,18 @@ CASINO-2: Business Rules Discovery & Test Oracle ← VOCÊ ESTÁ AQUI
 └─ Status: 🚀 INICIANDO
 └─ Bloqueia: CASINO-3 (não pode implementar Go até ter oráculo de testes)
 
-CASINO-3: Go Microservices Implementation & Migration
-├─ Fase 2: Microservices Architecture (CASINO-3.1-3.4)
-├─ Fase 3: Core Services Implementation (CASINO-3.5-3.11)
-├─ Fase 4: Database & Data Migration (CASINO-3.12-3.16)
-└─ Fase 5: Testing & Hybrid Deployment (CASINO-3.17-3.22)
-└─ Status: ⏸️ AGUARDANDO (bloqueado por CASINO-2)
+CASINO-3: Test Oracle (Java/WireMock Validation Suite)
+├─ PP: CASINO-3.1 (test), CASINO-3.2 (matrix), CASINO-3.3 (validate)
+├─ Evolution: CASINO-3.4–3.6 | PG Soft: 3.7–3.9 | Mancala: 3.10–3.12
+├─ Digitain: 3.13–3.15 | Evoplay: 3.16–3.18 | OpenBox: 3.19–3.21 | Alternar: 3.22–3.24
+└─ Status: 🟡 Em pipeline com CASINO-2 (PP pronto para iniciar)
+
+CASINO-4: Go Microservices Implementation & Migration
+├─ Fase 2: Microservices Architecture (CASINO-4.1-4.4)
+├─ Fase 3: Core Services Implementation (CASINO-4.5-4.11)
+├─ Fase 4: Database & Data Migration (CASINO-4.12-4.16)
+└─ Fase 5: Testing & Hybrid Deployment (CASINO-4.17-4.22)
+└─ Status: ⏸️ AGUARDANDO (bloqueado por CASINO-3)
 ```
 
 ---
@@ -64,13 +70,22 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
                  └──────────┬─────────┘                   │
                             │                             │
                      CASINO-2 ✅ 100%                     │
-                     (Oráculo de Testes Pronto)          │
+                     (Docs por provider completas)        │
                             │                             │
-                            ├─────────────┬───────────────┴─ CASINO-3 Fases 2-5
-                            │             │   (Implementação Go)
-                     CASINO-3.1-3.4      │   (Pode começar paralelo com CASINO-2 Fase 2+)
-                     (Arquitetura)       │
-                                         └─ CASINO-3.5+ (Implementação)
+                     CASINO-3 (oracle pipeline)          │
+                     ├─ PP: 3.1–3.3 (pode iniciar)      │
+                     ├─ Evo: 3.4–3.6 (aguarda 2.7)      │
+                     └─ ... (1 provider por vez)         │
+                            │                             │
+                     CASINO-3 ✅ 100%                     │
+                     (Oracle validado 8 providers)       │
+                            │                             │
+                            ├─────────────────────────────┴─ CASINO-4 Fases 2-5
+                            │                                 (Implementação Go)
+                     CASINO-4.1-4.4
+                     (Arquitetura)
+                            │
+                            └─ CASINO-4.5+ (Implementação)
 ```
 
 ---
@@ -81,7 +96,8 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
 |------|------|------------------|------------------|--------|
 | **CASINO-1** | Documentação OpenAPI | @dev | @po | ✅ COMPLETO |
 | **CASINO-2** | Descoberta de Regras & Oráculo de Testes | @dev | @po (validar entre fases) | 🚀 INICIANDO |
-| **CASINO-3** | Implementação & Migração Go | @dev + @architect | @qa + @devops | ⏸️ AGUARDANDO CASINO-2 |
+| **CASINO-3** | Test Oracle Java/WireMock | @dev (Java) | @po (gate por provider) | 🟡 Em pipeline |
+| **CASINO-4** | Implementação & Migração Go | @dev + @architect | @qa + @devops | ⏸️ AGUARDANDO CASINO-3 |
 
 ---
 
@@ -138,32 +154,61 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
 
 ---
 
-### CASINO-3: Go Microservices Implementation & Migration
+### CASINO-3: Test Oracle — Java Validation Suite
+
+**Objetivo:** Construir Test Oracle agnóstico (JUnit 5 + WireMock) para todos os 8 providers.
+
+**Escopo:** 3 fases por provider (24 stories total):
+- **Fase 3 (CASINO-3.{N}):** Suite JUnit 5 + WireMock stubs — 50+ testes por provider
+- **Fase 4 (CASINO-3.{N+1}):** Trace Matrix YAML — 100% regras BR-* mapeadas
+- **Fase 5 (CASINO-3.{N+2}):** Validation Gate — 100% PHP PASS + @po aprova
+
+**Resultado:**
+- `casino-proxy-test-oracle/{provider}/` — 8 suites Java executáveis
+- `docs/architecture/casino-proxy/trace-matrices/` — 8 YAML trace matrices
+- `docs/architecture/casino-proxy/validation-gates/` — 8 validation reports aprovados
+
+**Paralelismo:** Em pipeline com CASINO-2 — oracle de provider N inicia quando docs de N completam.
+
+**Definition of Done:**
+- [ ] 8 suites Java com 50+ testes cada (400+ total)
+- [ ] 400+ testes PASS contra PHP legado
+- [ ] 8 trace matrices com 100% de cobertura BR-*
+- [ ] 8 @po gates: GO para todos os providers
+- [ ] Oracle executável contra Go sem modificação
+
+**Bloqueia:** CASINO-4
+
+---
+
+### CASINO-4: Go Microservices Implementation & Migration
 
 **Objetivo:** Implementar serviços Go que replicam 100% comportamento PHP.
+
+> **Depende de:** CASINO-3 (oracle validado por todos os 8 providers)
 
 > ⏸️ **CASINO-3.0 DEFERRED:** IaC provisioning is no longer a dev team responsibility. Infrastructure will be handled by a dedicated ops/infrastructure team. Dev team assumes infrastructure will be available when CASINO-3 starts.
 
 **Escopo:**
-- **Fase 2 (CASINO-3.1-3.4):** Arquitetura microservices + design de banco de dados
+- **Fase 2 (CASINO-4.1-4.4):** Arquitetura microservices + design de banco de dados
   - Microservices architecture design
   - Database schema design (PostgreSQL + GORM)
   - Gateway service architecture
   
-- **Fase 3 (CASINO-3.5-3.11):** Implementar serviços Go (1 por provider + gateway + admin)
+- **Fase 3 (CASINO-4.5-4.11):** Implementar serviços Go (1 por provider + gateway + admin)
   - Implementar cada serviço Go
   - Configurar CI/CD pipeline
   
-- **Fase 4 (CASINO-3.12-3.16):** Migração de dados + dual-write
+- **Fase 4 (CASINO-4.12-4.16):** Migração de dados + dual-write
   - Implementar migração de dados
   - Setup dual-write entre PHP e Go
   
-- **Fase 5 (CASINO-3.17-3.22):** Testes, deployment híbrido, migração tráfego
+- **Fase 5 (CASINO-4.17-4.22):** Testes, deployment híbrido, migração tráfego
   - Testes end-to-end
   - Migração gradual de tráfego
   - Cutover final
 
-**Sequência:** Fases 2-5 iniciam quando CASINO-2 Fase 1 completa.
+**Sequência:** Fases 2-5 iniciam quando CASINO-3 completa (oracle 100% validado).
 
 **Resultado:**
 - Serviços Go em `/services/` (1 pasta por provider + gateway)
@@ -173,10 +218,9 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
 - Documentação operacional
 
 **Validação:** 
-- **Fases 2-5:** Go tests passam contra CASINO-2 PHP tests (prova de parity)
+- **Fases 2-5:** Go tests passam contra CASINO-3 oracle (prova de parity)
 
 **Definition of Done:**
-- ~~[ ] Fase 0: IaC escolhida, validada e documentada~~ ⏸️ DEFERRED — not a dev team responsibility
 - [ ] Todos 8 providers migrados para Go em produção
 - [ ] Zero downtime durante migração por provider
 - [ ] Performance meets or exceeds PHP baseline
@@ -186,14 +230,14 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
 
 ## Resumo Executivo
 
-| Métrica | CASINO-1 | CASINO-2 | CASINO-3 |
-|---------|----------|----------|----------|
-| **Stories** | 6 | 40 | 22 |
-| **Status** | COMPLETO | INICIANDO | AGUARDANDO |
-| **Depende De** | - | CASINO-1 | CASINO-2 |
-| **Bloqueia** | - | CASINO-3 | - |
-| **Agente** | @dev | @dev | @dev + @architect |
-| **Validação** | @po | @po (por fase) | @qa + @devops |
+| Métrica | CASINO-1 | CASINO-2 | CASINO-3 | CASINO-4 |
+|---------|----------|----------|----------|----------|
+| **Stories** | 6 | 16 | 24 | 22 |
+| **Status** | COMPLETO | EM ANDAMENTO | EM PIPELINE | AGUARDANDO |
+| **Depende De** | - | CASINO-1 | CASINO-2 per-provider | CASINO-3 |
+| **Bloqueia** | - | CASINO-3 | CASINO-4 | - |
+| **Agente** | @dev | @dev | @dev (Java) | @dev + @architect |
+| **Validação** | @po | @po (por fase) | @po (gate por provider) | @qa + @devops |
 
 ---
 
@@ -202,17 +246,18 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
 ✅ **Clareza Narrativa:** Cada epic responde uma pergunta diferente
 - CASINO-1: "Como documentamos os endpoints?"
 - CASINO-2: "O que cada endpoint realmente faz?"
-- CASINO-3: "Como reconstruímos em Go?"
+- CASINO-3: "Como provamos que o comportamento está correto?"
+- CASINO-4: "Como reconstruímos em Go?"
 
 ✅ **Ciclos Independentes:** Cada epic tem seu próprio DoD e validação
 
-✅ **Execução Paralela:** CASINO-2 Fase 2+ pode rodar enquanto CASINO-3 Fase 2 começa
+✅ **Execução Paralela:** CASINO-2 docs de provider N rodam enquanto CASINO-3 oracle de provider N-1 começa
 
 ✅ **Qualidade Garantida:** CASINO-2 tests = acceptance criteria para CASINO-3
 
 ✅ **Manageability:** Nenhum epic > 40 stories (fácil de rastrear)
 
-✅ **Escalabilidade:** Se um provider pegar fogo, isolado no CASINO-2, não impacta arquitetura (CASINO-3)
+✅ **Escalabilidade:** Se um provider pegar fogo, isolado no CASINO-2/3, não impacta arquitetura (CASINO-4)
 
 ---
 
@@ -220,10 +265,11 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
 
 - [ ] Renomear/revalidar CASINO-1 (apenas OpenAPI, 6 stories)
 - [ ] Criar CASINO-2 epic (Business Rules Discovery, 40 stories)
-- [ ] Criar CASINO-3 epic (Go Implementation, 22 stories)
+- [ ] Criar CASINO-3 epic (Test Oracle, 24 stories) — arquivo criado em docs/prd/epics/CASINO-3-test-oracle.md ✅
+- [ ] Criar CASINO-4 epic (Go Implementation, 22 stories)
 - [ ] Atualizar `CASINO-1-migration-plan.md` com nova estrutura
 - [ ] Vincular epics com "Depends On" / "Blocks" relationships
-- [ ] Começar CASINO-2.1 (Pragmatic Play extraction)
+- [ ] Começar CASINO-3.1 (Pragmatic Play Test Oracle) — PP docs ✅ Done
 
 ---
 

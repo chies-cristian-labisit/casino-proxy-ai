@@ -8,28 +8,30 @@
 
 ## 1. Visão Geral Executiva
 
-### Estrutura de 3 Epics Sequenciais
+### Estrutura de 4 Epics Sequenciais
 
 ```
 CASINO-1: OpenAPI Documentation ✅ COMPLETO
    ↓ (bloqueia por documentação)
-CASINO-2: Business Rules Discovery & Test Oracle 🚀 EM ANDAMENTO
-   ↓ (bloqueia por teste de validação)
-CASINO-3: Go Microservices Implementation ⏸️ AGUARDANDO
+CASINO-2: Business Rules Discovery & Documentation 🚀 EM ANDAMENTO
+   ↓ (fases 1-2 por provider: Extract + Document)
+CASINO-3: Test Oracle (Java/WireMock Validation Suite) ⏸️ AGUARDANDO PP docs ✅
+   ↓ (bloqueia por 100% testes PHP passando)
+CASINO-4: Go Microservices Implementation ⏸️ AGUARDANDO
 ```
 
 ### Tabela de Resumo Executivo
 
-| Métrica | CASINO-1 | CASINO-2 | CASINO-3 |
-|---------|----------|----------|----------|
-| **Objetivo** | Documentar 100% endpoints | Extrair & validar regras | Reconstruir em Go |
-| **Stories** | 6 | 40 | 22 |
-| **Status** | ✅ Completo | 🚀 Iniciando | ⏸️ Aguardando |
-| **Depende De** | — | CASINO-1 | CASINO-2 |
-| **Bloqueia** | — | CASINO-3 | — |
-| **Artefatos** | OpenAPI specs | Rules + Tests + Oracle | Go services |
-| **Validação** | @po | @po (por fase) | @qa + @devops |
-| **Risco** | ✅ Baixo | 🟡 Médio | 🟡 Médio |
+| Métrica | CASINO-1 | CASINO-2 | CASINO-3 | CASINO-4 |
+|---------|----------|----------|----------|----------|
+| **Objetivo** | Documentar endpoints | Extract + Document | Test Oracle | Reconstruir em Go |
+| **Stories** | 6 | 16 | 24 | 22 |
+| **Status** | ✅ Completo | 🚀 Em andamento | ⏸️ PP pronto | ⏸️ Aguardando |
+| **Depende De** | — | CASINO-1 | CASINO-2 per-provider | CASINO-3 |
+| **Bloqueia** | — | CASINO-3 | CASINO-4 | — |
+| **Artefatos** | OpenAPI specs | Rules.md + Endpoint docs | Java suite + Matrix | Go services |
+| **Validação** | @po | @po (por fase) | @po (gate por provider) | @qa + @devops |
+| **Risco** | ✅ Baixo | 🟡 Médio | 🟡 Médio | 🟡 Médio |
 
 ---
 
@@ -109,7 +111,7 @@ Fase 5: VALIDATE    → Testes PHP passam 100%
 
 - **Endpoints:** 9 (authenticate, balance, bet, refund, result, bonusWin, jackpotWin, promoWin, adjustment)
 - **Integração:** HTTP POST + MD5 signature + tenant isolation
-- **Stories:** CASINO-2.1 até CASINO-2.5 (5 fases)
+- **Stories:** CASINO-2.1 (Extract) e CASINO-2.2 (Document) — Fases 3-5 em CASINO-3 (3.1–3.3)
 
 ---
 
@@ -251,8 +253,8 @@ Para cada endpoint, documentar o fluxo técnico completo mostrando como as regra
 
 ### **Fase 3: TEST — Construir Suite de Testes de Integração**
 
-**Story:** CASINO-2.3  
-**Status:** ⏳ PLANEJADO
+**Story:** CASINO-3.1  
+**Status:** 📝 Draft
 
 #### O que será feito
 
@@ -400,8 +402,8 @@ casino-proxy-test-oracle/
 
 ### **Fase 4: MATRIX — Criar Matrizes de Rastreamento YAML**
 
-**Story:** CASINO-2.4  
-**Status:** ⏳ PLANEJADO
+**Story:** CASINO-3.2  
+**Status:** 📝 Draft
 
 #### O que será feito
 
@@ -410,7 +412,7 @@ Criar matrizes YAML que rastreiam **cada regra de negócio através de 4 camadas
 1. **OpenAPI Spec (CASINO-1):** Qual endpoint e operação documenta essa regra?
 2. **Código-fonte PHP:** Exatamente onde a regra está implementada (arquivo + linhas)?
 3. **Teste de Validação (Fase 3):** Qual test case valida essa regra?
-4. **Implementação Go (CASINO-3):** Onde essa mesma regra será implementada em Go?
+4. **Implementação Go (CASINO-4):** Onde essa mesma regra será implementada em Go?
 
 #### Por Que a Fase 4 Existe?
 
@@ -471,8 +473,8 @@ docs/casino-proxy/trace-matrices/
 
 ### **Fase 5: VALIDATE — Validação 100% de Testes PHP**
 
-**Story:** CASINO-2.5  
-**Status:** ⏳ PLANEJADO
+**Story:** CASINO-3.3  
+**Status:** 📝 Draft
 
 #### O que será feito
 
@@ -510,18 +512,19 @@ docs/casino-proxy/validation-gates/
 
 ### Backlog Completo: CASINO-2 (40 Stories)
 
-**8 provedores × 5 fases = 40 stories**
+**8 provedores × 2 fases = 16 stories (Extract + Document)
+Fases 3-5 (Test + Matrix + Validate) estão em CASINO-3**
 
 | Provider | Fase 1 (Extract) | Fase 2 (Document) | Fase 3 (Test) | Fase 4 (Matrix) | Fase 5 (Validate) | Status |
 |----------|------------------|------------------|---------------|-----------------|-------------------|--------|
-| **Pragmatic Play** | CASINO-2.1 ✅ | CASINO-2.2 ✅ | CASINO-2.3 ⏳ | CASINO-2.4 ⏳ | CASINO-2.5 ⏳ | Em Andamento |
-| **Evolution Gaming** | CASINO-2.6 | CASINO-2.7 | CASINO-2.8 | CASINO-2.9 | CASINO-2.10 | Planejado |
-| **PG Soft** | CASINO-2.11 | CASINO-2.12 | CASINO-2.13 | CASINO-2.14 | CASINO-2.15 | Planejado |
-| **Mancala** | CASINO-2.16 | CASINO-2.17 | CASINO-2.18 | CASINO-2.19 | CASINO-2.20 | Planejado |
-| **Digitain** | CASINO-2.21 | CASINO-2.22 | CASINO-2.23 | CASINO-2.24 | CASINO-2.25 | Planejado |
-| **Evoplay** | CASINO-2.26 | CASINO-2.27 | CASINO-2.28 | CASINO-2.29 | CASINO-2.30 | Planejado |
-| **OpenBox** | CASINO-2.31 | CASINO-2.32 | CASINO-2.33 | CASINO-2.34 | CASINO-2.35 | Planejado |
-| **Alternar** | CASINO-2.36 | CASINO-2.37 | CASINO-2.38 | CASINO-2.39 | CASINO-2.40 | Planejado |
+| **Pragmatic Play** | CASINO-2.1 ✅ | CASINO-2.2 ✅ | → CASINO-3.1 | → CASINO-3.2 | → CASINO-3.3 | Docs ✅, Oracle em andamento |
+| **Evolution Gaming** | CASINO-2.6 | CASINO-2.7 | → CASINO-3.4 | → CASINO-3.5 | → CASINO-3.6 | Planejado |
+| **PG Soft** | CASINO-2.11 | CASINO-2.12 | → CASINO-3.7 | → CASINO-3.8 | → CASINO-3.9 | Planejado |
+| **Mancala** | CASINO-2.16 | CASINO-2.17 | → CASINO-3.10 | → CASINO-3.11 | → CASINO-3.12 | Planejado |
+| **Digitain** | CASINO-2.21 | CASINO-2.22 | → CASINO-3.13 | → CASINO-3.14 | → CASINO-3.15 | Planejado |
+| **Evoplay** | CASINO-2.26 | CASINO-2.27 | → CASINO-3.16 | → CASINO-3.17 | → CASINO-3.18 | Planejado |
+| **OpenBox** | CASINO-2.31 | CASINO-2.32 | → CASINO-3.19 | → CASINO-3.20 | → CASINO-3.21 | Planejado |
+| **Alternar** | CASINO-2.36 | CASINO-2.37 | → CASINO-3.22 | → CASINO-3.23 | → CASINO-3.24 | Planejado |
 
 ---
 
@@ -545,18 +548,59 @@ Semanas 3-6
 └─ @po valida cada provider antes de próximo
 
 Final de Semana 6 (2026-06-22)
-└─ CASINO-2 100% completo → Desbloqueia CASINO-3
+└─ CASINO-2 100% completo → Desbloqueia CASINO-3 (último provider)
+└─ CASINO-3 100% completo → Desbloqueia CASINO-4
 ```
 
 ---
 
-## 4. CASINO-3 — Go Microservices Implementation ⏸️ AGUARDANDO
+## 4. CASINO-3 — Test Oracle ⏸️ EM PIPELINE COM CASINO-2
+
+### Objetivo
+Construir o Test Oracle Java (JUnit 5 + WireMock) para cada um dos 8 providers, em pipeline com o CASINO-2. Cada provider tem 3 stories: test → matrix → validate.
+
+### Status
+🟡 **EM PIPELINE** — Pragmatic Play (CASINO-3.1–3.3) pode iniciar agora. CASINO-2.2 ✅ Done.
+
+### Estrutura: 3 Fases × 8 Providers = 24 Stories
+
+| Fase | O que Produz | Dependência |
+|------|--------------|-------------|
+| **Fase 3: Test** | Suite JUnit 5 + WireMock stubs | CASINO-2 Fase 2 do provider |
+| **Fase 4: Matrix** | Trace matrix YAML (regras → testes → Go) | Fase 3 do provider |
+| **Fase 5: Validate** | Validation report + @po gate | Fases 3+4 do provider |
+
+### Backlog Oracle — 24 Stories
+
+| Provider | Fase 3 (Test) | Fase 4 (Matrix) | Fase 5 (Validate) | Depends On |
+|----------|--------------|-----------------|-------------------|------------|
+| **Pragmatic Play** | CASINO-3.1 📝 Draft | CASINO-3.2 📝 Draft | CASINO-3.3 📝 Draft | CASINO-2.2 ✅ |
+| **Evolution Gaming** | CASINO-3.4 ⏳ | CASINO-3.5 ⏳ | CASINO-3.6 ⏳ | CASINO-2.7 |
+| **PG Soft** | CASINO-3.7 ⏳ | CASINO-3.8 ⏳ | CASINO-3.9 ⏳ | CASINO-2.12 |
+| **Mancala** | CASINO-3.10 ⏳ | CASINO-3.11 ⏳ | CASINO-3.12 ⏳ | CASINO-2.17 |
+| **Digitain** | CASINO-3.13 ⏳ | CASINO-3.14 ⏳ | CASINO-3.15 ⏳ | CASINO-2.22 |
+| **Evoplay** | CASINO-3.16 ⏳ | CASINO-3.17 ⏳ | CASINO-3.18 ⏳ | CASINO-2.27 |
+| **OpenBox** | CASINO-3.19 ⏳ | CASINO-3.20 ⏳ | CASINO-3.21 ⏳ | CASINO-2.32 |
+| **Alternar** | CASINO-3.22 ⏳ | CASINO-3.23 ⏳ | CASINO-3.24 ⏳ | CASINO-2.37 |
+
+### Definição de Pronto (CASINO-3)
+
+- ~~[ ] Fase 0: IaC testada, deploy bem-sucedido com health checks~~ ⏸️ DEFERRED — IaC not a dev team responsibility
+- [ ] 8 suites Java criadas com 50+ testes cada
+- [ ] 400+ testes passando 100% contra PHP legado
+- [ ] 8 trace matrices YAML com cobertura 100% de regras BR-*
+- [ ] 8 validation reports aprovados por @po
+- [ ] Oracle executável contra Go sem modificação de código
+
+---
+
+## 5. CASINO-4 — Go Microservices Implementation ⏸️ AGUARDANDO
 
 ### ⚠️ Status de Trabalho em Progresso
 
-CASINO-3 é um **epic em trabalho em progresso (WIP)**. As fases documentadas abaixo (0, 2, 3, 4, 5) são **baseline assumptions** que serão refináveis durante a execução conforme:
+CASINO-4 é um **epic em trabalho em progresso (WIP)**. As fases documentadas abaixo são **baseline assumptions** que serão refináveis durante a execução conforme:
 - Restrições técnicas e de infraestrutura emergirem
-- Resultados dos testes de Fase 3 (CASINO-2) informarem decisões de design
+- Resultados do Test Oracle (CASINO-3) informarem decisões de design
 - Paridade de performance entre PHP e Go for validada
 - Novos requisitos ou edge cases forem descobertos
 
@@ -566,31 +610,31 @@ CASINO-3 é um **epic em trabalho em progresso (WIP)**. As fases documentadas ab
 Implementar serviços Go que replicam 100% o comportamento do PHP, com infraestrutura moderna e escalabilidade.
 
 ### Status
-🔴 **BLOQUEADO por CASINO-2** — Não pode começar implementação sem oráculo de testes PHP
+🔴 **BLOQUEADO por CASINO-3** — Não pode começar implementação sem oracle de testes validado
 
 ### Estrutura: 4 Fases
 
 | Fase | Stories | O que é Feito |
 |------|---------|--------------|
 | ~~**Fase 0: IaC**~~ | ~~CASINO-3.0~~ | ⏸️ DEFERRED — IaC not a dev team responsibility |
-| **Fase 2: Architecture** | CASINO-3.1-3.4 | Design microservices + DB schema (PostgreSQL) |
-| **Fase 3: Implementation** | CASINO-3.5-3.11 | Implementa 8 serviços Go + gateway + admin API |
-| **Fase 4: Migration** | CASINO-3.12-3.16 | Migração dados + dual-write + tráfego gradual |
-| **Fase 5: Deploy** | CASINO-3.17-3.22 | Deploy híbrido + cutover final + decommission PHP |
+| **Fase 2: Architecture** | CASINO-4.1-4.4 | Design microservices + DB schema (PostgreSQL) |
+| **Fase 3: Implementation** | CASINO-4.5-4.11 | Implementa 8 serviços Go + gateway + admin API |
+| **Fase 4: Migration** | CASINO-4.12-4.16 | Migração dados + dual-write + tráfego gradual |
+| **Fase 5: Deploy** | CASINO-4.17-4.22 | Deploy híbrido + cutover final + decommission PHP |
 
-### Como CASINO-2 Tests Guiam CASINO-3
+### Como CASINO-3 Tests Guiam CASINO-4
 
 ```
-CASINO-2 Artefato                  →  CASINO-3 Acceptance Criteria
+CASINO-3 Artefato                  →  CASINO-4 Acceptance Criteria
 ─────────────────────────────────────────────────────────────────
-rules.md (12 regras)               →  Cada regra deve ser implementada identicamente
+trace-matrix.yaml (12 regras)      →  Cada regra deve ser implementada identicamente
 /balance.md (fluxo 8-fases)        →  Go handler deve executar mesmas 8 fases
-phpunit suite (50+ testes)         →  Go implementation roda testes PHP localmente
-trace-matrices (rastreamento)      →  Cada regra mapeada de PHP → Go
-validation report (100% pass)      →  Go tests devem igualar PHP tests 100%
+Java oracle suite (50+ testes)     →  Go implementation roda mesmos testes
+trace-matrices (rastreamento)      →  Cada regra mapeada de PHP → Go (campo go_implementation)
+validation report (100% pass)      →  Go tests devem igualar oracle tests 100%
 ```
 
-### Definição de Pronto (CASINO-3)
+### Definição de Pronto (CASINO-4)
 
 - ~~[ ] Fase 0: IaC testada, deploy bem-sucedido com health checks~~ ⏸️ DEFERRED — IaC not a dev team responsibility
 - [ ] Fase 2: Arquitetura desenhada, DB schema validado
@@ -601,7 +645,7 @@ validation report (100% pass)      →  Go tests devem igualar PHP tests 100%
 
 ---
 
-## 5. Template — Como Replicar para Outros Providers
+## 6. Template — Como Replicar para Outros Providers
 
 ### Checklist de 5 Fases (Reutilizável)
 
@@ -706,7 +750,7 @@ BUILD SUCCESS (50+ tests)
 
 ---
 
-## 6. Timeline Integrada (Visão Completa)
+## 7. Timeline Integrada (Visão Completa)
 
 ### Fluxo de Execução
 
@@ -715,27 +759,26 @@ Ciclo CASINO-2: Pragmatic Play → Evolution Gaming → PG Soft → (Mancala, Di
 
 Pragmatic Play (Provider 1)
 ├─ CASINO-2.1: Extract ✅
-├─ CASINO-2.2: Document ✅
-├─ CASINO-2.3: Test (em andamento)
-├─ CASINO-2.4: Matrix (planejado)
-├─ CASINO-2.5: Validate (planejado)
-└─ Gate: GO → @po aprova → próximo provider
+├─ CASINO-2.2: Document ✅ → CASINO-3 pode iniciar em paralelo
+├─ CASINO-3.1: Test Oracle (JUnit 5 + WireMock)
+├─ CASINO-3.2: Trace Matrix YAML
+├─ CASINO-3.3: Validate (100% PHP PASS + @po gate)
+└─ Gate: GO → @po aprova → Evolution Gaming desbloqueada
 
 Evolution Gaming (Provider 2)
-├─ CASINO-2.6: Extract (espera aprovação Pragmatic)
-├─ CASINO-2.7: Document
-├─ CASINO-2.8: Test
-├─ CASINO-2.9: Matrix
-├─ CASINO-2.10: Validate
+├─ CASINO-2.6: Extract (aguarda PP gate em CASINO-3.3)
+├─ CASINO-2.7: Document → CASINO-3.4 pode iniciar
+├─ CASINO-3.4: Test Oracle
+├─ CASINO-3.5: Trace Matrix YAML
+├─ CASINO-3.6: Validate → Gate → próximo provider
 └─ Gate: GO → @po aprova → próximo provider
 
 (Repetir para PG Soft, Mancala, Digitain, Evoplay, OpenBox, Alternar)
 
-Final: CASINO-2 100% Completo
-└─ Desbloqueia CASINO-3: Implementação Go em paralelo
+Final: CASINO-3 100% Completo (todos os 8 providers com oracle validado)
+└─ Desbloqueia CASINO-4: Implementação Go
 
-CASINO-3 Timeline
-~~├─ Fase 0: IaC design + setup (em paralelo com CASINO-2)~~ ⏸️ DEFERRED
+CASINO-4 Timeline
 ├─ Fase 2: Architecture microservices + DB schema
 ├─ Fase 3: Implementation (8 serviços Go + gateway + admin)
 ├─ Fase 4: Database migration + dual-write
@@ -744,7 +787,7 @@ CASINO-3 Timeline
 
 ---
 
-## 7. Métricas de Sucesso
+## 8. Métricas de Sucesso
 
 ### CASINO-1 ✅
 - [x] 8 provedores documentados
@@ -758,30 +801,36 @@ CASINO-3 Timeline
 - [ ] 0 regras perdidas na tradução PHP → Go
 - [ ] PO approves cada provider antes de próximo
 
-### CASINO-3 (aguardando)
+### CASINO-3 (em pipeline com CASINO-2)
+- [ ] 24 stories completas (8 providers × 3 fases)
+- [ ] 50+ testes por provider (400+ total) passando 100%
+- [ ] 8 trace matrices YAML com cobertura 100% de regras BR-*
+- [ ] 8 validation reports aprovados por @po
+- [ ] Oracle executável contra Go sem modificação
+
+### CASINO-4 (aguardando CASINO-3)
 - [ ] 8 serviços Go em produção
-- [ ] Go tests = PHP tests (100% parity)
+- [ ] Go tests = oracle tests (100% parity)
 - [ ] 0 downtime durante migração
 - [ ] Performance ≥ PHP baseline
-- ~~[ ] Infrastructure 100% via IaC~~ ⏸️ DEFERRED — IaC not a dev team responsibility
 - [ ] 99.9% uptime SLA
 - [ ] PHP completamente decommissioned
 
 ---
 
-## 8. Riscos e Mitigações
+## 9. Riscos e Mitigações
 
 | Risco | Probabilidade | Impacto | Mitigação |
 |-------|--------------|--------|-----------|
-| Provider toma mais tempo que estimado | 🟡 Médio | 🟡 Atraso cascata | Fases paralelas CASINO-3, buffer de 1 semana |
+| Provider toma mais tempo que estimado | 🟡 Médio | 🟡 Atraso cascata | Fases paralelas CASINO-4, buffer de 1 semana |
 | Teste PHP descobre gaps em código | 🟡 Médio | 🟡 Rework necessário | Code review rigoroso em Fase 3 |
-| Go implementation encontra edge cases | 🟡 Médio | 🟡 Delays | CASINO-2 tests cobrem 99% dos casos |
+| Go implementation encontra edge cases | 🟡 Médio | 🟡 Delays | CASINO-3 oracle cobre 99% dos casos |
 | ~~Infraestrutura de IaC tem issue~~ | — | — | ⏸️ DEFERRED — IaC handled by ops/infra team, not dev team |
 | Performance Go < PHP | 🔴 Muito Baixo | 🔴 Crítico | Profiling + optimization em Fase 3 |
 
 ---
 
-## 9. Glossário
+## 10. Glossário
 
 | Termo | Definição |
 |-------|-----------|
@@ -796,7 +845,7 @@ CASINO-3 Timeline
 
 ---
 
-## 10. Documentos Relacionados
+## 11. Documentos Relacionados
 
 - **Epic Reorganization Plan:** `docs/epics/casino-proxy/EPIC-REORGANIZATION-PLAN.md`
 - **Phase 1 Rules (Pragmatic Play):** `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md`

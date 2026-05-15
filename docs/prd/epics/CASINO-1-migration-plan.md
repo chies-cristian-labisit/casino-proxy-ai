@@ -212,8 +212,8 @@ Create comprehensive OpenAPI documentation for all 8 provider integrations, then
 **Stories:**
 7. **CASINO-2.1** - Design Microservices Architecture & Service Boundaries
 8. **CASINO-2.2** - Design Database Schema & Data Models (GORM)
-9. **CASINO-2.3** - Design Gateway Service (routing, authentication, middleware)
-10. **CASINO-2.4** - Design CI/CD Pipeline & Deployment Strategy
+9. **CASINO-4.3** - Design Gateway Service (routing, authentication, middleware)
+10. **CASINO-4.4** - Design CI/CD Pipeline & Deployment Strategy
 
 ---
 
@@ -467,13 +467,14 @@ Hybrid Mode (During Transition):
 
 ## Epic Reorganization (New Structure)
 
-**CASINO-1** has been split into **3 focused epics** for clarity and parallel execution:
+**CASINO-1** has been split into **4 focused epics** for clarity and parallel execution:
 
 | Epic | Phase | Purpose | Stories | Status |
 |------|-------|---------|---------|--------|
 | **CASINO-1** | 1 (OpenAPI) | Documentation & Swagger Generation | 6 | ✅ COMPLETE |
-| **CASINO-2** | 1.5 (Discovery) | Business Rules & Test Oracle | 40 | 🚀 STARTING |
-| **CASINO-3** | 0-5 | Go Implementation & Migration | 23 | ⏸️ WAITING |
+| **CASINO-2** | 1.5 (Discovery) | Business Rules Extract + Document | 16 | 🚀 IN PROGRESS |
+| **CASINO-3** | 2 (Oracle) | Test Oracle (Java/WireMock Validation) | 24 | 🟡 IN PIPELINE |
+| **CASINO-4** | 3-5 | Go Implementation & Migration | 22 | ⏸️ WAITING |
 
 **See:** `docs/planning/EPIC-REORGANIZATION-PLAN.md` for detailed breakdown.
 
@@ -484,7 +485,7 @@ Hybrid Mode (During Transition):
 ### Immediate (This Week)
 1. ✅ Complete Phase 1 story planning (CASINO-1.1 to CASINO-1.6) → MERGED to master
 2. 🚀 Start CASINO-2 Phase 1 (Business Rules Extraction - Pragmatic Play)
-3. ~~CASINO-3.0 (Infrastructure as Code Discovery)~~ ⏸️ DEFERRED — IaC provisioning is no longer a dev team responsibility; infrastructure will be handled by a dedicated ops/infrastructure team.
+3. Start CASINO-3.1 (Pragmatic Play Test Oracle) — PP docs complete in CASINO-2.2 ✅
 
 ### Week 2-3
 - Complete OpenAPI documentation for all 8 providers

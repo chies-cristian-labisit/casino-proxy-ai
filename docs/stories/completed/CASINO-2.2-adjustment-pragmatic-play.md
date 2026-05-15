@@ -309,7 +309,7 @@ behavior:
 - **Criado:** 2026-05-12
 - **Estimado:** 1-2 horas (adaptação de bet.md + seção de contexto + tabela de grupos)
 - **Depende De:** CASINO-1.7 ✅, CASINO-2.2-bet ✅ (Ready)
-- **Bloqueia:** CASINO-2.3 (próxima fase — Test Oracle)
+- **Bloqueia:** CASINO-3.1 (próxima fase — Test Oracle)
 - **Sequência Fase 2:** authenticate ✅ → bet ✅ → refund ✅ → result ✅ → bonusWin ✅ → jackpotWin ✅ → promoWin → **adjustment** ← ÚLTIMO
 
 ---

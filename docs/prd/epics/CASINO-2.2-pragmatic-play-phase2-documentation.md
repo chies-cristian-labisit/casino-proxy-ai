@@ -9,13 +9,13 @@
 **Executor:** @dev (Dex)  
 **Validação:** @po (Pax)  
 **Depende De:** CASINO-2.1 (Fase 1 — Extract) ✅ Done  
-**Bloqueia:** CASINO-2.3 (Fase 3 — Test Oracle)
+**Bloqueia:** CASINO-3.1 (Fase 3 — Test Oracle)
 
 ---
 
 ## Objetivo
 
-Produzir documentação técnica completa para os **9 endpoints do Pragmatic Play**, mostrando como as 12 regras de negócio (BR-*) extraídas na Fase 1 se combinam em fluxos de 8 fases por endpoint. Os documentos de output são a especificação que guia a implementação dos handlers Go na CASINO-3.
+Produzir documentação técnica completa para os **9 endpoints do Pragmatic Play**, mostrando como as 12 regras de negócio (BR-*) extraídas na Fase 1 se combinam em fluxos de 8 fases por endpoint. Os documentos de output alimentam o Test Oracle (CASINO-3) e guiam a implementação dos handlers Go na CASINO-4.
 
 ```
 Input:   docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md (12 regras BR-*)
@@ -251,7 +251,7 @@ STORIES (Backlog)       READY ✅             IN PROGRESS         DONE ✅
                                                                  adjustment
 ```
 
-> **Estado atual (2026-05-15):** Todas as 8 stories Done. Fase 2 concluída. @qa (Quinn) validou todos os outputs. CASINO-2.3 desbloqueado.
+> **Estado atual (2026-05-15):** Todas as 8 stories Done. Fase 2 concluída. @qa (Quinn) validou todos os outputs. CASINO-3.1 desbloqueado.
 
 ### Ordem Recomendada de Implementação (@dev)
 
@@ -315,8 +315,8 @@ STORIES (Backlog)       READY ✅             IN PROGRESS         DONE ✅
 - [x] Passthrough documentado em 8/9 endpoints; response transform em 1/9 (authenticate)
 - [x] Padrão handleResult() documentado em result.md e referenciado em bonusWin/jackpotWin/promoWin
 - [x] Tabela de grupos dos 9 endpoints presente em adjustment.md
-- [x] @po revisa e aprova cada documento antes de CASINO-2.3 iniciar
-- [x] CASINO-2.3 desbloqueado
+- [x] @po revisa e aprova cada documento antes de CASINO-3.1 iniciar
+- [x] CASINO-3.1 desbloqueado
 
 ---
 

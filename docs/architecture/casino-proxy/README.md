@@ -2,7 +2,7 @@
 
 **Purpose:** Centralized documentation for the Casino Proxy PHP → Go migration (CASINO epics)
 
-**Status:** CASINO-1 ✅ Complete | CASINO-2 🚀 In Progress | CASINO-3 ⏸️ Waiting
+**Status:** CASINO-1 ✅ Complete | CASINO-2 🚀 In Progress | CASINO-3 🟡 In Pipeline | CASINO-4 ⏸️ Waiting
 
 ---
 
