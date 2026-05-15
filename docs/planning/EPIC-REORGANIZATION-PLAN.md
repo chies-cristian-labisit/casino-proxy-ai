@@ -140,42 +140,32 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
 
 ### CASINO-3: Go Microservices Implementation & Migration
 
-**Objetivo:** Implementar serviços Go que replicam 100% comportamento PHP (com descoberta prévia de IaC)
+**Objetivo:** Implementar serviços Go que replicam 100% comportamento PHP.
+
+> ⏸️ **CASINO-3.0 DEFERRED:** IaC provisioning is no longer a dev team responsibility. Infrastructure will be handled by a dedicated ops/infrastructure team. Dev team assumes infrastructure will be available when CASINO-3 starts.
 
 **Escopo:**
-- **Fase 0 (CASINO-3.0):** Descoberta & Validação de Infrastructure as Code
-  - Avaliar opções de IaC (Terraform, CloudFormation, Pulumi, etc.)
-  - Escolher stack IaC apropriado para projeto
-  - Setup inicial de infrastructure code
-  - Deploy e validação com health check endpoints
-  - Documentar decisões arquiteturais de infraestrutura
-  
 - **Fase 2 (CASINO-3.1-3.4):** Arquitetura microservices + design de banco de dados
-  - Usar IaC definida em Fase 0 para toda infraestrutura
   - Microservices architecture design
   - Database schema design (PostgreSQL + GORM)
   - Gateway service architecture
   
 - **Fase 3 (CASINO-3.5-3.11):** Implementar serviços Go (1 por provider + gateway + admin)
-  - Usar IaC para provisionar ambientes
   - Implementar cada serviço Go
   - Configurar CI/CD pipeline
   
 - **Fase 4 (CASINO-3.12-3.16):** Migração de dados + dual-write
-  - Usar IaC para provisionar nova infraestrutura PostgreSQL
   - Implementar migração de dados
   - Setup dual-write entre PHP e Go
   
 - **Fase 5 (CASINO-3.17-3.22):** Testes, deployment híbrido, migração tráfego
-  - Deploy híbrido (PHP + Go) via IaC
   - Testes end-to-end
   - Migração gradual de tráfego
   - Cutover final
 
-**Sequência:** Pode começar Fase 0 (IaC) em paralelo com CASINO-2. Fases 2-5 iniciam quando CASINO-2 Fase 1 completa.
+**Sequência:** Fases 2-5 iniciam quando CASINO-2 Fase 1 completa.
 
 **Resultado:**
-- IaC completa (`/infrastructure/` com Terraform/CloudFormation)
 - Serviços Go em `/services/` (1 pasta por provider + gateway)
 - Schema PostgreSQL novo (migrations GORM)
 - Suite de testes Go (match CASINO-2 tests)
@@ -183,17 +173,14 @@ Semana 1           Semana 2-3         Semana 4+           Semana 8+
 - Documentação operacional
 
 **Validação:** 
-- **Fase 0:** Deploy de infraestrutura com health check endpoints respondendo
 - **Fases 2-5:** Go tests passam contra CASINO-2 PHP tests (prova de parity)
 
 **Definition of Done:**
-- [ ] Fase 0: IaC escolhida, validada e documentada
+- ~~[ ] Fase 0: IaC escolhida, validada e documentada~~ ⏸️ DEFERRED — not a dev team responsibility
 - [ ] Todos 8 providers migrados para Go em produção
-- [ ] Infraestrutura gerenciada 100% via IaC
 - [ ] Zero downtime durante migração por provider
 - [ ] Performance meets or exceeds PHP baseline
 - [ ] PHP decommissioned
-- [ ] Monitoring & alerting configured via IaC
 
 ---
 

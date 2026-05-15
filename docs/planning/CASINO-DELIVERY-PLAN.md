@@ -572,7 +572,7 @@ Implementar serviços Go que replicam 100% o comportamento do PHP, com infraestr
 
 | Fase | Stories | O que é Feito |
 |------|---------|--------------|
-| **Fase 0: IaC** | CASINO-3.0 | Escolhe Terraform/CloudFormation, setup inicial |
+| ~~**Fase 0: IaC**~~ | ~~CASINO-3.0~~ | ⏸️ DEFERRED — IaC not a dev team responsibility |
 | **Fase 2: Architecture** | CASINO-3.1-3.4 | Design microservices + DB schema (PostgreSQL) |
 | **Fase 3: Implementation** | CASINO-3.5-3.11 | Implementa 8 serviços Go + gateway + admin API |
 | **Fase 4: Migration** | CASINO-3.12-3.16 | Migração dados + dual-write + tráfego gradual |
@@ -592,7 +592,7 @@ validation report (100% pass)      →  Go tests devem igualar PHP tests 100%
 
 ### Definição de Pronto (CASINO-3)
 
-- [ ] Fase 0: IaC testada, deploy bem-sucedido com health checks
+- ~~[ ] Fase 0: IaC testada, deploy bem-sucedido com health checks~~ ⏸️ DEFERRED — IaC not a dev team responsibility
 - [ ] Fase 2: Arquitetura desenhada, DB schema validado
 - [ ] Fase 3: Go services passam em CASINO-2 tests (parity 100%)
 - [ ] Fase 4: Migração de dados zero-loss, dual-write funcionando
@@ -735,7 +735,7 @@ Final: CASINO-2 100% Completo
 └─ Desbloqueia CASINO-3: Implementação Go em paralelo
 
 CASINO-3 Timeline
-├─ Fase 0: IaC design + setup (em paralelo com CASINO-2)
+~~├─ Fase 0: IaC design + setup (em paralelo com CASINO-2)~~ ⏸️ DEFERRED
 ├─ Fase 2: Architecture microservices + DB schema
 ├─ Fase 3: Implementation (8 serviços Go + gateway + admin)
 ├─ Fase 4: Database migration + dual-write
@@ -763,7 +763,7 @@ CASINO-3 Timeline
 - [ ] Go tests = PHP tests (100% parity)
 - [ ] 0 downtime durante migração
 - [ ] Performance ≥ PHP baseline
-- [ ] Infrastructure 100% via IaC
+- ~~[ ] Infrastructure 100% via IaC~~ ⏸️ DEFERRED — IaC not a dev team responsibility
 - [ ] 99.9% uptime SLA
 - [ ] PHP completamente decommissioned
 
@@ -776,7 +776,7 @@ CASINO-3 Timeline
 | Provider toma mais tempo que estimado | 🟡 Médio | 🟡 Atraso cascata | Fases paralelas CASINO-3, buffer de 1 semana |
 | Teste PHP descobre gaps em código | 🟡 Médio | 🟡 Rework necessário | Code review rigoroso em Fase 3 |
 | Go implementation encontra edge cases | 🟡 Médio | 🟡 Delays | CASINO-2 tests cobrem 99% dos casos |
-| Infraestrutura de IaC tem issue | 🔴 Baixo | 🔴 Crítico | Fase 0 de CASINO-3 com expert review |
+| ~~Infraestrutura de IaC tem issue~~ | — | — | ⏸️ DEFERRED — IaC handled by ops/infra team, not dev team |
 | Performance Go < PHP | 🔴 Muito Baixo | 🔴 Crítico | Profiling + optimization em Fase 3 |
 
 ---
@@ -792,7 +792,7 @@ CASINO-3 Timeline
 | **Gate** | Critério de saída de uma fase (ex: 100% testes passam) |
 | **Provider** | Provedor de jogos (Pragmatic Play, Evolution, PG Soft, etc) |
 | **Tenant** | Isolamento multi-tenant via prefixo em token |
-| **IaC** | Infrastructure as Code (Terraform / CloudFormation) |
+| **IaC** | Infrastructure as Code (Terraform / CloudFormation) — ⏸️ DEFERRED: not a dev team responsibility |
 
 ---
 

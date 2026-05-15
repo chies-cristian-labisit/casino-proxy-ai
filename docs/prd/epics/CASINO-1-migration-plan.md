@@ -484,7 +484,7 @@ Hybrid Mode (During Transition):
 ### Immediate (This Week)
 1. ✅ Complete Phase 1 story planning (CASINO-1.1 to CASINO-1.6) → MERGED to master
 2. 🚀 Start CASINO-2 Phase 1 (Business Rules Extraction - Pragmatic Play)
-3. 🔧 Start CASINO-3.0 (Infrastructure as Code Discovery)
+3. ~~CASINO-3.0 (Infrastructure as Code Discovery)~~ ⏸️ DEFERRED — IaC provisioning is no longer a dev team responsibility; infrastructure will be handled by a dedicated ops/infrastructure team.
 
 ### Week 2-3
 - Complete OpenAPI documentation for all 8 providers
