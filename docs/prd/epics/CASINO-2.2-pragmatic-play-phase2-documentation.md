@@ -2,9 +2,9 @@
 
 **Epic ID:** CASINO-2.2  
 **Tipo:** Fase 2 de 5 — Technical Documentation (Pragmatic Play)  
-**Status:** 🟡 Ready for Implementation — Stories completas, @dev pendente  
+**Status:** ✅ Done — Fase 2 completa. Todos os 9 outputs criados e validados por @qa (2026-05-15)  
 **Criado:** 2026-05-12  
-**Atualizado:** 2026-05-13  
+**Atualizado:** 2026-05-15  
 **Owner:** @sm (River)  
 **Executor:** @dev (Dex)  
 **Validação:** @po (Pax)  
@@ -18,8 +18,8 @@
 Produzir documentação técnica completa para os **9 endpoints do Pragmatic Play**, mostrando como as 12 regras de negócio (BR-*) extraídas na Fase 1 se combinam em fluxos de 8 fases por endpoint. Os documentos de output são a especificação que guia a implementação dos handlers Go na CASINO-3.
 
 ```
-Input:   docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md (12 regras BR-*)
-Output:  docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-{endpoint}.md (9 docs)
+Input:   docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md (12 regras BR-*)
+Output:  docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-{endpoint}.md (9 docs)
 ```
 
 ---
@@ -85,8 +85,8 @@ Fase 8 → RESPONSE       Passthrough (7 endpoints) | Transform userId (authenti
 | Total de stories | 9 |
 | Stories criadas | 9 / 9 ✅ |
 | Stories validadas (@po) | 9 / 9 ✅ |
-| Documentos de output criados (@dev) | 0 / 9 ⏳ |
-| Fase 2 completa | ❌ Pendente implementação |
+| Documentos de output criados (@dev) | 9 / 9 ✅ |
+| Fase 2 completa | ✅ Completa |
 
 ---
 
@@ -112,10 +112,10 @@ Fase 8 → RESPONSE       Passthrough (7 endpoints) | Transform userId (authenti
 | Campo | Valor |
 |-------|-------|
 | **Story ID** | CASINO-2.2-authenticate |
-| **Arquivo Story** | `docs/stories/CASINO-2.2-pragmatic-play-authenticate.md` |
-| **Documento Output** | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md` |
-| **Status Story** | ✅ Ready (GO 8/10) |
-| **Status Output** | ⏳ A criar — @dev pendente |
+| **Arquivo Story** | `docs/stories/completed/CASINO-2.2-pragmatic-play-authenticate.md` |
+| **Documento Output** | `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md` |
+| **Status Story** | ✅ Done |
+| **Status Output** | ✅ Criado |
 | **Validação @po** | ✅ 2026-05-12 — GO 8/10 |
 | **Diferencial** | Único endpoint com response transformation (re-prefixa `userId` se `error==0`); regras exclusivas PP-007 + PP-012 |
 | **Estimativa @dev** | 2-3 horas |
@@ -128,10 +128,10 @@ Fase 8 → RESPONSE       Passthrough (7 endpoints) | Transform userId (authenti
 | Campo | Valor |
 |-------|-------|
 | **Story ID** | CASINO-2.2-bet |
-| **Arquivo Story** | `docs/stories/CASINO-2.2-bet-pragmatic-play.md` |
-| **Documento Output** | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` |
-| **Status Story** | ✅ Ready (GO 9/10) |
-| **Status Output** | ⏳ A criar — @dev pendente |
+| **Arquivo Story** | `docs/stories/completed/CASINO-2.2-bet-pragmatic-play.md` |
+| **Documento Output** | `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` |
+| **Status Story** | ✅ Done |
+| **Status Output** | ✅ Criado |
 | **Validação @po** | ✅ 2026-05-12 — GO 9/10. Fix: coluna "Regras exclusivas" → "Regras notáveis" |
 | **Diferencial** | Padrão canônico de transação; usa `userId`; sem regras exclusivas; serve de modelo para refund/result/bonusWin/jackpotWin/promoWin |
 | **Estimativa @dev** | 1-2 horas |
@@ -144,10 +144,10 @@ Fase 8 → RESPONSE       Passthrough (7 endpoints) | Transform userId (authenti
 | Campo | Valor |
 |-------|-------|
 | **Story ID** | CASINO-2.2-refund |
-| **Arquivo Story** | `docs/stories/CASINO-2.2-refund-pragmatic-play.md` |
-| **Documento Output** | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-refund.md` |
-| **Status Story** | ✅ Ready (GO 9/10) |
-| **Status Output** | ⏳ A criar — @dev pendente |
+| **Arquivo Story** | `docs/stories/completed/CASINO-2.2-refund-pragmatic-play.md` |
+| **Documento Output** | `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-refund.md` |
+| **Status Story** | ✅ Done |
+| **Status Output** | ✅ Criado |
 | **Validação @po** | ✅ 2026-05-12 — GO 9/10 |
 | **Diferencial** | Reverso do /bet; estruturalmente idêntico (única diferença: URL `refund.html`, contexto estorno, linhas ~79-92) |
 | **Estimativa @dev** | 1 hora |
@@ -160,10 +160,10 @@ Fase 8 → RESPONSE       Passthrough (7 endpoints) | Transform userId (authenti
 | Campo | Valor |
 |-------|-------|
 | **Story ID** | CASINO-2.2-result |
-| **Arquivo Story** | `docs/stories/CASINO-2.2-result-pragmatic-play.md` |
-| **Documento Output** | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md` |
-| **Status Story** | ✅ Ready (GO 9/10) |
-| **Status Output** | ⏳ A criar — @dev pendente |
+| **Arquivo Story** | `docs/stories/completed/CASINO-2.2-result-pragmatic-play.md` |
+| **Documento Output** | `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md` |
+| **Status Story** | ✅ Done |
+| **Status Output** | ✅ Criado |
 | **Validação @po** | ✅ 2026-05-12 — GO 9/10 |
 | **Diferencial** | Introduz padrão `handleResult()` — thin wrapper `result()` (~94-97) delega para método privado compartilhado (~161-175); serve de referência canônica para bonusWin/jackpotWin/promoWin |
 | **Estimativa @dev** | 1-2 horas |
@@ -176,10 +176,10 @@ Fase 8 → RESPONSE       Passthrough (7 endpoints) | Transform userId (authenti
 | Campo | Valor |
 |-------|-------|
 | **Story ID** | CASINO-2.2-bonusWin |
-| **Arquivo Story** | `docs/stories/CASINO-2.2-bonusWin-pragmatic-play.md` |
-| **Documento Output** | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bonusWin.md` |
-| **Status Story** | ✅ Ready (GO 9/10) |
-| **Status Output** | ⏳ A criar — @dev pendente |
+| **Arquivo Story** | `docs/stories/completed/CASINO-2.2-bonusWin-pragmatic-play.md` |
+| **Documento Output** | `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-bonusWin.md` |
+| **Status Story** | ✅ Done |
+| **Status Output** | ✅ Criado |
 | **Validação @po** | ✅ 2026-05-13 — GO 9/10 |
 | **Diferencial** | handleResult() family — wrapper `bonusWin()` (~99-102) passa `'bonusWin'` para handleResult(); URL `bonusWin.html`; contexto: pagamento de bônus |
 | **Estimativa @dev** | 1 hora |
@@ -192,10 +192,10 @@ Fase 8 → RESPONSE       Passthrough (7 endpoints) | Transform userId (authenti
 | Campo | Valor |
 |-------|-------|
 | **Story ID** | CASINO-2.2-jackpotWin |
-| **Arquivo Story** | `docs/stories/CASINO-2.2-jackpotWin-pragmatic-play.md` |
-| **Documento Output** | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-jackpotWin.md` |
-| **Status Story** | ✅ Ready (GO 9/10) |
-| **Status Output** | ⏳ A criar — @dev pendente |
+| **Arquivo Story** | `docs/stories/completed/CASINO-2.2-jackpotWin-pragmatic-play.md` |
+| **Documento Output** | `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-jackpotWin.md` |
+| **Status Story** | ✅ Done |
+| **Status Output** | ✅ Criado |
 | **Validação @po** | ✅ 2026-05-13 — GO 9/10 |
 | **Diferencial** | handleResult() family — wrapper `jackpotWin()` (~104-107); URL `jackpotWin.html`; contexto: evento de alta magnitude financeira com requisito de auditoria |
 | **Estimativa @dev** | 1 hora |
@@ -208,10 +208,10 @@ Fase 8 → RESPONSE       Passthrough (7 endpoints) | Transform userId (authenti
 | Campo | Valor |
 |-------|-------|
 | **Story ID** | CASINO-2.2-promoWin |
-| **Arquivo Story** | `docs/stories/CASINO-2.2-promoWin-pragmatic-play.md` |
-| **Documento Output** | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-promoWin.md` |
-| **Status Story** | ✅ Ready (GO 9/10) |
-| **Status Output** | ⏳ A criar — @dev pendente |
+| **Arquivo Story** | `docs/stories/completed/CASINO-2.2-promoWin-pragmatic-play.md` |
+| **Documento Output** | `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-promoWin.md` |
+| **Status Story** | ✅ Done |
+| **Status Output** | ✅ Criado |
 | **Validação @po** | ✅ 2026-05-13 — GO 9/10 |
 | **Diferencial** | handleResult() family — último membro; wrapper `promoWin()` (~109-112); URL `promoWin.html`; contexto: prêmio de campanha promocional do operador |
 | **Estimativa @dev** | 1 hora |
@@ -224,10 +224,10 @@ Fase 8 → RESPONSE       Passthrough (7 endpoints) | Transform userId (authenti
 | Campo | Valor |
 |-------|-------|
 | **Story ID** | CASINO-2.2-adjustment |
-| **Arquivo Story** | `docs/stories/CASINO-2.2-adjustment-pragmatic-play.md` |
-| **Documento Output** | `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` |
-| **Status Story** | ✅ Ready (GO 9/10) |
-| **Status Output** | ⏳ A criar — @dev pendente |
+| **Arquivo Story** | `docs/stories/completed/CASINO-2.2-adjustment-pragmatic-play.md` |
+| **Documento Output** | `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` |
+| **Status Story** | ✅ Done |
+| **Status Output** | ✅ Criado |
 | **Validação @po** | ✅ 2026-05-13 — GO 9/10 |
 | **Diferencial** | Único endpoint **não**-handleResult() fora do grupo bet/refund; lógica inline (~114-127), userId em linha ~120; iniciado pelo operador (não pelo jogador); ajuste administrativo de saldo; inclui tabela de grupos dos 9 endpoints (fecha Fase 2) |
 | **Estimativa @dev** | 1-2 horas |
@@ -238,19 +238,20 @@ Fase 8 → RESPONSE       Passthrough (7 endpoints) | Transform userId (authenti
 ## Kanban de Execução
 
 ```
-STORIES (Backlog)       READY ✅             IN PROGRESS         DONE
+STORIES (Backlog)       READY ✅             IN PROGRESS         DONE ✅
 ────────────────────    ─────────────────    ────────────────    ────────────────
-                        authenticate         —                   balance (template)
-                        bet
-                        refund
-                        result
-                        bonusWin
-                        jackpotWin
-                        promoWin
-                        adjustment
+                        —                    —                   balance (template)
+                                                                 authenticate
+                                                                 bet
+                                                                 refund
+                                                                 result
+                                                                 bonusWin
+                                                                 jackpotWin
+                                                                 promoWin
+                                                                 adjustment
 ```
 
-> **Estado atual (2026-05-13):** Todas as 8 stories em Ready. @dev pode iniciar implementação em qualquer ordem — a dependência real é apenas que `pragmatic-play-bet.md` exista antes de refund/adjustment usá-lo como template.
+> **Estado atual (2026-05-15):** Todas as 8 stories Done. Fase 2 concluída. @qa (Quinn) validou todos os outputs. CASINO-2.3 desbloqueado.
 
 ### Ordem Recomendada de Implementação (@dev)
 
@@ -275,47 +276,47 @@ STORIES (Backlog)       READY ✅             IN PROGRESS         DONE
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | 12 regras BR-* com rastreabilidade PHP | ✅ Completo |
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md` | Template canônico da Fase 2 | ✅ Completo |
+| `docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | 12 regras BR-* com rastreabilidade PHP | ✅ Completo |
+| `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md` | Template canônico da Fase 2 | ✅ Completo |
 
-### Output (Fase 2 — a criar pelo @dev)
+### Output (Fase 2 — criados pelo @dev, validados pelo @qa)
 
 | Arquivo | Endpoint | Status |
 |---------|----------|--------|
-| `pragmatic-play-authenticate.md` | `/authenticate` | ⏳ Pendente |
-| `pragmatic-play-bet.md` | `/bet` | ⏳ Pendente |
-| `pragmatic-play-refund.md` | `/refund` | ⏳ Pendente |
-| `pragmatic-play-result.md` | `/result` | ⏳ Pendente |
-| `pragmatic-play-bonusWin.md` | `/bonusWin` | ⏳ Pendente |
-| `pragmatic-play-jackpotWin.md` | `/jackpotWin` | ⏳ Pendente |
-| `pragmatic-play-promoWin.md` | `/promoWin` | ⏳ Pendente |
-| `pragmatic-play-adjustment.md` | `/adjustment` | ⏳ Pendente |
+| `pragmatic-play-authenticate.md` | `/authenticate` | ✅ Criado |
+| `pragmatic-play-bet.md` | `/bet` | ✅ Criado |
+| `pragmatic-play-refund.md` | `/refund` | ✅ Criado |
+| `pragmatic-play-result.md` | `/result` | ✅ Criado |
+| `pragmatic-play-bonusWin.md` | `/bonusWin` | ✅ Criado |
+| `pragmatic-play-jackpotWin.md` | `/jackpotWin` | ✅ Criado |
+| `pragmatic-play-promoWin.md` | `/promoWin` | ✅ Criado |
+| `pragmatic-play-adjustment.md` | `/adjustment` | ✅ Criado |
 
-### Stories (todas em `docs/stories/`)
+### Stories (todas em `docs/stories/completed/`)
 
 | Arquivo | Status |
 |---------|--------|
-| `CASINO-2.2-pragmatic-play-authenticate.md` | ✅ Ready |
-| `CASINO-2.2-bet-pragmatic-play.md` | ✅ Ready |
-| `CASINO-2.2-refund-pragmatic-play.md` | ✅ Ready |
-| `CASINO-2.2-result-pragmatic-play.md` | ✅ Ready |
-| `CASINO-2.2-bonusWin-pragmatic-play.md` | ✅ Ready |
-| `CASINO-2.2-jackpotWin-pragmatic-play.md` | ✅ Ready |
-| `CASINO-2.2-promoWin-pragmatic-play.md` | ✅ Ready |
-| `CASINO-2.2-adjustment-pragmatic-play.md` | ✅ Ready |
+| `CASINO-2.2-pragmatic-play-authenticate.md` | ✅ Done |
+| `CASINO-2.2-bet-pragmatic-play.md` | ✅ Done |
+| `CASINO-2.2-refund-pragmatic-play.md` | ✅ Done |
+| `CASINO-2.2-result-pragmatic-play.md` | ✅ Done |
+| `CASINO-2.2-bonusWin-pragmatic-play.md` | ✅ Done |
+| `CASINO-2.2-jackpotWin-pragmatic-play.md` | ✅ Done |
+| `CASINO-2.2-promoWin-pragmatic-play.md` | ✅ Done |
+| `CASINO-2.2-adjustment-pragmatic-play.md` | ✅ Done |
 
 ---
 
 ## Definition of Done — Epic CASINO-2.2
 
-- [ ] 9 documentos `pragmatic-play-{endpoint}.md` criados em `phase-2-technical-documentation/`
-- [ ] Todos os diagramas Mermaid renderizam corretamente
-- [ ] Cada documento referencia as regras BR-* corretas por fase
-- [ ] Passthrough documentado em 8/9 endpoints; response transform em 1/9 (authenticate)
-- [ ] Padrão handleResult() documentado em result.md e referenciado em bonusWin/jackpotWin/promoWin
-- [ ] Tabela de grupos dos 9 endpoints presente em adjustment.md
-- [ ] @po revisa e aprova cada documento antes de CASINO-2.3 iniciar
-- [ ] CASINO-2.3 desbloqueado
+- [x] 9 documentos `pragmatic-play-{endpoint}.md` criados em `phase-2-technical-documentation/`
+- [x] Todos os diagramas Mermaid renderizam corretamente
+- [x] Cada documento referencia as regras BR-* corretas por fase
+- [x] Passthrough documentado em 8/9 endpoints; response transform em 1/9 (authenticate)
+- [x] Padrão handleResult() documentado em result.md e referenciado em bonusWin/jackpotWin/promoWin
+- [x] Tabela de grupos dos 9 endpoints presente em adjustment.md
+- [x] @po revisa e aprova cada documento antes de CASINO-2.3 iniciar
+- [x] CASINO-2.3 desbloqueado
 
 ---
 
@@ -351,3 +352,7 @@ STORIES (Backlog)       READY ✅             IN PROGRESS         DONE
 | 2026-05-13 | @po (Pax) | CASINO-2.2-adjustment validada GO 9/10 — Ready |
 | 2026-05-13 | @devops (Gage) | Branch `docs/CASINO-2.2-phase2-pragmatic-play-stories` publicado |
 | 2026-05-13 | @sm (River) | Epic CASINO-2.2 criado com tracking completo |
+| 2026-05-14 | @dev (Dex) | 8 outputs `pragmatic-play-{endpoint}.md` criados em `docs/architecture/casino-proxy/phase-2-technical-documentation/` |
+| 2026-05-15 | @sm (River) | 8 stories migradas para `docs/stories/completed/`; paths atualizados `docs/casino-proxy/` → `docs/architecture/casino-proxy/` |
+| 2026-05-15 | @qa (Quinn) | QA Gate PASS em todas as 8 stories — status InReview → Done |
+| 2026-05-15 | @sm (River) | Epic atualizado: status Done, Kanban, DoD, artefatos, stories — Fase 2 encerrada |

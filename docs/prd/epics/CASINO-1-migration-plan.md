@@ -165,7 +165,7 @@ POST   /v1/webhooks/alternar/                      - Generic webhook endpoint
 
 ---
 
-**Analysis:** OpenAPI specs created for all 8 providers + admin API. See `docs/openapi/specs/` for complete specifications.
+**Analysis:** OpenAPI specs created for all 8 providers + admin API. See `application/docs/openapi/` for complete specifications.
 
 ---
 
@@ -475,7 +475,7 @@ Hybrid Mode (During Transition):
 | **CASINO-2** | 1.5 (Discovery) | Business Rules & Test Oracle | 40 | 🚀 STARTING |
 | **CASINO-3** | 0-5 | Go Implementation & Migration | 23 | ⏸️ WAITING |
 
-**See:** `EPIC-REORGANIZATION-PLAN.md` for detailed breakdown.
+**See:** `docs/planning/EPIC-REORGANIZATION-PLAN.md` for detailed breakdown.
 
 ---
 

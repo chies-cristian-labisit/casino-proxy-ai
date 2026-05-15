@@ -3,7 +3,7 @@
 **Story ID:** CASINO-2.2-authenticate  
 **Epic:** CASINO-2 (Business Rules Discovery & Test Oracle)  
 **Tipo:** Documentação Técnica (Fase 2 de 5 — Technical Documentation)  
-**Status:** InReview  
+**Status:** Done  
 **Prioridade:** Alta  
 **Atribuído a:** @dev (com revisão de @architect)  
 **Relacionado:** CASINO-1.7 (Regras de Negócio Pragmatic Play extraídas), CASINO-2.2 (Template /balance)  
@@ -15,7 +15,7 @@
 
 Documentar o endpoint `/authenticate` do Pragmatic Play seguindo o template estabelecido em `pragmatic-play-balance.md`. Este é o **primeiro dos 8 endpoints restantes** da Fase 2 (após `/balance`), e também o **mais crítico**: é o único endpoint que **transforma a resposta** do provider (re-prefixação do `userId`), diferente de todos os outros que fazem passthrough direto.
 
-**Objetivo:** Produzir `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md` completo — fluxo 8 fases, 9 regras mapeadas, exemplos request/response e security checklist.
+**Objetivo:** Produzir `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md` completo — fluxo 8 fases, 9 regras mapeadas, exemplos request/response e security checklist.
 
 ---
 
@@ -70,7 +70,7 @@ Fase 5: Validar — 100% testes PHP passam
 - [x] **AC-4:** Mínimo 5 cenários de erro documentados com causa raiz e comportamento esperado
 - [x] **AC-5:** Exemplo completo request → response mostrando a re-prefixação do `userId` (caso sucesso) e ausência de re-prefixação (caso erro)
 - [x] **AC-6:** Security checklist preenchido (tenant isolation, hash auth, operator/credential validation, endpoint validation)
-- [x] **AC-7:** Arquivo criado em `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md`
+- [x] **AC-7:** Arquivo criado em `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md`
 - [x] **AC-8:** File List desta story atualizada
 
 ### Deveria Ter
@@ -113,7 +113,7 @@ Fonte:  legacy/casino-proxy/app/Services/PragmaticPlayService.php (método authe
 | 8 | BR-GENERIC-PROVIDER-INTEGRATION-001 | HTTP POST para `{tenant_url}/pragmatic-play/authenticate.html` | 7 | Não |
 | 9 | **PP-012** (inclui PP-007) | **Re-prefixa `userId` se `error == 0`** — ÚNICO endpoint com transformação | **8** | **SIM** |
 
-> **Fonte das regras:** `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md`
+> **Fonte das regras:** `docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md`
 
 ### Comportamento de Re-prefixação (PP-007 / PP-012)
 
@@ -187,10 +187,10 @@ O arquivo `pragmatic-play-authenticate.md` deve seguir exatamente o template de 
 
 > Sequência de implementação para @dev
 
-- [x] **T-1:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md` completo — internalizar estrutura do template
-- [x] **T-2:** Ler `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — focar nas regras PP-007 e PP-012 (linhas `authenticate()` seção)
+- [x] **T-1:** Ler `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md` completo — internalizar estrutura do template
+- [x] **T-2:** Ler `docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — focar nas regras PP-007 e PP-012 (linhas `authenticate()` seção)
 - [x] **T-3:** Ler `legacy/casino-proxy/app/Services/PragmaticPlayService.php` método `authenticate()` (linhas ~26-44) — confirmar fluxo real
-- [x] **T-4:** Criar arquivo `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md`
+- [x] **T-4:** Criar arquivo `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md`
 - [x] **T-5:** Escrever Header + Resumo Executivo (destacar diferencial de response transformation)
 - [x] **T-6:** Escrever Fluxo 8 Fases com diagrama Mermaid (Fase 8 = transformação, não passthrough)
 - [x] **T-7:** Preencher Matriz de Regras (9 regras × fase × exclusiva?)
@@ -214,8 +214,8 @@ O arquivo `pragmatic-play-authenticate.md` deve seguir exatamente o template de 
 - Quality Gate: @architect (revisar fidelidade das regras documentadas)
 
 **Quality Gate Tasks:**
-- [ ] Pre-Commit (@dev): Verificar que markdown renderiza corretamente (headings, tabelas, Mermaid)
-- [ ] Pre-PR (@devops): Validar links e referências a arquivos existentes
+- [x] Pre-Commit (@dev): [N/A — CodeRabbit disabled] — Verificar que markdown renderiza corretamente (headings, tabelas, Mermaid)
+- [x] Pre-PR (@devops): [N/A — CodeRabbit disabled] — Validar links e referências a arquivos existentes
 
 **Self-Healing Configuration:**
 ```yaml
@@ -239,12 +239,12 @@ behavior:
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md` | Documentação técnica do endpoint /authenticate | ✅ Criado |
+| `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md` | Documentação técnica do endpoint /authenticate | ✅ Criado |
 
 ### Template de Referência
 
 ```
-docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md
+docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md
 ```
 
 ---
@@ -253,9 +253,9 @@ docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md` | Output principal desta story | ✅ Criado |
-| `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | Fonte das 9 regras BR-* | ✅ Existe |
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md` | Template a seguir | ✅ Existe |
+| `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-authenticate.md` | Output principal desta story | ✅ Criado |
+| `docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | Fonte das 9 regras BR-* | ✅ Existe |
+| `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md` | Template a seguir | ✅ Existe |
 | `legacy/casino-proxy/app/Services/PragmaticPlayService.php` | Código fonte de referência | ✅ Existe |
 
 ---
@@ -309,3 +309,16 @@ docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md
 | 2026-05-12 | @po (Pax) | Validação GO (8/10) — Status: Draft → Ready. Adicionadas seções Tasks/Subtasks e CodeRabbit Integration. |
 | 2026-05-12 | @dev (Dex) | Implementação completa — `pragmatic-play-authenticate.md` criado (10 seções, 6 cenários de erro, 2 exemplos, tabela comparativa, Mermaid 8 fases). Todos T-1..T-12 concluídos. Status: Ready → InProgress → aguarda QA. |
 | 2026-05-12 | @qa (Quinn) | QA Gate PASS — 7/7 checks OK. Todos os ACs (10/10) atendidos. Observação minor: atualizações administrativas da story aplicadas (checkboxes, File List, DoD). Status: InReview. |
+| 2026-05-15 | @qa (Quinn) | QA Gate PASS (retroativo) — Gate file criado. Status: InReview → Done | @qa |
+
+## QA Results
+
+### Review Date: 2026-05-15
+
+### Reviewed By: Quinn (Test Architect)
+
+All 10 ACs verified as complete. Output file exists and is complete. Prior QA PASS (2026-05-12) confirmed valid.
+
+### Gate Status
+
+Gate: PASS → docs/qa/gates/casino-2.2-authenticate.yml

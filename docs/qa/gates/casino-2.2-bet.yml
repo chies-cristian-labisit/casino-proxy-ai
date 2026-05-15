@@ -1,0 +1,8 @@
+schema: 1
+story: CASINO-2.2-bet
+gate: PASS
+status_reason: All ACs met. Output file pragmatic-play-bet.md complete with 8-phase flow, business rules mapped, 6 error scenarios, full request/response example, and 3-way comparative table. CodeRabbit N/A (disabled).
+reviewer: Quinn
+updated: '2026-05-15T00:00:00Z'
+top_issues: []
+waiver: { active: false }

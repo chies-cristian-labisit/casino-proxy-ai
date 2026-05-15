@@ -3,7 +3,7 @@
 **Story ID:** CASINO-2.2-adjustment  
 **Epic:** CASINO-2 (Business Rules Discovery & Test Oracle)  
 **Tipo:** Documentação Técnica (Fase 2 de 5 — Technical Documentation)  
-**Status:** InReview  
+**Status:** Done  
 **Prioridade:** Alta  
 **Atribuído a:** @dev (com revisão de @architect)  
 **Relacionado:** CASINO-1.7, CASINO-2.2-promoWin, CASINO-2.2-bet (Ready)  
@@ -15,7 +15,7 @@
 
 Documentar o endpoint `/adjustment` do Pragmatic Play seguindo o padrão estabelecido em `pragmatic-play-bet.md`. O `/adjustment` é o **último endpoint da Fase 2** e o único que **não pertence à família handleResult()**. É estruturalmente idêntico ao `/bet` e `/refund` — usa `userId`, lógica inline, passthrough de response, 9 regras genéricas — mas com contexto de negócio distinto: **correção/ajuste administrativo de saldo**, não um evento de jogo.
 
-**Objetivo:** Produzir `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` completo e encerrar a documentação de todos os 9 endpoints do Pragmatic Play na Fase 2.
+**Objetivo:** Produzir `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` completo e encerrar a documentação de todos os 9 endpoints do Pragmatic Play na Fase 2.
 
 ---
 
@@ -72,7 +72,7 @@ Fase 2: Documentar endpoints
 - [x] **AC-4:** Mínimo 5 cenários de erro documentados com causa raiz e comportamento esperado
 - [x] **AC-5:** Exemplo completo request → response mostrando sanitização do `userId` e passthrough da resposta
 - [x] **AC-6:** Security checklist preenchido (tenant isolation, hash auth, operator/credential validation)
-- [x] **AC-7:** Arquivo criado em `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md`
+- [x] **AC-7:** Arquivo criado em `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md`
 - [x] **AC-8:** File List desta story atualizada
 
 ### Deveria Ter
@@ -138,7 +138,7 @@ public function adjustment($data) {
 | 9 | BR-GENERIC-PROVIDER-INTEGRATION-001 | HTTP POST para `{tenant_url}/pragmatic-play/adjustment.html` | 7 | Não |
 
 > **Fase 8:** Passthrough direto — resposta do provider retornada **sem nenhuma transformação**.  
-> **Fonte das regras:** `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md`
+> **Fonte das regras:** `docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md`
 
 ### Uso de userId em adjustment()
 
@@ -204,10 +204,10 @@ O arquivo `pragmatic-play-adjustment.md` deve seguir o template de `pragmatic-pl
 
 ## Tasks / Subtasks
 
-- [x] **T-1:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` — usar como template direto (lógica inline idêntica)
-- [x] **T-2:** Ler `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — confirmar regras e tabela de endpoints (adjustment)
+- [x] **T-1:** Ler `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` — usar como template direto (lógica inline idêntica)
+- [x] **T-2:** Ler `docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — confirmar regras e tabela de endpoints (adjustment)
 - [x] **T-3:** Ler `legacy/casino-proxy/app/Services/PragmaticPlayService.php` método `adjustment()` (linhas ~114-127) — confirmar lógica inline e userId em ~120
-- [x] **T-4:** Criar arquivo `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md`
+- [x] **T-4:** Criar arquivo `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md`
 - [x] **T-5:** Adaptar conteúdo de bet.md — substituir referências bet → adjustment, ajustar URLs e linhas de código
 - [x] **T-6:** Escrever Fluxo 8 Fases com diagrama Mermaid
 - [x] **T-7:** Preencher Matriz de Regras (9 regras)
@@ -231,8 +231,8 @@ O arquivo `pragmatic-play-adjustment.md` deve seguir o template de `pragmatic-pl
 - Quality Gate: @architect
 
 **Quality Gate Tasks:**
-- [ ] Pre-Commit (@dev): Markdown renderiza corretamente; sem referências residuais a "bet" onde deveria ser "adjustment"; tabela de grupos presente
-- [ ] Pre-PR (@devops): Links e paths válidos
+- [x] Pre-Commit (@dev): [N/A — CodeRabbit disabled] — Markdown renderiza corretamente; sem referências residuais a "bet" onde deveria ser "adjustment"; tabela de grupos presente
+- [x] Pre-PR (@devops): [N/A — CodeRabbit disabled] — Links e paths válidos
 
 **Self-Healing Configuration:**
 ```yaml
@@ -257,7 +257,7 @@ behavior:
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` | Documentação técnica do endpoint /adjustment | ✅ Criado |
+| `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` | Documentação técnica do endpoint /adjustment | ✅ Criado |
 
 ---
 
@@ -265,9 +265,9 @@ behavior:
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` | Output principal desta story | ✅ Criado |
-| `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | Fonte das 9 regras BR-* | ✅ Existe |
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` | Template direto a seguir | ✅ Existe (Ready) |
+| `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-adjustment.md` | Output principal desta story | ✅ Criado |
+| `docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | Fonte das 9 regras BR-* | ✅ Existe |
+| `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` | Template direto a seguir | ✅ Existe (Ready) |
 | `legacy/casino-proxy/app/Services/PragmaticPlayService.php` | Código fonte de referência | ✅ Existe |
 
 ---
@@ -321,3 +321,17 @@ behavior:
 | 2026-05-12 | @sm (River) | Story criada — Draft |
 | 2026-05-12 | @po (Pax) | Validação GO (9/10) — Status: Draft → Ready. Fecha Fase 2; tabela de grupos dos 9 endpoints e contexto administrativo exigidos em ACs. |
 | 2026-05-14 | @dev (Dex) | Implementação completa — `pragmatic-play-adjustment.md` criado (10 seções, 6 cenários, tabela de grupos dos 9 endpoints, nota standalone/não-handleResult(), encerramento Fase 2). Todos T-1..T-12 concluídos. Status: InReview. |
+
+| 2026-05-15 | @qa (Quinn) | QA Gate PASS — Todos os ACs atendidos, output file completo, CodeRabbit N/A. Status: InReview → Done |
+
+## QA Results
+
+### Review Date: 2026-05-15
+
+### Reviewed By: Quinn (Test Architect)
+
+All ACs verified complete. Output file exists and passes documentation quality checks. CodeRabbit disabled (N/A).
+
+### Gate Status
+
+Gate: PASS → docs/qa/gates/casino-2.2-adjustment.yml

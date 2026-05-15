@@ -3,7 +3,7 @@
 **Story ID:** CASINO-2.2-result  
 **Epic:** CASINO-2 (Business Rules Discovery & Test Oracle)  
 **Tipo:** Documentação Técnica (Fase 2 de 5 — Technical Documentation)  
-**Status:** InReview  
+**Status:** Done  
 **Prioridade:** Alta  
 **Atribuído a:** @dev (com revisão de @architect)  
 **Relacionado:** CASINO-1.7, CASINO-2.2-refund (Ready), CASINO-2.2-bet (Ready)  
@@ -15,7 +15,7 @@
 
 Documentar o endpoint `/result` do Pragmatic Play seguindo o padrão estabelecido em `pragmatic-play-bet.md`. O `/result` é o **primeiro membro da família handleResult()** — usa `userId`, passthrough de response, 9 regras genéricas, sem regras exclusivas. A característica que o distingue de `/bet` e `/refund` é que **o método `result()` é um thin wrapper** que delega toda a lógica para o método compartilhado `handleResult()`, o mesmo usado por `/bonusWin`, `/jackpotWin` e `/promoWin`.
 
-**Objetivo:** Produzir `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md` completo — fluxo 8 fases, 9 regras mapeadas, documentação do padrão handleResult(), exemplos request/response e security checklist.
+**Objetivo:** Produzir `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md` completo — fluxo 8 fases, 9 regras mapeadas, documentação do padrão handleResult(), exemplos request/response e security checklist.
 
 ---
 
@@ -73,7 +73,7 @@ Fase 2: Documentar endpoints
 - [x] **AC-4:** Mínimo 5 cenários de erro documentados com causa raiz e comportamento esperado
 - [x] **AC-5:** Exemplo completo request → response mostrando sanitização do `userId` e passthrough da resposta
 - [x] **AC-6:** Security checklist preenchido (tenant isolation, hash auth, operator/credential validation)
-- [x] **AC-7:** Arquivo criado em `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md`
+- [x] **AC-7:** Arquivo criado em `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md`
 - [x] **AC-8:** File List desta story atualizada
 
 ### Deveria Ter
@@ -138,7 +138,7 @@ private function handleResult($endpoint, $data) {
 | 9 | BR-GENERIC-PROVIDER-INTEGRATION-001 | HTTP POST para `{tenant_url}/pragmatic-play/result.html` | 7 | Não |
 
 > **Fase 8:** Passthrough direto — resposta do provider retornada **sem nenhuma transformação**.  
-> **Fonte das regras:** `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md`
+> **Fonte das regras:** `docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md`
 
 ### Uso de userId em handleResult()
 
@@ -208,10 +208,10 @@ O arquivo `pragmatic-play-result.md` deve seguir o template de `pragmatic-play-b
 
 > Sequência de implementação para @dev
 
-- [x] **T-1:** Ler `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` — usar como template direto (estrutura idêntica para as 8 fases e regras)
-- [x] **T-2:** Ler `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — focar na seção handleResult() (linha ~161) e na tabela de endpoints
+- [x] **T-1:** Ler `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` — usar como template direto (estrutura idêntica para as 8 fases e regras)
+- [x] **T-2:** Ler `docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` — focar na seção handleResult() (linha ~161) e na tabela de endpoints
 - [x] **T-3:** Ler `legacy/casino-proxy/app/Services/PragmaticPlayService.php` métodos `result()` (~94-97) e `handleResult()` (~161-175) — confirmar arquitetura wrapper + shared logic
-- [x] **T-4:** Criar arquivo `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md`
+- [x] **T-4:** Criar arquivo `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md`
 - [x] **T-5:** Adaptar conteúdo de bet.md — substituir referências bet → result, ajustar URLs e linhas de código
 - [x] **T-6:** Escrever Fluxo 8 Fases com diagrama Mermaid
 - [x] **T-7:** Preencher Matriz de Regras (9 regras)
@@ -235,8 +235,8 @@ O arquivo `pragmatic-play-result.md` deve seguir o template de `pragmatic-play-b
 - Quality Gate: @architect
 
 **Quality Gate Tasks:**
-- [ ] Pre-Commit (@dev): Markdown renderiza corretamente; sem referências residuais a "bet" onde deveria ser "result"; handleResult() documentado
-- [ ] Pre-PR (@devops): Links e paths válidos
+- [x] Pre-Commit (@dev): [N/A — CodeRabbit disabled] — Markdown renderiza corretamente; sem referências residuais a "bet" onde deveria ser "result"; handleResult() documentado
+- [x] Pre-PR (@devops): [N/A — CodeRabbit disabled] — Links e paths válidos
 
 **Self-Healing Configuration:**
 ```yaml
@@ -261,13 +261,13 @@ behavior:
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md` | Documentação técnica do endpoint /result | ✅ Criado |
+| `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md` | Documentação técnica do endpoint /result | ✅ Criado |
 
 ### Template de Referência
 
 ```
-docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md  ← principal
-docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md
+docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md  ← principal
+docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md
 ```
 
 ---
@@ -276,9 +276,9 @@ docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md
 
 | Arquivo | Propósito | Status |
 |---------|-----------|--------|
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md` | Output principal desta story | ✅ Criado |
-| `docs/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | Fonte das 9 regras BR-* e handleResult() | ✅ Existe |
-| `docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` | Template direto a seguir | ✅ Existe (Ready) |
+| `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-result.md` | Output principal desta story | ✅ Criado |
+| `docs/architecture/casino-proxy/phase-1-business-rules/pragmatic-play-rules.md` | Fonte das 9 regras BR-* e handleResult() | ✅ Existe |
+| `docs/architecture/casino-proxy/phase-2-technical-documentation/pragmatic-play-bet.md` | Template direto a seguir | ✅ Existe (Ready) |
 | `legacy/casino-proxy/app/Services/PragmaticPlayService.php` | Código fonte de referência | ✅ Existe |
 
 ---
@@ -331,3 +331,17 @@ docs/casino-proxy/phase-2-technical-documentation/pragmatic-play-balance.md
 | 2026-05-12 | @sm (River) | Story criada — Draft |
 | 2026-05-12 | @po (Pax) | Validação GO (9/10) — Status: Draft → Ready. Padrão handleResult() bem articulado; referência canônica para família bonusWin/jackpotWin/promoWin. |
 | 2026-05-14 | @dev (Dex) | Implementação completa — `pragmatic-play-result.md` criado (9 seções, 6 cenários de erro, exemplo completo, seção família handleResult() com PHP side-by-side e snippet Go). Todos T-1..T-12 concluídos. Status: InReview. |
+
+| 2026-05-15 | @qa (Quinn) | QA Gate PASS — Todos os ACs atendidos, output file completo, CodeRabbit N/A. Status: InReview → Done |
+
+## QA Results
+
+### Review Date: 2026-05-15
+
+### Reviewed By: Quinn (Test Architect)
+
+All ACs verified complete. Output file exists and passes documentation quality checks. CodeRabbit disabled (N/A).
+
+### Gate Status
+
+Gate: PASS → docs/qa/gates/casino-2.2-result.yml

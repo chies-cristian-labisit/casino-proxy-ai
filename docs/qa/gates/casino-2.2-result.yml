@@ -1,0 +1,8 @@
+schema: 1
+story: CASINO-2.2-result
+gate: PASS
+status_reason: All ACs met. Output file pragmatic-play-result.md complete with 8-phase flow, handleResult() family documented, 6 error scenarios, PHP side-by-side and Go snippet. Canonical reference for bonusWin/jackpotWin/promoWin family. CodeRabbit N/A (disabled).
+reviewer: Quinn
+updated: '2026-05-15T00:00:00Z'
+top_issues: []
+waiver: { active: false }
